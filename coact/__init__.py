@@ -30,8 +30,15 @@ from coact.base import (
     FieldProvenance,
     ReturnContract,
 )
+from coact.analysis import back, diff, estimate, inventory
 from coact.complete import complete, plan_completion
-from coact.emit import emit_agent, emitters, from_claude_agent_md, to_claude_agent_md
+from coact.emit import (
+    emit_agent,
+    emitters,
+    from_claude_agent_md,
+    to_aw_agent_spec,
+    to_claude_agent_md,
+)
 from coact.frontmatter import (
     CoactMeta,
     parse_coact_meta,
@@ -86,6 +93,12 @@ __all__ = [
     "emitters",
     "to_claude_agent_md",
     "from_claude_agent_md",
+    "to_aw_agent_spec",
+    # Analysis
+    "diff",
+    "estimate",
+    "inventory",
+    "back",
     # Frontmatter convention
     "CoactMeta",
     "parse_coact_meta",
