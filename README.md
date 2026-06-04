@@ -56,6 +56,14 @@ plan = plan_completion(".claude/skills/ux-analyst")
 print(plan.render())   # every synthesized field + WHERE it came from + warnings
 ```
 
+A complete, runnable walk through all of this — a real skill → `complete` →
+`emit` → `realize(host)` → `realize(sdk)` → `estimate`/`inventory` — lives in
+[`examples/`](examples/) (no LLM, no API key needed):
+
+```bash
+python examples/walkthrough.py
+```
+
 ### CLI
 
 ```bash
