@@ -161,3 +161,122 @@ def test_sdk_satisfies_aw_agentic_step_duck_type():
 def test_sdk_rejects_multiple_agents():
     with pytest.raises(ValueError, match="exactly one agent"):
         realize([_agent("a"), _agent("b")], backend="sdk")
+
+
+# ---------------------------------------------------------------------------
+# D6 return contract — tool fallback (forced return_result tool)
+# ---------------------------------------------------------------------------
+
+
+def _msg(*blocks):
+    """A minimal stand-in for an SDK AssistantMessage carrying tool-use blocks."""
+    from types import SimpleNamespace
+
+    return SimpleNamespace(content=list(blocks))
+
+
+def _tool_block(name, payload):
+    from types import SimpleNamespace
+
+    return SimpleNamespace(name=name, input=payload)
+
+
+def test_auto_return_mode_prefers_output_format_then_tool():
+    from coact.realize import _auto_return_mode
+
+    assert _auto_return_mode({"system_prompt", "output_format"}) == "output_format"
+    assert _auto_return_mode({"system_prompt", "model"}) == "tool"
+
+
+def test_as_object_schema_passes_object_through_and_wraps_others():
+    from coact.realize import _as_object_schema
+
+    obj = {"type": "object", "properties": {"score": {"type": "number"}}}
+    assert _as_object_schema(obj) == (obj, None)
+    wrapped, key = _as_object_schema({"type": "array", "items": {"type": "string"}})
+    assert key == "result"
+    assert wrapped["properties"]["result"] == {"type": "array", "items": {"type": "string"}}
+    assert wrapped["required"] == ["result"]
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_tool_fallback_wires_return_tool_and_instruction():
+    from coact.realize import RETURN_TOOL_FULLNAME, RETURN_TOOL_SERVER
+
+    schema = {"type": "object", "properties": {"score": {"type": "number"}}}
+    ad = _agent(returns=ReturnContract(json_schema=schema, description="a score"))
+    runnable = realize(ad, backend="sdk", return_mode="tool")
+    opts = runnable.build_options()
+
+    assert RETURN_TOOL_SERVER in opts.mcp_servers
+    assert RETURN_TOOL_FULLNAME in opts.allowed_tools
+    # the instruction names the tool and embeds the schema; no output_format used
+    assert "return_result" in opts.system_prompt
+    assert "score" in opts.system_prompt
+    assert getattr(opts, "output_format", None) is None
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_tool_fallback_extracts_structured_result():
+    from coact.realize import RETURN_TOOL_FULLNAME
+
+    schema = {"type": "object", "properties": {"score": {"type": "number"}}}
+    ad = _agent(returns=ReturnContract(json_schema=schema))
+    payload = {"score": 0.9}
+
+    def fake_runner(prompt, options):
+        # the model "calls" the forced return tool; that input is the result
+        return [_msg(_tool_block(RETURN_TOOL_FULLNAME, payload))]
+
+    runnable = realize(ad, backend="sdk", runner=fake_runner, return_mode="tool")
+    artifact, info = runnable.execute("analyze", {})
+    assert artifact == payload
+    assert info["return_mode"] == "tool"
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_tool_fallback_unwraps_non_object_schema():
+    # a top-level array return type is wrapped under `result` and unwrapped back
+    ad = _agent(returns=ReturnContract(json_schema={"type": "array", "items": {"type": "string"}}))
+
+    def fake_runner(prompt, options):
+        from coact.realize import RETURN_TOOL_FULLNAME
+
+        return [_msg(_tool_block(RETURN_TOOL_FULLNAME, {"result": ["a", "b"]}))]
+
+    runnable = realize(ad, backend="sdk", runner=fake_runner, return_mode="tool")
+    artifact, _ = runnable.execute("go", {})
+    assert artifact == ["a", "b"]
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_tool_fallback_ignores_other_tool_calls():
+    from coact.realize import RETURN_TOOL_FULLNAME
+
+    ad = _agent(returns=ReturnContract(json_schema={"type": "object", "properties": {}}))
+
+    def fake_runner(prompt, options):
+        return [
+            _msg(_tool_block("Read", {"path": "x"})),
+            _msg(_tool_block(RETURN_TOOL_FULLNAME, {"ok": True})),
+        ]
+
+    runnable = realize(ad, backend="sdk", runner=fake_runner, return_mode="tool")
+    artifact, _ = runnable.execute("go", {})
+    assert artifact == {"ok": True}
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_return_mode_output_format_does_not_wrap():
+    # explicit output_format keeps the schema verbatim (no result-wrapping)
+    schema = {"type": "object", "properties": {"a": {"type": "string"}}}
+    ad = _agent(returns=ReturnContract(json_schema=schema))
+    opts = realize(ad, backend="sdk", return_mode="output_format").build_options()
+    assert opts.output_format == {"type": "json_schema", "schema": schema}
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_unknown_return_mode_raises():
+    ad = _agent(returns=ReturnContract(json_schema={"type": "object", "properties": {}}))
+    with pytest.raises(ValueError, match="Unknown return_mode"):
+        realize(ad, backend="sdk", return_mode="bogus").build_options()
