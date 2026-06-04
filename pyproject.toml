@@ -27,6 +27,9 @@ Homepage = "https://github.com/thorwhalen/coact"
 Repository = "https://github.com/thorwhalen/coact"
 Documentation = "https://thorwhalen.github.io/coact"
 
+[project.scripts]
+coact = "coact.__main__:main"
+
 [project.entry-points."skill.validators"]
 coact_frontmatter = "coact.frontmatter:_coact_validator"
 

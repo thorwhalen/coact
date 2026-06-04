@@ -199,6 +199,48 @@ emitters.register("sdk-agent-dict", to_sdk_agent_dict)
 
 
 # ---------------------------------------------------------------------------
+# Optional aw-bridged emitters (CrewAI / OpenAI) — reuse aw's renderers
+# ---------------------------------------------------------------------------
+
+
+def to_aw_agent_spec(ad: AgentDefinition):
+    """Adapt an :class:`AgentDefinition` to an ``aw.translators.AgentSpec``.
+
+    Lets coact reuse ``aw``'s CrewAI / OpenAI / SKILL.md renderers (the
+    ``*_from_spec`` cores) instead of reimplementing them — the ecosystem
+    coordination point. Requires ``aw``.
+    """
+    check_requirements({"aw": "aw"}, feature="aw-bridged emitters")
+    from aw.translators import AgentSpec, ToolSpec
+
+    return AgentSpec(
+        name=ad.name,
+        description=ad.description,
+        instructions=ad.prompt or ad.description,
+        tools=[ToolSpec(name=t) for t in (ad.tools or [])],
+        model=ad.model or "",
+        source_class=ad.name,
+    )
+
+
+def _register_aw_emitters() -> None:
+    """Register ``crewai`` / ``openai-tools`` emitters when ``aw`` is importable."""
+    try:
+        from aw.translators import crewai_yaml_from_spec, openai_tools_from_spec
+    except Exception:
+        return
+    emitters.register(
+        "crewai", lambda ad: crewai_yaml_from_spec(to_aw_agent_spec(ad), name=ad.name)
+    )
+    emitters.register(
+        "openai-tools", lambda ad: openai_tools_from_spec(to_aw_agent_spec(ad))
+    )
+
+
+_register_aw_emitters()
+
+
+# ---------------------------------------------------------------------------
 # Dispatcher
 # ---------------------------------------------------------------------------
 
