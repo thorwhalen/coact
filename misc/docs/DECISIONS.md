@@ -119,6 +119,17 @@ Non-obvious gotchas that the build surfaced (recorded so they aren't re-discover
 - A declared-but-unresolvable `schema_ref` **raises** at realize time rather than
   silently dropping the contract; an explicit `output_format` on an SDK lacking the
   field also raises (only `auto` silently degrades to `tool`).
+- `resolve_schema_ref` now produces **typed** properties for dataclasses / TypedDicts
+  (`_annotation_to_schema`: primitives, `Optional`/union→`anyOf`, `list[X]`→typed
+  `items`, nested objects one level) plus a `required` list — not just permissive
+  `{}` placeholders. Pydantic still wins via `model_json_schema`; unknown
+  annotations fall back to `{}` so resolution never crashes.
+
+**Live tests are opt-in.** A `real_llm` pytest marker gates the end-to-end smoke
+tests (`tests/test_live_realize.py`); `tests/conftest.py` skips them unless
+`COACT_RUN_REAL_LLM=1` is set, so the default suite stays offline and CI spends no
+tokens. Both the `sdk` and `litellm` backends were verified live this way (the
+streaming-runner fix above is confirmed end-to-end, not just unit-tested).
 
 ## D7 — Validator registered into `skill.create.validators` (+ entry point)
 

@@ -102,6 +102,9 @@ doctest_optionflags = [
     "NORMALIZE_WHITESPACE",
     "ELLIPSIS",
 ]
+markers = [
+    "real_llm: live test that calls a real LLM / agent backend (opt-in; set COACT_RUN_REAL_LLM=1 to run, else skipped)",
+]
 
 [tool.wads.ci]
 project_name = ""
