@@ -39,6 +39,14 @@ from coact.frontmatter import (
     validate_coact_block,
 )
 from coact.policy import CompletionPolicy, default_policy
+from coact.realize import (
+    RealizedHost,
+    RunnableAgent,
+    realize,
+    realize_host,
+    realize_sdk,
+)
+from coact.realize import backends as realization_backends
 from coact.stores import AgentStore, agents_dir
 
 # Make `skill validate` aware of the coact: block as soon as coact is imported.
@@ -57,6 +65,13 @@ __all__ = [
     "plan_completion",
     "CompletionPolicy",
     "default_policy",
+    # REALIZE
+    "realize",
+    "realize_host",
+    "realize_sdk",
+    "RealizedHost",
+    "RunnableAgent",
+    "realization_backends",
     # Emit
     "emit_agent",
     "emitters",
