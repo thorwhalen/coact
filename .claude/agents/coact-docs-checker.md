@@ -22,8 +22,8 @@ the gap between what the docs *say* and what the code *does*.
    examples that would raise.
 2. **README CLI commands vs `__main__.py`.** Every `coact <verb> …` shown must
    exist as a subcommand with matching flags (`plan`, `complete`, `emit`,
-   `realize`, `diff`, `estimate`, `inventory`, `back`). Flag missing verbs or
-   flags.
+   `realize` incl. `--dry-run`, `diff`, `estimate`, `inventory`, `back`,
+   `scaffold`). Flag missing verbs or flags.
 3. **Install extras vs `pyproject.toml`.** `pip install coact[sdk]` /
    `coact[mcp]` and any others in the README must match the
    `[project.optional-dependencies]` table. Flag mismatched or undocumented

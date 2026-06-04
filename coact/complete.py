@@ -62,7 +62,7 @@ def plan_completion(
     True
     """
     policy = policy or default_policy
-    skill = _resolve_skill(source)
+    skill = resolve_skill(source)
     coact_meta = parse_coact_meta(skill)
     prov: list[FieldProvenance] = []
     warnings: list[str] = []
@@ -209,7 +209,7 @@ def complete(
 # ---------------------------------------------------------------------------
 
 
-def _resolve_skill(source: SkillSource) -> Skill:
+def resolve_skill(source: SkillSource) -> Skill:
     """Resolve a Skill from an object, a path, or a key/name.
 
     Resolution order for strings: filesystem path → local store key → project

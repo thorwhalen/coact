@@ -173,7 +173,7 @@ a commit message contains the `publish_marker` (`"[publish]"`).
 
 **Why not `enabled = true` like the sibling repos (`skill`/`aw`/`py2mcp`):** those
 publish on every main push because they have a `PYPI_PASSWORD` secret and an
-established release cadence. `coact` is new (only `0.0.2` on PyPI, hand-published);
+established release cadence. `coact` is new (only `0.0.3` on PyPI, hand-published);
 the repo has **no** `PYPI_PASSWORD` secret, so an `enabled = true` posture made
 every main push fail at `uv publish` with a 403 (empty token). Releasing a *new*
 public package version is a deliberate, owner-initiated act — gating it behind an
@@ -216,3 +216,56 @@ Python callables, but a coact definition carries tool *names* (host-resolved), w
 don't map cleanly; LiteLLM's chat-completion-with-structured-output maps exactly onto
 what a definition actually carries (persona + return contract). Topology stays out
 (D8): one definition → one runnable. LangGraph/CrewAI *realizers* remain deferred.
+
+## D13 — The §6.4 fleet-scaffold shim is implemented (the one topology-adjacent emit)
+
+`coact.scaffold.scaffold_fleet(target, *, dest=None, agents_dir=…)` realizes the
+single capability D8 reserves: for a multi-agent run it **emits a starter Python
+file** wiring N realized `sdk` agents under an `aw` coordinator, "clearly marked as
+a starting point the user owns." It is a pure **string/file emitter** — it runs no
+LLM and stands up no runtime; the emitted shim defers all execution to
+`realize(..., backend='sdk')` and *all topology to the human who owns it*.
+
+This does **not** soften D8. coact still serializes no graph: the shim is a
+deliberately thin **sequential** hand-off with `TODO(you)` markers and an embedded
+cost-gate + ownership notice, not a topology engine. The boundary is "coact writes
+the starter once and never runs it." Exposed as `scaffold_fleet` in `__all__` and
+the `coact scaffold <agents…>` CLI verb. The §6.4 promise (previously documented as
+deferred) is now kept; LangGraph/CrewAI orchestration stays the user's to own.
+
+## D14 — Hardening pass: version-from-metadata, module decomposition, realize dry-run
+
+A round of robustness + clean-up that changed no public contract:
+
+- **`__version__` is sourced from `importlib.metadata.version("coact")`** (with a
+  `0.0.0+unknown` sentinel for an uninstalled tree), not a second hand-edited
+  literal. The SSOT is `pyproject.toml` (what wads bumps on release); deriving the
+  attribute from installed metadata makes drift structurally impossible (it had
+  drifted to `0.0.2` while pyproject was `0.0.3`).
+- **Two cohesive subsystems were extracted** from the largest modules, with the
+  old import paths preserved (re-export) so nothing downstream broke:
+  `coact.schema` (the `resolve_schema_ref` typed JSON-Schema resolver, out of
+  `base.py` — leaving it a pure data model) and `coact.return_contract` (the
+  backend-agnostic D6 helpers — `ReturnPlan`, mode selection, `as_object_schema`,
+  the two instruction renderers, tool-use extraction — out of `realize.py`, which
+  keeps only the SDK-specific wiring). The two return-instruction builders that
+  `realize`/`realize_litellm` had duplicated now share one home (DRY).
+- **`_resolve_skill`/`_coerce_agents` became public** (`resolve_skill`/
+  `coerce_agents`): they are imported across modules, and the house rule is that
+  cross-module helpers carry no leading underscore.
+- **`realize(..., backend='host', dry_run=True)`** previews the files/links that
+  *would* be written without touching the filesystem (a `RealizedHost` with
+  `dry_run=True`), extending `plan_completion`'s look-before-you-leap contract to
+  the one backend that mutates disk (progressive disclosure, COACT_SPEC §8). Also
+  on the CLI as `coact realize … --dry-run`.
+- **Robustness fixes:** `llm._extract_json` no longer crashes on a `None` LLM reply
+  (D10 "no crash"); the `litellm` `response_format` fallback now **surfaces** the
+  error that forced the retry in `info['response_format_error']` (graceful
+  degradation that is no longer silent); `check_requirements` reports which deps are
+  already present alongside what is missing.
+
+Test depth grew with the surface: dedicated suites for the CLI, the LLM facade, the
+frontmatter validator, `util`, `stores`, `policy`, and the two new modules
+(`schema`, `return_contract`, `scaffold`) — ~120 new tests, coverage 88% → 95%
+(the residual is the live Agent-SDK runner, exercised only by the opt-in `real_llm`
+tests).

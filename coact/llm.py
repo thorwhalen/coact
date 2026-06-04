@@ -102,8 +102,18 @@ def structured(
     return None
 
 
-def _extract_json(text: str) -> Any:
-    """Pull a JSON object out of an LLM reply (tolerating code fences/trailing prose)."""
+def _extract_json(text: Any) -> Any:
+    """Pull a JSON object out of an LLM reply (tolerating code fences/trailing prose).
+
+    Non-string input (e.g. an injected ``llm`` that returns ``None``) yields
+    ``None`` rather than crashing — the facade's "no crash" contract (DECISIONS
+    D10), mirroring ``coact.realize_litellm._try_json``'s guard.
+
+    >>> _extract_json(None) is None
+    True
+    """
+    if not isinstance(text, str):
+        return None
     text = text.strip()
     fence = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
     candidate = fence.group(1) if fence else text

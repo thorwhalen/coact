@@ -1,7 +1,6 @@
 """Tests for the coact foundation: SSOT model, emitters, frontmatter, stores."""
 
 import importlib.util
-from pathlib import Path
 
 import pytest
 
@@ -11,7 +10,6 @@ from coact import (
     AgentDefinition,
     AgentPlan,
     AgentStore,
-    CoactMeta,
     FieldProvenance,
     ReturnContract,
     emit_agent,

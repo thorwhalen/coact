@@ -25,18 +25,22 @@ job belongs to one of those, delegate — don't reimplement.
 
 | Module | Responsibility |
 |---|---|
-| `base.py` | SSOT data model: `AgentDefinition`, `ReturnContract`, `AgentPlan`, `FieldProvenance`, `resolve_schema_ref`. **SDK-independent.** |
+| `base.py` | SSOT data model: `AgentDefinition`, `ReturnContract`, `AgentPlan`, `FieldProvenance`. Pure data model — **no SDK, no schema-resolution logic** (that moved to `schema.py`). |
+| `schema.py` | `resolve_schema_ref` + the typed annotation→JSON-Schema resolver (dataclass / TypedDict / union / forward-ref). Re-exported by `base.py` for back-compat. |
 | `frontmatter.py` | The additive `coact:` SKILL.md block (`CoactMeta`) + its validator. Reads **raw** frontmatter (see gotcha below). |
 | `policy.py` | `CompletionPolicy` — data-driven tool/model/memory routing. No hardcoded magic in callers. |
 | `synthesis.py` | `synthesize_persona` / `synthesize_return_contract` — templates by default; LLM only if `llm=` passed. |
-| `complete.py` | COMPLETE: `complete()` / `plan_completion()`. Mechanical, no-LLM. Records per-field provenance. |
-| `emit.py` | `AgentDefinition` → serializations. Open-closed `emitters` registry (`claude-agents-md`, `sdk-agent-dict`, …). |
-| `realize.py` | REALIZE: `realize()` + the open-closed `backends` registry (`host`, `sdk`, `mcp`). The biggest, hairiest module. |
+| `complete.py` | COMPLETE: `complete()` / `plan_completion()`. Mechanical, no-LLM. Records per-field provenance. Owns the public `resolve_skill`. |
+| `emit.py` | `AgentDefinition` → serializations. Open-closed `emitters` registry (`claude-agents-md`, `sdk-agent-dict`, + `crewai`/`openai-tools` when `aw` is present). |
+| `realize.py` | REALIZE: `realize()` + the open-closed `backends` registry (`host`, `sdk`, `mcp`; `litellm` self-registers from `realize_litellm.py`). Owns the public `coerce_agents` and the SDK *wiring*. `host` has a `dry_run` preview. |
+| `return_contract.py` | The backend-agnostic D6 helpers extracted from `realize.py`: `ReturnPlan`, `auto_return_mode`, `as_object_schema`, the two instruction renderers, `extract_return_tool_input`. |
+| `realize_litellm.py` | The provider-agnostic `litellm` backend (`RunnableLLMAgent`). Self-registers into `realize.backends`. |
+| `scaffold.py` | `scaffold_fleet` — emits a **starter** multi-agent shim (the one topology-adjacent emit; D8). Pure string/file render, no runtime. |
 | `llm.py` | Thin LLM facade (`resolve_llm`, `structured`). Provider-agnostic; never imported on a mechanical path. |
 | `analysis.py` | `diff` / `estimate` / `inventory` / `back` — tooling to see and move between the layers. |
 | `stores.py` | `AgentStore` (a `dol`-style mapping over `.claude/agents/`), `agents_dir`. |
-| `util.py` | `check_requirements` and small shared helpers. |
-| `__main__.py` | argh CLI — thin wrappers over the same core functions. |
+| `util.py` | `check_requirements`, `import_object`, and small shared helpers. |
+| `__main__.py` | argh CLI — thin wrappers over the same core functions (incl. `realize --dry-run`, `scaffold`). |
 
 The public facade is `coact/__init__.py` (its `__all__` is the supported API).
 Decisions are logged in `misc/docs/DECISIONS.md`; the build brief is
@@ -101,8 +105,12 @@ CrewAI *realizer* that encodes a graph.
   python -m ruff check coact/                # D100 + format
   ```
 - **ruff only enforces `D100`** here (`select = ["D100"]`). It will **not** catch
-  unused imports or undefined names — the test suite (which imports every module)
-  is your real safety net there. Don't rely on ruff for correctness.
+  unused imports (`F401`) or undefined names (`F821`) on a normal `ruff check` — the
+  test suite (which imports every module) is your real safety net, but `from
+  __future__ import annotations` hides a stale annotation from the runtime too. After
+  a refactor, run a one-off pyflakes pass: `python -m ruff check --select F coact/`
+  (and `--select F401 --fix` to drop dead imports). Don't rely on the default ruff
+  for correctness.
 - **`skill.SkillMeta` drops the `coact:` key on parse.** Read it from the raw
   frontmatter via `parse_coact_meta()` (which re-reads `skill.source_path`), never
   from `Skill.meta`.

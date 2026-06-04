@@ -18,15 +18,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 from skill.base import Skill, SkillMeta
 from skill.util import find_project_root
 
 from coact.base import AgentDefinition
-from coact.complete import _resolve_skill, complete
+from coact.complete import resolve_skill
 from coact.frontmatter import parse_coact_meta
-from coact.realize import _coerce_agents
+from coact.realize import coerce_agents
 from coact.stores import AgentStore
 
 # ---------------------------------------------------------------------------
@@ -70,8 +69,8 @@ def diff(skill: object, agent: object) -> AgentDiff:
     >>> any(f == 'prompt' and cls.startswith('extra') for f, cls, _ in d.rows)
     True
     """
-    sk = _resolve_skill(skill) if not isinstance(skill, Skill) else skill
-    ad = agent if isinstance(agent, AgentDefinition) else _coerce_agents(agent)[0]
+    sk = resolve_skill(skill) if not isinstance(skill, Skill) else skill
+    ad = agent if isinstance(agent, AgentDefinition) else coerce_agents(agent)[0]
 
     rows: list[tuple[str, str, str]] = []
     for fname in (
@@ -146,7 +145,7 @@ def estimate(agents: object) -> Estimate:
     >>> est.interdependent, est.shared_skills
     (True, ['shared'])
     """
-    ads = _coerce_agents(agents)
+    ads = coerce_agents(agents)
     n = len(ads)
 
     # interdependence heuristics: shared skills, or any declared input contract.
@@ -263,7 +262,7 @@ def back(agent: object) -> Skill:
     >>> 'lossy' in sk.body.lower()
     True
     """
-    ad = agent if isinstance(agent, AgentDefinition) else _coerce_agents(agent)[0]
+    ad = agent if isinstance(agent, AgentDefinition) else coerce_agents(agent)[0]
     referenced = [s for s in ad.skills if s != ad.name]
     refs_note = (
         f"\n\nReferenced skills (procedure may live here): {', '.join(referenced)}."

@@ -57,6 +57,10 @@ plan = plan_completion(".claude/skills/ux-analyst")
 print(plan.render())   # every synthesized field + WHERE it came from + warnings
 ```
 
+That extends to the one backend that touches disk:
+`realize(agent, backend="host", dry_run=True)` returns the agent files and skill
+links it *would* write — without creating any of them.
+
 A complete, runnable walk through all of this — a real skill → `complete` →
 `emit` → `realize(host)` → `realize(sdk)` → `estimate`/`inventory` — lives in
 [`examples/`](examples/) (no LLM, no API key needed):
@@ -71,9 +75,11 @@ python examples/walkthrough.py
 coact plan      .claude/skills/ux-analyst                 # dry-run with provenance
 coact complete  .claude/skills/ux-analyst --dest .claude/agents
 coact realize   .claude/skills/ux-analyst --backend host
+coact realize   .claude/skills/ux-analyst --backend host --dry-run   # preview; writes nothing
 coact diff      .claude/skills/ux-analyst .claude/agents/ux-analyst.md
 coact estimate  .claude/agents/a.md .claude/agents/b.md   # the cost gate
 coact inventory .                                         # skills + agents + MCP tools
+coact scaffold  .claude/agents/a.md .claude/agents/b.md   # a starter fleet shim (you own it)
 ```
 
 ## The model in one minute
@@ -151,11 +157,22 @@ artifact, info = llm_step.execute(task)             # info["backend"] == "litell
   print(estimate([agent_a, agent_b]).render())
   ```
 
+  If you do decide to fan out, `scaffold_fleet` emits a **starter** Python shim
+  wiring the realized agents under an `aw` coordinator — a sequential hand-off you
+  then reshape. It's the one topology-adjacent thing `coact` writes, and only a
+  starter: `coact` emits it once and never runs it (the topology stays yours).
+
+  ```python
+  from coact import scaffold_fleet
+  scaffold_fleet([agent_a, agent_b], dest="fleet.py")   # a runnable starter you own
+  ```
+
 ## Design notes
 
 - No LLM on any mechanical path; persona drafting is *optional* and injected
   (`complete(skill, llm=...)`), never a hard provider dependency.
-- Open-closed registries for emit targets and realization backends — register
-  your own without touching core.
+- Open-closed registries for emit targets (`claude-agents-md`, `sdk-agent-dict`,
+  plus `crewai` / `openai-tools` auto-registered when [`aw`](https://github.com/thorwhalen/aw)
+  is installed) and realization backends — register your own without touching core.
 - Decisions are recorded in [`misc/docs/DECISIONS.md`](misc/docs/DECISIONS.md);
   the build brief is [`misc/docs/COACT_SPEC.md`](misc/docs/COACT_SPEC.md).

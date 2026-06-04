@@ -77,18 +77,25 @@ def check_requirements(
     ``modules`` maps an importable module name to the pip target that provides
     it (e.g. ``{'claude_agent_sdk': 'claude-agent-sdk'}``). Raises
     ``ImportError`` listing the exact ``pip install`` line for whatever is
-    missing — the package-UX convention for optional backends.
+    missing — and, when some requirements *are* present, which ones — the
+    package-UX convention for optional backends (informative, actionable errors).
 
     >>> check_requirements({'json': 'json'}, feature='noop')  # importable -> no raise
     """
-    missing = []
+    missing: list[str] = []
+    present: list[str] = []
     for module_name, pip_target in modules.items():
         try:
             import_module(module_name)
+            present.append(module_name)
         except ImportError:
             missing.append(pip_target)
     if missing:
+        already = (
+            f" (already present: {', '.join(sorted(present))})" if present else ""
+        )
         raise ImportError(
             f"The {feature!r} feature needs optional dependencies that are not "
-            f"installed. Install them with:\n\n    pip install {' '.join(sorted(set(missing)))}\n"
+            f"installed{already}. Install them with:\n\n    "
+            f"pip install {' '.join(sorted(set(missing)))}\n"
         )

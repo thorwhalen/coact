@@ -12,7 +12,6 @@ from __future__ import annotations
 
 from collections.abc import Iterator, MutableMapping
 from pathlib import Path
-from typing import Optional
 
 from skill.util import find_project_root
 
