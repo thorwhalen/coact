@@ -102,9 +102,7 @@ class CompletionPolicy:
             return None, "default: no memory (least privilege)"
         return self.default_memory, "policy default"
 
-    def infer_tools(
-        self, skill: Skill, coact_meta: CoactMeta
-    ) -> tuple[list[str], str]:
+    def infer_tools(self, skill: Skill, coact_meta: CoactMeta) -> tuple[list[str], str]:
         """Derive the tool allowlist (declared-or-heuristic + report; DECISIONS D3).
 
         Precedence: an explicit ``coact: tools`` wins; otherwise a conservative

@@ -43,7 +43,9 @@ class AgentDiff:
 
     skill_name: str
     agent_name: str
-    rows: list[tuple[str, str, str]] = field(default_factory=list)  # field, class, value
+    rows: list[tuple[str, str, str]] = field(
+        default_factory=list
+    )  # field, class, value
 
     def render(self) -> str:
         """Render the extras table for terminal display."""
@@ -124,7 +126,11 @@ class Estimate:
             f"  ~{self.token_multiplier_vs_chat:g}× the tokens of a single chat "
             f"(one agent ≈ {_AGENT_FACTOR:g}×, a fleet ≈ {_FLEET_CEILING:g}×)",
             f"  interdependent: {self.interdependent}"
-            + (f" (shared skills: {', '.join(self.shared_skills)})" if self.shared_skills else ""),
+            + (
+                f" (shared skills: {', '.join(self.shared_skills)})"
+                if self.shared_skills
+                else ""
+            ),
             f"  → {self.recommendation}",
         ]
         return "\n".join(lines)
@@ -233,9 +239,7 @@ def inventory(project: Path | str | None = None) -> Inventory:
     agents_root = root / ".claude" / "agents"
     agents = list(AgentStore(root=agents_root)) if agents_root.exists() else []
 
-    return Inventory(
-        project=root, skills=skills, agents=agents, mcp_tools=mcp_tools
-    )
+    return Inventory(project=root, skills=skills, agents=agents, mcp_tools=mcp_tools)
 
 
 # ---------------------------------------------------------------------------

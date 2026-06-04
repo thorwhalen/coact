@@ -42,7 +42,9 @@ def complete(skill: str, *, dest: str | None = None, plan: bool = False) -> str:
     return _emit(agent, "claude-agents-md")
 
 
-def emit(skill: str, *, target: str = "claude-agents-md", dest: str | None = None) -> str:
+def emit(
+    skill: str, *, target: str = "claude-agents-md", dest: str | None = None
+) -> str:
     """Complete a skill and emit it to a target (claude-agents-md, sdk-agent-dict, ...)."""
     agent = _complete(skill)
     result = _emit(agent, target, dest=dest)

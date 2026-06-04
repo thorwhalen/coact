@@ -59,7 +59,9 @@ def synthesize_return_contract(
         f"Result of the {skill.meta.name!r} agent: {skill.meta.description}".rstrip()
     )
     return (
-        ReturnContract(json_schema=dict(DEFAULT_RETURN_SCHEMA), description=description),
+        ReturnContract(
+            json_schema=dict(DEFAULT_RETURN_SCHEMA), description=description
+        ),
         "synthesized-template",
     )
 
@@ -180,7 +182,7 @@ def _llm_draft_identity(skill: Skill, *, llm: object) -> str | None:
     prompt = (
         "Write a concise 2-3 sentence system-prompt identity for a Claude subagent "
         f"derived from a skill named '{skill.meta.name}' described as: "
-        f"\"{skill.meta.description}\".\n\n"
+        f'"{skill.meta.description}".\n\n'
         "Rules: speak in second person ('You are ...'); reference the skill by "
         f"name (`{skill.meta.name}`) and instruct the agent to follow that skill's "
         "procedure as the single source of truth; do NOT restate or invent the "

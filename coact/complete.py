@@ -72,7 +72,9 @@ def plan_completion(
 
     description = skill.meta.description
     prov.append(
-        FieldProvenance("description", description, "skill", "reused as delegation trigger")
+        FieldProvenance(
+            "description", description, "skill", "reused as delegation trigger"
+        )
     )
 
     # tools (declared-or-heuristic + report) then narrow with denylist.
@@ -152,7 +154,9 @@ def plan_completion(
             extra_skills=[s for s in skills if s != name],
             llm=llm,
         )
-    prov.append(FieldProvenance("prompt", persona, persona_src, "system prompt / persona"))
+    prov.append(
+        FieldProvenance("prompt", persona, persona_src, "system prompt / persona")
+    )
 
     if coact_meta.consumes:
         prov.append(

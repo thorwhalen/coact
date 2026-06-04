@@ -165,7 +165,9 @@ def validate_coact_block(skill_or_meta: Skill | dict) -> list[str]:
     """
     if isinstance(skill_or_meta, Skill):
         meta = (
-            parse_frontmatter((Path(skill_or_meta.source_path) / "SKILL.md").read_text())[0]
+            parse_frontmatter(
+                (Path(skill_or_meta.source_path) / "SKILL.md").read_text()
+            )[0]
             if skill_or_meta.source_path is not None
             else {}
         )

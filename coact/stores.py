@@ -20,7 +20,9 @@ from coact.base import AgentDefinition
 from coact.emit import from_claude_agent_md, to_claude_agent_md
 
 
-def agents_dir(*, scope: str = "project", project_dir: Path | str | None = None) -> Path:
+def agents_dir(
+    *, scope: str = "project", project_dir: Path | str | None = None
+) -> Path:
     """Resolve the ``.claude/agents`` directory for the given scope.
 
     ``scope='project'`` resolves against the detected project root (or

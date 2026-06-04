@@ -130,8 +130,10 @@ def realize_host(
     via the local store / project. Verifies discovery and reports anything missing.
     """
     agents = _coerce_agents(target, policy=policy)
-    out_dir = Path(dest) if dest is not None else agents_dir(
-        scope=scope, project_dir=project_dir
+    out_dir = (
+        Path(dest)
+        if dest is not None
+        else agents_dir(scope=scope, project_dir=project_dir)
     )
     out_dir.mkdir(parents=True, exist_ok=True)
     skills_target = out_dir.parent / "skills"
@@ -270,8 +272,8 @@ class RunnableAgent:
             "system_prompt": self.agent_def.prompt or self.agent_def.description,
         }
         tools = self.agent_def.tools
-        kwargs["allowed_tools"] = list(tools) if tools is not None else list(
-            self.default_tools
+        kwargs["allowed_tools"] = (
+            list(tools) if tools is not None else list(self.default_tools)
         )
         if self.agent_def.disallowed_tools:
             kwargs["disallowed_tools"] = list(self.agent_def.disallowed_tools)
