@@ -30,6 +30,7 @@ from coact.base import (
     FieldProvenance,
     ReturnContract,
 )
+from coact.complete import complete, plan_completion
 from coact.emit import emit_agent, emitters, from_claude_agent_md, to_claude_agent_md
 from coact.frontmatter import (
     CoactMeta,
@@ -37,6 +38,7 @@ from coact.frontmatter import (
     register_validator,
     validate_coact_block,
 )
+from coact.policy import CompletionPolicy, default_policy
 from coact.stores import AgentStore, agents_dir
 
 # Make `skill validate` aware of the coact: block as soon as coact is imported.
@@ -50,6 +52,11 @@ __all__ = [
     "AgentPlan",
     "FieldProvenance",
     "ReturnContract",
+    # COMPLETE
+    "complete",
+    "plan_completion",
+    "CompletionPolicy",
+    "default_policy",
     # Emit
     "emit_agent",
     "emitters",
