@@ -35,6 +35,7 @@ from skill.util import find_project_root
 from coact.base import AgentDefinition
 from coact.complete import _resolve_skill, complete
 from coact.emit import emit_agent, from_claude_agent_md
+from coact.frontmatter import parse_coact_meta
 from coact.policy import CompletionPolicy
 from coact.stores import agents_dir
 from coact.util import check_requirements
@@ -351,3 +352,70 @@ def realize_sdk(
 
 
 backends.register("sdk", realize_sdk)
+
+
+# ---------------------------------------------------------------------------
+# mcp backend — expose a skill's Python tools as an MCP server (via py2mcp)
+# ---------------------------------------------------------------------------
+
+
+def realize_mcp(
+    target: RealizeTarget,
+    *,
+    name: Optional[str] = None,
+    input_trans: Optional[Callable[[dict], dict]] = None,
+) -> Any:
+    """Expose a skill's declared Python tools as a FastMCP server (foreign-host).
+
+    Reads the ``coact: mcp:`` block (``module`` + ``functions``) of the source
+    skill(s) and delegates to ``py2mcp.mk_mcp_from_refs`` — coact writes no MCP
+    plumbing (DECISIONS §6.1.3). ``target`` may be a skill source or an
+    :class:`AgentDefinition` (whose ``source_skill`` is resolved back to the
+    skill that carries the declaration).
+    """
+    check_requirements(
+        {"py2mcp": "py2mcp", "fastmcp": "fastmcp"},
+        feature="realize(backend='mcp')",
+    )
+    from py2mcp import mk_mcp_from_refs
+
+    refs, server_name = _mcp_refs(target)
+    if not refs:
+        raise ValueError(
+            "No Python tools to expose via MCP. Declare them in a `coact: mcp:` "
+            "block (module + functions) on the source skill, or use "
+            "backend='host' / 'sdk'."
+        )
+    return mk_mcp_from_refs(refs, name=name or server_name, input_trans=input_trans)
+
+
+def _mcp_refs(target: RealizeTarget) -> tuple[list[str], str]:
+    """Collect ``'module:function'`` refs (and a server name) from coact: mcp blocks."""
+    skills = _resolve_skills_for_mcp(target)
+    refs: list[str] = []
+    names: list[str] = []
+    for sk in skills:
+        names.append(sk.meta.name)
+        for entry in parse_coact_meta(sk).mcp:
+            module = entry.get("module")
+            if not module:
+                continue
+            for fn in entry.get("functions") or []:
+                refs.append(f"{module}:{fn}")
+    server_name = (names[0] if len(names) == 1 else "coact") + "-tools"
+    return refs, server_name
+
+
+def _resolve_skills_for_mcp(target: RealizeTarget) -> list[Skill]:
+    """Resolve the skill(s) that carry the coact: mcp declaration for ``target``."""
+    if isinstance(target, (list, tuple)):
+        out: list[Skill] = []
+        for item in target:
+            out.extend(_resolve_skills_for_mcp(item))
+        return out
+    if isinstance(target, AgentDefinition):
+        return [_resolve_skill(target.source_skill or target.name)]
+    return [_resolve_skill(target)]
+
+
+backends.register("mcp", realize_mcp)

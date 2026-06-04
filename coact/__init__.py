@@ -38,16 +38,19 @@ from coact.frontmatter import (
     register_validator,
     validate_coact_block,
 )
+from coact.llm import resolve_llm, structured
 from coact.policy import CompletionPolicy, default_policy
 from coact.realize import (
     RealizedHost,
     RunnableAgent,
     realize,
     realize_host,
+    realize_mcp,
     realize_sdk,
 )
 from coact.realize import backends as realization_backends
 from coact.stores import AgentStore, agents_dir
+from coact.synthesis import synthesize_persona, synthesize_return_contract
 
 # Make `skill validate` aware of the coact: block as soon as coact is imported.
 register_validator()
@@ -69,9 +72,15 @@ __all__ = [
     "realize",
     "realize_host",
     "realize_sdk",
+    "realize_mcp",
     "RealizedHost",
     "RunnableAgent",
     "realization_backends",
+    # Synthesis & LLM facade
+    "synthesize_persona",
+    "synthesize_return_contract",
+    "resolve_llm",
+    "structured",
     # Emit
     "emit_agent",
     "emitters",
