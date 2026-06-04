@@ -68,9 +68,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#coact.base.ReturnContract"><code class="docutils literal notranslate"><span class="pre">ReturnContract</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#coact.base.ReturnContract.from_dict"><code class="docutils literal notranslate"><span class="pre">ReturnContract.from_dict()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#coact.base.ReturnContract.is_empty"><code class="docutils literal notranslate"><span class="pre">ReturnContract.is_empty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coact.base.ReturnContract.schema"><code class="docutils literal notranslate"><span class="pre">ReturnContract.schema()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#coact.base.ReturnContract.to_dict"><code class="docutils literal notranslate"><span class="pre">ReturnContract.to_dict()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.base.resolve_schema_ref"><code class="docutils literal notranslate"><span class="pre">resolve_schema_ref()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="complete.html">coact.complete</a></li>
@@ -233,11 +235,42 @@ from a Pydantic model / dataclass / TypedDict.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="coact.base.ReturnContract.schema">
+<span class="sig-name descname"><span class="pre">schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../_modules/coact/base.html#ReturnContract.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.base.ReturnContract.schema" title="Link to this definition"></a></dt>
+<dd><p>Return the canonical JSON Schema, resolving <code class="docutils literal notranslate"><span class="pre">ref</span></code> if needed (else <code class="docutils literal notranslate"><span class="pre">{}</span></code>).</p>
+<p>Honors DECISIONS D6 (“JSON Schema is canonical; refs resolve to it”): an
+inline <code class="docutils literal notranslate"><span class="pre">json_schema</span></code> wins; otherwise a <code class="docutils literal notranslate"><span class="pre">module:Name</span></code> <code class="docutils literal notranslate"><span class="pre">ref</span></code> is
+resolved best-effort to a schema. Returns <code class="docutils literal notranslate"><span class="pre">{}</span></code> when neither is available.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ReturnContract</span><span class="p">(</span><span class="n">json_schema</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
+<span class="go">{&#39;type&#39;: &#39;object&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;properties&#39;</span> <span class="ow">in</span> <span class="n">ReturnContract</span><span class="p">(</span><span class="n">ref</span><span class="o">=</span><span class="s1">&#39;coact.base:ReturnContract&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="coact.base.ReturnContract.to_dict">
 <span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../_modules/coact/base.html#ReturnContract.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.base.ReturnContract.to_dict" title="Link to this definition"></a></dt>
 <dd><p>Serialize to a plain dict (for the agent-md <code class="docutils literal notranslate"><span class="pre">coact:</span></code> block), omitting empties.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.base.resolve_schema_ref">
+<span class="sig-prename descclassname"><span class="pre">coact.base.</span></span><span class="sig-name descname"><span class="pre">resolve_schema_ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/coact/base.html#resolve_schema_ref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.base.resolve_schema_ref" title="Link to this definition"></a></dt>
+<dd><p>Best-effort resolve a <code class="docutils literal notranslate"><span class="pre">'module:Name'</span></code> ref to a JSON Schema dict, or <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<p>Handles Pydantic models (<code class="docutils literal notranslate"><span class="pre">model_json_schema</span></code>/<code class="docutils literal notranslate"><span class="pre">schema</span></code>), dataclasses, and
+TypedDicts (structural <code class="docutils literal notranslate"><span class="pre">{type:</span> <span class="pre">object,</span> <span class="pre">properties:</span> <span class="pre">{...}}</span></code>). Provider- and
+pydantic-agnostic: returns <code class="docutils literal notranslate"><span class="pre">None</span></code> on any failure so callers can warn and
+fall back rather than crash (DECISIONS D6/D10).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">resolve_schema_ref</span><span class="p">(</span><span class="s1">&#39;coact.base:ReturnContract&#39;</span><span class="p">)[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+<span class="go">&#39;object&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resolve_schema_ref</span><span class="p">(</span><span class="s1">&#39;definitely.not:Real&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="go">True</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>

@@ -199,7 +199,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">from_claude_agent_md</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AgentDefinition</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse ``.claude/agents/*.md`` content back into an :class:`AgentDefinition`.</span>
 
-<span class="sd">    The inverse of :func:`to_claude_agent_md` (lossless for all coact fields).</span>
+<span class="sd">    The inverse of :func:`to_claude_agent_md`: lossless for every **structured**</span>
+<span class="sd">    field; the ``prompt`` body is whitespace-trimmed on both ends (personas are</span>
+<span class="sd">    not whitespace-sensitive).</span>
 
 <span class="sd">    &gt;&gt;&gt; ad = AgentDefinition(name=&#39;ux&#39;, description=&#39;Analyze.&#39;, prompt=&#39;You are an analyst.&#39;,</span>
 <span class="sd">    ...     tools=[&#39;Read&#39;, &#39;Grep&#39;], model=&#39;sonnet&#39;,</span>
@@ -275,7 +277,12 @@
 
     <span class="k">for</span> <span class="n">ad_field</span><span class="p">,</span> <span class="n">sdk_field</span> <span class="ow">in</span> <span class="n">_AD_TO_SDK_FIELD</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="n">ad_field</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[],</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">{}):</span>
+        <span class="k">if</span> <span class="n">ad_field</span> <span class="o">==</span> <span class="s2">&quot;tools&quot;</span><span class="p">:</span>
+            <span class="c1"># Preserve the None (inherit all) vs [] (no tools) distinction (base.py):</span>
+            <span class="c1"># drop only None; an empty allowlist is meaningful and must be emitted.</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[],</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">{}):</span>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="n">sdk_field</span> <span class="ow">in</span> <span class="n">accepted</span><span class="p">:</span>
             <span class="n">agent_kwargs</span><span class="p">[</span><span class="n">sdk_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>

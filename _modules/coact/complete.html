@@ -105,6 +105,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">replace</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
@@ -112,7 +113,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">skill.stores</span><span class="w"> </span><span class="kn">import</span> <span class="n">LocalSkillStore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">skill.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_project_root</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">coact.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span><span class="p">,</span> <span class="n">AgentPlan</span><span class="p">,</span> <span class="n">FieldProvenance</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.base</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AgentDefinition</span><span class="p">,</span>
+    <span class="n">AgentPlan</span><span class="p">,</span>
+    <span class="n">FieldProvenance</span><span class="p">,</span>
+    <span class="n">resolve_schema_ref</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.frontmatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_coact_meta</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompletionPolicy</span><span class="p">,</span> <span class="n">default_policy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.synthesis</span><span class="w"> </span><span class="kn">import</span> <span class="n">synthesize_persona</span><span class="p">,</span> <span class="n">synthesize_return_contract</span>
@@ -206,6 +212,16 @@
 
     <span class="c1"># return contract (author-pinned else template) — the most important extra.</span>
     <span class="n">return_contract</span><span class="p">,</span> <span class="n">rc_src</span> <span class="o">=</span> <span class="n">synthesize_return_contract</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">coact_meta</span><span class="o">=</span><span class="n">coact_meta</span><span class="p">)</span>
+    <span class="c1"># Resolve a schema_ref to canonical JSON Schema now (D6), or warn (never crash).</span>
+    <span class="k">if</span> <span class="n">return_contract</span><span class="o">.</span><span class="n">ref</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">return_contract</span><span class="o">.</span><span class="n">json_schema</span><span class="p">:</span>
+        <span class="n">resolved</span> <span class="o">=</span> <span class="n">resolve_schema_ref</span><span class="p">(</span><span class="n">return_contract</span><span class="o">.</span><span class="n">ref</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resolved</span><span class="p">:</span>
+            <span class="n">return_contract</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">return_contract</span><span class="p">,</span> <span class="n">json_schema</span><span class="o">=</span><span class="n">resolved</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;return schema_ref </span><span class="si">{</span><span class="n">return_contract</span><span class="o">.</span><span class="n">ref</span><span class="si">!r}</span><span class="s2"> could not be resolved &quot;</span>
+                <span class="s2">&quot;to a JSON Schema; the contract carries only the reference.&quot;</span>
+            <span class="p">)</span>
     <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
         <span class="n">FieldProvenance</span><span class="p">(</span>
             <span class="s2">&quot;returns&quot;</span><span class="p">,</span>
