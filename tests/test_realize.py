@@ -126,7 +126,8 @@ def test_sdk_build_options_maps_fields():
     assert opts.system_prompt == ad.prompt
     assert opts.allowed_tools == ["Read", "Grep"]
     assert opts.model == "sonnet"
-    assert opts.output_format == {"type": "object"}
+    # output_format must be the SDK's json_schema wrapper, not a bare schema.
+    assert opts.output_format == {"type": "json_schema", "schema": {"type": "object"}}
 
 
 @pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")

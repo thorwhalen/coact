@@ -17,6 +17,7 @@ Two entry points (progressive disclosure: dry-run first):
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 from typing import Optional, Union
 
@@ -24,7 +25,12 @@ from skill.base import Skill
 from skill.stores import LocalSkillStore
 from skill.util import find_project_root
 
-from coact.base import AgentDefinition, AgentPlan, FieldProvenance
+from coact.base import (
+    AgentDefinition,
+    AgentPlan,
+    FieldProvenance,
+    resolve_schema_ref,
+)
 from coact.frontmatter import parse_coact_meta
 from coact.policy import CompletionPolicy, default_policy
 from coact.synthesis import synthesize_persona, synthesize_return_contract
@@ -116,6 +122,16 @@ def plan_completion(
 
     # return contract (author-pinned else template) — the most important extra.
     return_contract, rc_src = synthesize_return_contract(skill, coact_meta=coact_meta)
+    # Resolve a schema_ref to canonical JSON Schema now (D6), or warn (never crash).
+    if return_contract.ref and not return_contract.json_schema:
+        resolved = resolve_schema_ref(return_contract.ref)
+        if resolved:
+            return_contract = replace(return_contract, json_schema=resolved)
+        else:
+            warnings.append(
+                f"return schema_ref {return_contract.ref!r} could not be resolved "
+                "to a JSON Schema; the contract carries only the reference."
+            )
     prov.append(
         FieldProvenance(
             "returns",

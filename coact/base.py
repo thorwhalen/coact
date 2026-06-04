@@ -18,6 +18,7 @@ Three dataclasses live here:
 
 from __future__ import annotations
 
+import dataclasses
 from dataclasses import dataclass, field
 from typing import Any, Literal, Optional
 
@@ -87,6 +88,63 @@ class ReturnContract:
             ref=d.get("schema_ref") or d.get("ref"),
             description=d.get("description", ""),
         )
+
+    def schema(self) -> dict:
+        """Return the canonical JSON Schema, resolving ``ref`` if needed (else ``{}``).
+
+        Honors DECISIONS D6 ("JSON Schema is canonical; refs resolve to it"): an
+        inline ``json_schema`` wins; otherwise a ``module:Name`` ``ref`` is
+        resolved best-effort to a schema. Returns ``{}`` when neither is available.
+
+        >>> ReturnContract(json_schema={'type': 'object'}).schema()
+        {'type': 'object'}
+        >>> 'properties' in ReturnContract(ref='coact.base:ReturnContract').schema()
+        True
+        """
+        if self.json_schema:
+            return self.json_schema
+        if self.ref:
+            return resolve_schema_ref(self.ref) or {}
+        return {}
+
+
+def resolve_schema_ref(ref: str) -> Optional[dict]:
+    """Best-effort resolve a ``'module:Name'`` ref to a JSON Schema dict, or ``None``.
+
+    Handles Pydantic models (``model_json_schema``/``schema``), dataclasses, and
+    TypedDicts (structural ``{type: object, properties: {...}}``). Provider- and
+    pydantic-agnostic: returns ``None`` on any failure so callers can warn and
+    fall back rather than crash (DECISIONS D6/D10).
+
+    >>> resolve_schema_ref('coact.base:ReturnContract')['type']
+    'object'
+    >>> resolve_schema_ref('definitely.not:Real') is None
+    True
+    """
+    try:
+        from coact.util import import_object
+
+        obj = import_object(ref)
+    except Exception:
+        return None
+    # Pydantic v2, then v1.
+    for method in ("model_json_schema", "schema"):
+        fn = getattr(obj, method, None)
+        if callable(fn) and isinstance(obj, type):
+            try:
+                result = fn()
+                if isinstance(result, dict) and result:
+                    return result
+            except Exception:
+                pass
+    # Dataclass / TypedDict: a structural object schema (permissive property set).
+    if dataclasses.is_dataclass(obj):
+        names = [f.name for f in dataclasses.fields(obj)]
+        return {"type": "object", "properties": {n: {} for n in names}}
+    annotations = getattr(obj, "__annotations__", None)
+    if annotations and getattr(obj, "__total__", None) is not None:
+        return {"type": "object", "properties": {k: {} for k in annotations}}
+    return None
 
 
 @dataclass

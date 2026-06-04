@@ -103,7 +103,9 @@ def to_claude_agent_md(ad: AgentDefinition) -> str:
 def from_claude_agent_md(text: str) -> AgentDefinition:
     """Parse ``.claude/agents/*.md`` content back into an :class:`AgentDefinition`.
 
-    The inverse of :func:`to_claude_agent_md` (lossless for all coact fields).
+    The inverse of :func:`to_claude_agent_md`: lossless for every **structured**
+    field; the ``prompt`` body is whitespace-trimmed on both ends (personas are
+    not whitespace-sensitive).
 
     >>> ad = AgentDefinition(name='ux', description='Analyze.', prompt='You are an analyst.',
     ...     tools=['Read', 'Grep'], model='sonnet',
@@ -176,7 +178,12 @@ def to_sdk_agent_dict(ad: AgentDefinition) -> dict:
 
     for ad_field, sdk_field in _AD_TO_SDK_FIELD.items():
         value = getattr(ad, ad_field)
-        if value in (None, [], "", {}):
+        if ad_field == "tools":
+            # Preserve the None (inherit all) vs [] (no tools) distinction (base.py):
+            # drop only None; an empty allowlist is meaningful and must be emitted.
+            if value is None:
+                continue
+        elif value in (None, [], "", {}):
             continue
         if sdk_field in accepted:
             agent_kwargs[sdk_field] = value
