@@ -8,6 +8,7 @@
    module_docs/coact/emit
    module_docs/coact/frontmatter
    module_docs/coact/policy
+   module_docs/coact/realize
    module_docs/coact/stores
    module_docs/coact/synthesis
    module_docs/coact/util
