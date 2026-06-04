@@ -128,3 +128,21 @@ COMPLETE's mechanical path (read `coact:` + policy defaults), all emitters, the
 injected through `coact.llm` (wrapping `skill.ai.chat` or an `aw` `StepConfig`
 llm or any `callable(str)->str`). Absent an LLM, synthesis produces a sound
 template. No hard provider dependency anywhere.
+
+## D11 — PyPI publishing is marker-gated, not automatic
+
+`[tool.wads.ci.publish].enabled = false`. In the wads CI model the publish job's
+`if` condition is `publish-enabled == 'true' || contains(commit_message,
+publish-marker)`. With `enabled = false`, routine pushes to `main` **skip** the
+publish job entirely (so `main` stays green), and a release happens **only** when
+a commit message contains the `publish_marker` (`"[publish]"`).
+
+**Why not `enabled = true` like the sibling repos (`skill`/`aw`/`py2mcp`):** those
+publish on every main push because they have a `PYPI_PASSWORD` secret and an
+established release cadence. `coact` is new (only `0.0.2` on PyPI, hand-published);
+the repo has **no** `PYPI_PASSWORD` secret, so an `enabled = true` posture made
+every main push fail at `uv publish` with a 403 (empty token). Releasing a *new*
+public package version is a deliberate, owner-initiated act — gating it behind an
+explicit `[publish]` marker keeps CI honest (green when it should be) and makes the
+release moment intentional. To ship: set the `PYPI_PASSWORD` repo secret, then land
+a commit whose message contains `[publish]`.
