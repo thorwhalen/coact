@@ -1,6 +1,5 @@
 """Tests for COMPLETE: the skill→agent lift, policy routing, and dry-run provenance."""
 
-from pathlib import Path
 
 import pytest
 from skill.base import Skill, SkillMeta
@@ -11,7 +10,7 @@ from coact import (
     complete,
     plan_completion,
 )
-from coact.complete import _resolve_skill
+from coact.complete import resolve_skill
 
 
 def _skill(name="ux-analyst", description="Analyze UX bundles for issues.", body="Do the steps.", **kw):
@@ -159,14 +158,14 @@ def test_resolve_skill_from_dir(tmp_path):
     (skill_dir / "SKILL.md").write_text(
         "---\nname: auditor\ndescription: Audit.\n---\n# auditor\nbody\n"
     )
-    s = _resolve_skill(skill_dir)
+    s = resolve_skill(skill_dir)
     assert s.meta.name == "auditor"
-    assert _resolve_skill(skill_dir / "SKILL.md").meta.name == "auditor"
+    assert resolve_skill(skill_dir / "SKILL.md").meta.name == "auditor"
 
 
 def test_resolve_skill_unresolvable_raises():
     with pytest.raises(FileNotFoundError, match="Could not resolve skill"):
-        _resolve_skill("definitely-not-a-real-skill-xyz")
+        resolve_skill("definitely-not-a-real-skill-xyz")
 
 
 def test_complete_then_emit_roundtrips(tmp_path):
@@ -178,3 +177,76 @@ def test_complete_then_emit_roundtrips(tmp_path):
     assert back.name == ad.name
     assert back.skills == ad.skills
     assert back.returns.json_schema == ad.returns.json_schema
+
+
+# --- coverage gaps: schema_ref resolution, consumes, extra-skills persona ----
+
+
+def test_complete_resolves_schema_ref_in_plan(tmp_path):
+    d = tmp_path / "skills" / "rc"
+    d.mkdir(parents=True)
+    (d / "SKILL.md").write_text(
+        "---\nname: rc\ndescription: Return a contract.\n"
+        "coact:\n  returns:\n    schema_ref: coact.base:ReturnContract\n---\n# rc\nbody\n"
+    )
+    from coact import plan_completion
+
+    plan = plan_completion(d)
+    # the ref resolved to a canonical JSON Schema on the agent's contract
+    assert plan.agent.returns.json_schema.get("type") == "object"
+    assert "properties" in plan.agent.returns.json_schema
+
+
+def test_complete_unresolvable_schema_ref_warns_not_crashes(tmp_path):
+    d = tmp_path / "skills" / "bad"
+    d.mkdir(parents=True)
+    (d / "SKILL.md").write_text(
+        "---\nname: bad\ndescription: Bad ref.\n"
+        "coact:\n  returns:\n    schema_ref: nope.nope:Nothing\n---\n# bad\nbody\n"
+    )
+    from coact import plan_completion
+
+    plan = plan_completion(d)
+    assert any("could not be resolved" in w for w in plan.warnings)
+    assert plan.agent.returns.ref == "nope.nope:Nothing"
+
+
+def test_complete_pins_consumes(tmp_path):
+    d = tmp_path / "skills" / "cons"
+    d.mkdir(parents=True)
+    (d / "SKILL.md").write_text(
+        "---\nname: cons\ndescription: Consumes a bundle.\n"
+        "coact:\n  consumes: evidence_bundle\n---\n# cons\nbody\n"
+    )
+    from coact import complete, plan_completion
+
+    assert complete(d).consumes == "evidence_bundle"
+    plan = plan_completion(d)
+    assert any(p.field == "consumes" for p in plan.provenance)
+
+
+def test_persona_names_extra_skills():
+    from skill.base import Skill, SkillMeta
+
+    from coact.base import ReturnContract
+    from coact.synthesis import synthesize_persona
+
+    persona, _ = synthesize_persona(
+        Skill(meta=SkillMeta(name="ux", description="Analyze."), body="b"),
+        return_contract=ReturnContract(json_schema={"type": "object"}),
+        extra_skills=["shared-evidence"],
+    )
+    assert "`shared-evidence`" in persona
+
+
+def test_resolve_skill_project_fallback(tmp_path, monkeypatch):
+    # a project root with .claude/skills/<name> resolves by bare name
+    proj = tmp_path / "proj"
+    sk = proj / ".claude" / "skills" / "projskill"
+    sk.mkdir(parents=True)
+    (sk / "SKILL.md").write_text("---\nname: projskill\ndescription: In project.\n---\n# x\nb\n")
+    (proj / ".git").mkdir()  # a project-root marker for find_project_root()
+    monkeypatch.chdir(proj)
+    from coact.complete import resolve_skill
+
+    assert resolve_skill("projskill").meta.name == "projskill"

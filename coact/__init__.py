@@ -57,13 +57,32 @@ from coact.realize import (
 )
 from coact.realize import backends as realization_backends
 from coact.realize_litellm import RunnableLLMAgent, realize_litellm  # registers 'litellm'
+from coact.scaffold import scaffold_fleet
 from coact.stores import AgentStore, agents_dir
 from coact.synthesis import synthesize_persona, synthesize_return_contract
 
 # Make `skill validate` aware of the coact: block as soon as coact is imported.
 register_validator()
 
-__version__ = "0.0.2"
+
+def _resolve_version() -> str:
+    """Read the installed distribution version (SSOT = pyproject), else a sentinel.
+
+    Sourcing ``__version__`` from installed metadata keeps it from drifting away
+    from ``pyproject.toml`` (the version wads bumps on release) — there is no
+    second literal to forget to update. A source checkout that was never installed
+    has no metadata, so a clearly-marked sentinel is returned rather than a stale
+    number.
+    """
+    from importlib.metadata import PackageNotFoundError, version
+
+    try:
+        return version("coact")
+    except PackageNotFoundError:  # pragma: no cover - only in an uninstalled tree
+        return "0.0.0+unknown"
+
+
+__version__ = _resolve_version()
 
 __all__ = [
     # Core data model (SSOT)
@@ -86,6 +105,8 @@ __all__ = [
     "RunnableAgent",
     "RunnableLLMAgent",
     "realization_backends",
+    # Scaffold (the one topology-adjacent emitter — a starter you own; D8)
+    "scaffold_fleet",
     # Synthesis & LLM facade
     "synthesize_persona",
     "synthesize_return_contract",

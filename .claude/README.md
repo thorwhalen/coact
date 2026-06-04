@@ -11,9 +11,10 @@ skill's `description` trigger.
 
 | Skill | Audience | Use it when… |
 |---|---|---|
+| [`coact`](skills/coact/SKILL.md) | consumers (**start here**) | unsure which capability you need — a thin overview that routes to the three below |
 | [`coact-dev`](skills/coact-dev/SKILL.md) | **developers of coact** | working on this package — architecture, invariants, open-closed extension points, testing/tooling gotchas |
 | [`coact-complete`](skills/coact-complete/SKILL.md) | consumers | turning a `.claude/skills/` skill into an agent definition (COMPLETE) |
-| [`coact-realize`](skills/coact-realize/SKILL.md) | consumers | turning a definition into something that runs (REALIZE: host/sdk/mcp) |
+| [`coact-realize`](skills/coact-realize/SKILL.md) | consumers | turning a definition into something that runs (REALIZE: host/sdk/mcp/litellm), preview with `--dry-run`, or `scaffold` a starter fleet |
 | [`coact-analyze`](skills/coact-analyze/SKILL.md) | consumers | `diff` / `estimate` / `inventory` / `back` — see and move between the layers |
 
 ## Agents (`.claude/agents/`)

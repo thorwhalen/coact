@@ -25,7 +25,8 @@ from typing import Any, Optional
 
 from coact.base import AgentDefinition
 from coact.policy import CompletionPolicy
-from coact.realize import RealizeTarget, _coerce_agents, backends
+from coact.realize import RealizeTarget, coerce_agents, backends
+from coact.return_contract import render_json_return_instruction
 from coact.util import check_requirements
 
 #: Map coact's model *selectors* to LiteLLM model strings. Data, not code — pass a
@@ -39,16 +40,6 @@ DEFAULT_MODEL_MAP: dict[str, str] = {
 }
 #: Used when the definition pins no model and none maps.
 DEFAULT_MODEL = "openai/gpt-4o-mini"
-
-
-def _json_return_instruction(schema: dict) -> str:
-    """The portable structured-output fallback: ask for JSON conforming to a schema."""
-    return (
-        "## Return contract\n"
-        "Respond with a single JSON value conforming to this JSON Schema. Output "
-        "JSON only — no prose, no code fences.\n\n"
-        f"```json\n{json.dumps(schema, indent=2)}\n```"
-    )
 
 
 @dataclass
@@ -97,7 +88,7 @@ class RunnableLLMAgent:
         system = self.agent_def.prompt or self.agent_def.description or ""
         schema = self.agent_def.returns.schema()
         if schema:
-            system = (system + "\n\n" + _json_return_instruction(schema)).strip()
+            system = (system + "\n\n" + render_json_return_instruction(schema)).strip()
         user = input_data if isinstance(input_data, str) else _to_user_text(input_data)
         messages: list[dict] = []
         if system:
@@ -133,7 +124,9 @@ class RunnableLLMAgent:
             check_requirements({"litellm": "litellm"}, feature="realize(backend='litellm')")
             completion = _default_litellm_completion
         kwargs = self.build_kwargs(input_data)
-        raw, response_format_used = _complete_with_fallback(completion, kwargs)
+        raw, response_format_used, fallback_error = _complete_with_fallback(
+            completion, kwargs
+        )
         has_schema = bool(self.agent_def.returns.schema())
         artifact = _extract_litellm_artifact(raw, has_schema=has_schema)
         info = {
@@ -144,6 +137,11 @@ class RunnableLLMAgent:
             "response_format_used": response_format_used,
             "raw": raw,
         }
+        # Surface (don't bury) the error that forced the no-response_format retry,
+        # so a caller can tell "provider rejected structured output" from a real
+        # network/auth failure that we happened to recover from on the retry.
+        if fallback_error is not None:
+            info["response_format_error"] = repr(fallback_error)
         return artifact, info
 
 
@@ -159,20 +157,27 @@ def _to_user_text(value: Any) -> str:
         return repr(value)
 
 
-def _complete_with_fallback(completion: Callable[..., Any], kwargs: dict) -> tuple[Any, bool]:
+def _complete_with_fallback(
+    completion: Callable[..., Any], kwargs: dict
+) -> tuple[Any, bool, Optional[Exception]]:
     """Call ``completion``; if ``response_format`` is rejected, retry once without it.
 
-    Returns ``(response, response_format_used)``. The structured schema is still
-    requested via the system-prompt instruction, so dropping ``response_format`` on a
-    provider that doesn't support it degrades gracefully instead of hard-failing.
+    Returns ``(response, response_format_used, fallback_error)``. The schema is
+    still requested via the system-prompt instruction, so dropping
+    ``response_format`` on a provider that doesn't support it degrades gracefully
+    instead of hard-failing. The ``except`` is deliberately broad — providers
+    signal "structured output unsupported" with wildly different exception types —
+    but the caught error is **returned** (not swallowed) so ``execute`` can record
+    it in ``info['response_format_error']``: a transient network/auth failure on
+    the first call that the retry happens to mask stays observable.
     """
     if "response_format" not in kwargs:
-        return completion(**kwargs), False
+        return completion(**kwargs), False, None
     try:
-        return completion(**kwargs), True
-    except Exception:
+        return completion(**kwargs), True, None
+    except Exception as error:
         retry = {k: v for k, v in kwargs.items() if k != "response_format"}
-        return completion(**retry), False
+        return completion(**retry), False, error
 
 
 def _default_litellm_completion(**kwargs: Any) -> Any:
@@ -264,7 +269,7 @@ def realize_litellm(
     ``model_map`` overrides how coact model selectors (``sonnet``/``opus``/``haiku``)
     map to LiteLLM model strings — point them at any provider to prove portability.
     """
-    agents = _coerce_agents(target, policy=policy)
+    agents = coerce_agents(target, policy=policy)
     if len(agents) != 1:
         raise ValueError(
             f"backend='litellm' realizes exactly one agent; got {len(agents)}. "

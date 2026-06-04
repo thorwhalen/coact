@@ -12,7 +12,7 @@ from coact import (
     realize,
     realize_host,
 )
-from coact.realize import _coerce_agents
+from coact.realize import coerce_agents
 
 _HAS_SDK = importlib.util.find_spec("claude_agent_sdk") is not None
 
@@ -34,19 +34,19 @@ def _agent(name="ux", skills=("ux",), **kw):
 
 def test_coerce_agent_definition_passthrough():
     ad = _agent()
-    assert _coerce_agents(ad) == [ad]
+    assert coerce_agents(ad) == [ad]
 
 
 def test_coerce_skill_completes_it():
     s = Skill(
         meta=SkillMeta(name="auditor", description="Audit the bundle."), body="steps"
     )
-    out = _coerce_agents(s)
+    out = coerce_agents(s)
     assert len(out) == 1 and out[0].name == "auditor"
 
 
 def test_coerce_list_flattens():
-    out = _coerce_agents([_agent("a"), _agent("b")])
+    out = coerce_agents([_agent("a"), _agent("b")])
     assert [a.name for a in out] == ["a", "b"]
 
 
@@ -54,7 +54,7 @@ def test_coerce_agent_md_file(tmp_path):
     from coact import emit_agent
 
     p = emit_agent(_agent("written"), "claude-agents-md", dest=tmp_path)
-    out = _coerce_agents(p)
+    out = coerce_agents(p)
     assert out[0].name == "written"
 
 
@@ -184,18 +184,18 @@ def _tool_block(name, payload):
 
 
 def test_auto_return_mode_prefers_output_format_then_tool():
-    from coact.realize import _auto_return_mode
+    from coact.realize import auto_return_mode
 
-    assert _auto_return_mode({"system_prompt", "output_format"}) == "output_format"
-    assert _auto_return_mode({"system_prompt", "model"}) == "tool"
+    assert auto_return_mode({"system_prompt", "output_format"}) == "output_format"
+    assert auto_return_mode({"system_prompt", "model"}) == "tool"
 
 
 def test_as_object_schema_passes_object_through_and_wraps_others():
-    from coact.realize import _as_object_schema
+    from coact.realize import as_object_schema
 
     obj = {"type": "object", "properties": {"score": {"type": "number"}}}
-    assert _as_object_schema(obj) == (obj, None)
-    wrapped, key = _as_object_schema({"type": "array", "items": {"type": "string"}})
+    assert as_object_schema(obj) == (obj, None)
+    wrapped, key = as_object_schema({"type": "array", "items": {"type": "string"}})
     assert key == "result"
     assert wrapped["properties"]["result"] == {
         "type": "array",
@@ -301,20 +301,20 @@ def test_sdk_unknown_return_mode_raises():
 def test_as_object_schema_does_not_wrap_free_form_object():
     # {'type':'object'} with no properties is passed through (with an empty
     # properties key), NOT wrapped — so a model's {'result': ...} can't collapse.
-    from coact.realize import _as_object_schema
+    from coact.realize import as_object_schema
 
-    coerced, key = _as_object_schema({"type": "object"})
+    coerced, key = as_object_schema({"type": "object"})
     assert key is None
     assert coerced == {"type": "object", "properties": {}}
 
 
 def test_is_return_tool_is_server_scoped():
-    from coact.realize import _is_return_tool
+    from coact.return_contract import is_return_tool
 
-    assert _is_return_tool("mcp__coact_return__return_result")
-    assert not _is_return_tool("mcp__other_server__return_result")
-    assert not _is_return_tool("return_result")  # bare name on no server
-    assert not _is_return_tool("Read")
+    assert is_return_tool("mcp__coact_return__return_result")
+    assert not is_return_tool("mcp__other_server__return_result")
+    assert not is_return_tool("return_result")  # bare name on no server
+    assert not is_return_tool("Read")
 
 
 def test_coerce_mcp_servers_forms():
@@ -331,23 +331,23 @@ def test_coerce_mcp_servers_forms():
 
 
 def test_extract_return_tool_input_last_wins_direct():
-    from coact.realize import RETURN_TOOL_FULLNAME, _extract_return_tool_input
+    from coact.realize import RETURN_TOOL_FULLNAME, extract_return_tool_input
 
     msgs = [
         _msg(_tool_block(RETURN_TOOL_FULLNAME, {"v": 1})),
         _msg(_tool_block(RETURN_TOOL_FULLNAME, {"v": 2})),
     ]
-    assert _extract_return_tool_input(msgs, None) == {"v": 2}
+    assert extract_return_tool_input(msgs, None) == {"v": 2}
 
 
 def test_extract_does_not_unwrap_when_extra_keys_present():
-    from coact.realize import _extract_return_tool_input
+    from coact.realize import extract_return_tool_input
 
     block = _tool_block(
         "mcp__coact_return__return_result", {"result": ["a"], "extra": 1}
     )
     # the strict guard only unwraps a dict that is EXACTLY {result: ...}
-    assert _extract_return_tool_input([_msg(block)], "result") == {
+    assert extract_return_tool_input([_msg(block)], "result") == {
         "result": ["a"],
         "extra": 1,
     }
@@ -514,3 +514,54 @@ def test_sdk_tool_mode_falls_back_to_text_when_tool_not_called():
     ).execute("t", {})
     assert artifact == "part1\npart2"
     assert info["return_mode"] == "tool"
+
+
+# ---------------------------------------------------------------------------
+# host backend — dry_run preview (progressive disclosure)
+# ---------------------------------------------------------------------------
+
+
+def test_host_dry_run_previews_without_writing(tmp_path):
+    dest = tmp_path / "proj" / ".claude" / "agents"
+    res = realize_host(_agent("ux"), dest=dest, link=False, dry_run=True)
+    assert res.dry_run is True
+    assert res.agents["ux"] == dest / "ux.md"  # the path that WOULD be written
+    assert not dest.exists()  # nothing materialized
+    assert res.warnings == []
+
+
+def test_host_dry_run_previews_skill_link(tmp_path):
+    skills_src = tmp_path / "src_skills" / "ux"
+    skills_src.mkdir(parents=True)
+    (skills_src / "SKILL.md").write_text("---\nname: ux\ndescription: UX.\n---\n# ux\nb\n")
+    agents_out = tmp_path / "proj" / ".claude" / "agents"
+    from coact import complete
+
+    res = realize_host(
+        complete(skills_src),
+        dest=agents_out,
+        link=True,
+        skills_source=tmp_path / "src_skills",
+        dry_run=True,
+    )
+    would_link = agents_out.parent / "skills" / "ux"
+    assert res.skills["ux"] == would_link  # predicted link path
+    assert not would_link.exists()  # but no symlink created
+    assert res.warnings == []
+
+
+def test_host_dry_run_still_warns_on_unresolvable_skill(tmp_path):
+    res = realize_host(
+        _agent("x", skills=["nope-skill-xyz"]),
+        dest=tmp_path / "agents",
+        link=True,
+        dry_run=True,
+    )
+    assert any("could not be resolved" in w for w in res.warnings)
+    assert not (tmp_path / "agents").exists()
+
+
+def test_realize_dispatch_passes_dry_run_through(tmp_path):
+    dest = tmp_path / "a"
+    res = realize(_agent("ux"), backend="host", dest=dest, link=False, dry_run=True)
+    assert res.dry_run is True and not dest.exists()

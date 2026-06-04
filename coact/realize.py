@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import dataclasses
 import os
-import shutil
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -30,13 +29,22 @@ from typing import Any, Optional, Union
 
 from skill.base import Skill
 from skill.registry import Registry
-from skill.util import find_project_root
 
 from coact.base import AgentDefinition
-from coact.complete import _resolve_skill, complete
+from coact.complete import resolve_skill, complete
 from coact.emit import emit_agent, from_claude_agent_md
 from coact.frontmatter import parse_coact_meta
 from coact.policy import CompletionPolicy
+from coact.return_contract import (
+    RETURN_TOOL_FULLNAME,
+    RETURN_TOOL_NAME,
+    RETURN_TOOL_SERVER,
+    ReturnPlan,
+    as_object_schema,
+    auto_return_mode,
+    extract_return_tool_input,
+    render_tool_return_instruction,
+)
 from coact.stores import agents_dir
 from coact.util import check_requirements
 
@@ -70,7 +78,7 @@ def realize(target: RealizeTarget, *, backend: str = "host", **kwargs) -> Any:
 # ---------------------------------------------------------------------------
 
 
-def _coerce_agents(
+def coerce_agents(
     target: RealizeTarget, *, policy: Optional[CompletionPolicy] = None
 ) -> list[AgentDefinition]:
     """Resolve a realize target to a list of :class:`AgentDefinition`.
@@ -85,7 +93,7 @@ def _coerce_agents(
     if isinstance(target, (list, tuple)):
         out: list[AgentDefinition] = []
         for item in target:
-            out.extend(_coerce_agents(item, policy=policy))
+            out.extend(coerce_agents(item, policy=policy))
         return out
     if isinstance(target, (str, Path)):
         path = Path(target)
@@ -101,13 +109,19 @@ def _coerce_agents(
 
 @dataclass
 class RealizedHost:
-    """The materialized result of host realization (files the host will discover)."""
+    """The materialized result of host realization (files the host will discover).
+
+    When produced by a ``dry_run`` the paths are what *would* be written/linked
+    (``dry_run=True`` is recorded so the caller / CLI can label the preview);
+    nothing on disk is touched.
+    """
 
     agents: dict[str, Path] = field(default_factory=dict)
     skills: dict[str, Path] = field(default_factory=dict)
     agents_dir: Optional[Path] = None
     skills_dir: Optional[Path] = None
     warnings: list[str] = field(default_factory=list)
+    dry_run: bool = False
 
 
 def realize_host(
@@ -119,6 +133,7 @@ def realize_host(
     link: bool = True,
     skills_source: Path | str | list | None = None,
     force: bool = False,
+    dry_run: bool = False,
     policy: Optional[CompletionPolicy] = None,
 ) -> RealizedHost:
     """Materialize agents (+ linked skills) so the host agent runs them.
@@ -128,27 +143,45 @@ def realize_host(
     discovers both. ``skills_source`` (a dir or list of dirs each holding
     ``<name>/SKILL.md``) is searched first; otherwise skills are resolved by name
     via the local store / project. Verifies discovery and reports anything missing.
+
+    Pass ``dry_run=True`` to *preview* — the returned :class:`RealizedHost` lists
+    the agent files that would be written and the skills that would link (with the
+    same unresolvable-skill warnings), but **no file or symlink is created**. This
+    mirrors :func:`coact.complete.plan_completion`'s look-before-you-leap contract
+    for the one backend that mutates the filesystem (progressive disclosure).
     """
-    agents = _coerce_agents(target, policy=policy)
+    agents = coerce_agents(target, policy=policy)
     out_dir = (
         Path(dest)
         if dest is not None
         else agents_dir(scope=scope, project_dir=project_dir)
     )
-    out_dir.mkdir(parents=True, exist_ok=True)
     skills_target = out_dir.parent / "skills"
     sources = _as_source_list(skills_source)
 
-    result = RealizedHost(agents_dir=out_dir, skills_dir=skills_target)
+    result = RealizedHost(
+        agents_dir=out_dir, skills_dir=skills_target, dry_run=dry_run
+    )
+    if not dry_run:
+        out_dir.mkdir(parents=True, exist_ok=True)
     for ad in agents:
-        result.agents[ad.name] = emit_agent(ad, "claude-agents-md", dest=out_dir)
+        result.agents[ad.name] = (
+            out_dir / f"{ad.name}.md"
+            if dry_run
+            else emit_agent(ad, "claude-agents-md", dest=out_dir)
+        )
 
     if link:
-        skills_target.mkdir(parents=True, exist_ok=True)
+        if not dry_run:
+            skills_target.mkdir(parents=True, exist_ok=True)
         for ad in agents:
             for skill_name in ad.skills:
                 linked = _link_skill(
-                    skill_name, skills_target, sources=sources, force=force
+                    skill_name,
+                    skills_target,
+                    sources=sources,
+                    force=force,
+                    dry_run=dry_run,
                 )
                 if linked is not None:
                     result.skills[skill_name] = linked
@@ -158,16 +191,17 @@ def realize_host(
                         f"could not be resolved to link into {skills_target}"
                     )
 
-    # verify discovery
-    for ad in agents:
-        path = result.agents[ad.name]
-        if not path.exists():
-            result.warnings.append(f"agent file not written: {path}")
-        for skill_name in ad.skills:
-            if link and not (skills_target / skill_name).exists():
-                result.warnings.append(
-                    f"skill {skill_name!r} not discoverable in {skills_target}"
-                )
+    # verify discovery — only meaningful once files actually exist (real run).
+    if not dry_run:
+        for ad in agents:
+            path = result.agents[ad.name]
+            if not path.exists():
+                result.warnings.append(f"agent file not written: {path}")
+            for skill_name in ad.skills:
+                if link and not (skills_target / skill_name).exists():
+                    result.warnings.append(
+                        f"skill {skill_name!r} not discoverable in {skills_target}"
+                    )
     return result
 
 
@@ -187,7 +221,7 @@ def _find_skill_source(name: str, sources) -> Optional[Path]:
         if (candidate / "SKILL.md").exists():
             return candidate
     try:
-        return _resolve_skill(name).source_path
+        return resolve_skill(name).source_path
     except FileNotFoundError:
         return None
 
@@ -198,6 +232,7 @@ def _link_skill(
     *,
     sources=(),
     force: bool = False,
+    dry_run: bool = False,
 ) -> Optional[Path]:
     """Symlink one referenced skill into ``skills_target``; None if unresolved.
 
@@ -207,7 +242,8 @@ def _link_skill(
     user's and is never touched; a working coact symlink is kept unless ``force``;
     the source is resolved **before** any existing link is removed, so a failed
     re-link can never destroy a previously working one; a dangling symlink is
-    re-linked rather than reported as discoverable.
+    re-linked rather than reported as discoverable. With ``dry_run`` the source is
+    resolved (read-only) to predict the outcome, but no symlink is created.
     """
     dest = skills_target / name
 
@@ -222,6 +258,10 @@ def _link_skill(
     if source is None:
         # Can't resolve a replacement: never delete; report only if it resolves.
         return dest if dest.exists() else None
+
+    if dry_run:
+        # Source resolves, so a (re)link *would* happen here — predict it, mutate nothing.
+        return dest
 
     # Safe to (re)create the link now that we have a valid source. At this point
     # any existing dest is a symlink (good/broken) — real entries returned above.
@@ -249,75 +289,11 @@ def _filter_kwargs(cls: type, kwargs: dict) -> dict:
 # --- D6 return-contract realization -----------------------------------------
 #
 # The return contract reaches the SDK by one of two mechanisms (DECISIONS D6):
-#
-# - ``output_format``: the native structured-output option. Used when the
-#   installed ``ClaudeAgentOptions`` exposes the field (SDK ≥ 0.1.x).
-# - ``tool``: a forced ``return_result`` tool whose ``input_schema`` IS the
-#   return schema, plus a system-prompt instruction to call it. The fallback for
-#   older SDKs that lack ``output_format`` (and selectable explicitly via
-#   ``return_mode='tool'`` for models / extended-thinking modes that cannot honor
-#   ``output_format`` at runtime). The structured result is then recovered from
-#   the tool-use block's ``input`` in the message stream — no extra plumbing.
-
-#: In-process SDK MCP server + tool names for the forced return path.
-RETURN_TOOL_SERVER = "coact_return"
-RETURN_TOOL_NAME = "return_result"
-#: How Claude references the tool (``mcp__<server>__<tool>``).
-RETURN_TOOL_FULLNAME = f"mcp__{RETURN_TOOL_SERVER}__{RETURN_TOOL_NAME}"
-
-
-@dataclass(frozen=True)
-class _ReturnPlan:
-    """How an agent's return contract is realized for the SDK (resolved once)."""
-
-    mode: str  # "none" | "output_format" | "tool"
-    schema: dict
-    unwrap_key: Optional[str] = None
-    tool_fullname: str = ""
-
-
-def _auto_return_mode(option_field_names) -> str:
-    """Pick the return mode in ``auto``: native ``output_format`` if the SDK has it.
-
-    >>> _auto_return_mode({'system_prompt', 'output_format'})
-    'output_format'
-    >>> _auto_return_mode({'system_prompt'})  # older SDK without the field
-    'tool'
-    """
-    return "output_format" if "output_format" in set(option_field_names) else "tool"
-
-
-def _as_object_schema(schema: dict) -> tuple[dict, Optional[str]]:
-    """Coerce a return schema to a valid object ``inputSchema`` for the return tool.
-
-    The Agent SDK passes a dict ``input_schema`` through unchanged only when it is
-    an object schema with **both** ``type: object`` and ``properties``; any other
-    dict is misread as a ``{param: type}`` map (and mangled). So:
-
-    - An object schema *with* ``properties`` → passed through, no wrapping.
-    - A free-form object schema (``type: object`` but no ``properties``) → given an
-      empty ``properties`` key so the SDK passes it through verbatim. Crucially it
-      is **not** wrapped: wrapping a free-form object under ``result`` would make a
-      model's own single-key ``{result: ...}`` output indistinguishable from the
-      wrapper (a silent-collapse hazard).
-    - Any non-object schema (array / scalar) → wrapped under a ``result`` key, with
-      that key returned so extraction can unwrap it.
-
-    >>> _as_object_schema({'type': 'object', 'properties': {'a': {}}})[1] is None
-    True
-    >>> _as_object_schema({'type': 'object'})  # free-form object: passed through, not wrapped
-    ({'type': 'object', 'properties': {}}, None)
-    >>> _as_object_schema({'type': 'array', 'items': {'type': 'string'}})
-    ({'type': 'object', 'properties': {'result': {'type': 'array', 'items': {'type': 'string'}}}, 'required': ['result']}, 'result')
-    """
-    if isinstance(schema, dict) and schema.get("type") == "object":
-        if "properties" in schema:
-            return schema, None
-        return {**schema, "properties": {}}, None
-    return (
-        {"type": "object", "properties": {"result": schema}, "required": ["result"]},
-        "result",
-    )
+# the native ``output_format`` option, or a forced ``return_result`` tool. The
+# backend-agnostic pieces (naming, ReturnPlan, mode selection, object-schema
+# coercion, instruction rendering, tool-use extraction) live in
+# :mod:`coact.return_contract`; what stays here is the SDK-specific *wiring*
+# (the in-process MCP server, ``ClaudeAgentOptions``, ``mcp_servers`` coercion).
 
 
 def _coerce_mcp_servers(servers: Any) -> tuple[dict, list[str]]:
@@ -368,68 +344,6 @@ def _coerce_mcp_servers(servers: Any) -> tuple[dict, list[str]]:
     return out, warnings
 
 
-def _with_return_instruction(
-    system_prompt: str, obj_schema: dict, description: str
-) -> str:
-    """Append the "you MUST call return_result" instruction to a system prompt."""
-    import json
-
-    suffix = f" ({description})" if description else ""
-    schema_json = json.dumps(obj_schema, indent=2)
-    instruction = (
-        "\n\n## Return contract\n"
-        f"When you have finished, you MUST call the `{RETURN_TOOL_NAME}` tool "
-        f"exactly once with your final result{suffix}. Its arguments must conform "
-        f"to this JSON Schema:\n\n```json\n{schema_json}\n```\n"
-        f"Do not return the result as prose — call `{RETURN_TOOL_NAME}` instead."
-    )
-    return (system_prompt or "") + instruction
-
-
-def _is_return_tool(name: str) -> bool:
-    """True if ``name`` denotes coact's forced return tool (server-scoped).
-
-    Matches the full MCP name, or any prefix variant scoped to coact's own server
-    (``…__coact_return__return_result``). Deliberately does **not** match a bare
-    ``return_result`` or a ``return_result`` on a *different* MCP server, so a
-    user's own same-named tool is never mistaken for the return contract.
-
-    >>> _is_return_tool('mcp__coact_return__return_result')
-    True
-    >>> _is_return_tool('mcp__other_server__return_result')
-    False
-    >>> _is_return_tool('Read')
-    False
-    """
-    return name == RETURN_TOOL_FULLNAME or name.endswith(
-        f"__{RETURN_TOOL_SERVER}__{RETURN_TOOL_NAME}"
-    )
-
-
-def _extract_return_tool_input(messages: list, unwrap_key: Optional[str]) -> Any:
-    """Recover the forced ``return_result`` tool-use input from SDK messages, or None.
-
-    Scans assistant messages for a tool-use block calling the return tool and
-    returns its ``input`` (the last one wins). When the schema was wrapped (a
-    non-object return type), the single ``result`` key is unwrapped.
-    """
-    found = None
-    for message in messages:
-        content = getattr(message, "content", None)
-        if not isinstance(content, list):
-            continue
-        for block in content:
-            name = getattr(block, "name", None)
-            block_input = getattr(block, "input", None)
-            if name and block_input is not None and _is_return_tool(name):
-                found = block_input
-    if found is None:
-        return None
-    if unwrap_key and isinstance(found, dict) and set(found) == {unwrap_key}:
-        return found[unwrap_key]
-    return found
-
-
 @dataclass
 class RunnableAgent:
     """An ``aw.AgenticStep``-compatible runnable backed by the Claude Agent SDK.
@@ -450,7 +364,7 @@ class RunnableAgent:
     #: thinking that cannot honor output_format). See DECISIONS D6.
     return_mode: str = "auto"
 
-    def _resolved_return(self) -> _ReturnPlan:
+    def _resolved_return(self) -> ReturnPlan:
         """Resolve how this agent's return contract maps onto the SDK (no API call).
 
         Honors ``return_mode`` and, in ``'auto'``, the installed SDK's
@@ -471,7 +385,7 @@ class RunnableAgent:
         if not schema:
             # Distinguish "no contract" from "contract declared but unresolved".
             if self.agent_def.returns.is_empty():
-                return _ReturnPlan("none", {})
+                return ReturnPlan("none", {})
             raise ValueError(
                 f"Return contract references schema_ref "
                 f"{self.agent_def.returns.ref!r}, which could not be resolved to a "
@@ -480,7 +394,7 @@ class RunnableAgent:
             )
         mode = self.return_mode
         if mode == "auto":
-            mode = _auto_return_mode(option_fields)
+            mode = auto_return_mode(option_fields)
         if mode == "output_format":
             # An explicit output_format request must not be silently swallowed by
             # _filter_kwargs on an SDK that lacks the field (the 'auto' path would
@@ -488,11 +402,14 @@ class RunnableAgent:
             if "output_format" not in option_fields:
                 raise ValueError(
                     "return_mode='output_format' but the installed claude_agent_sdk "
-                    "has no output_format option; use return_mode='tool' (or 'auto')."
+                    "has no output_format option (it predates structured output). "
+                    "Upgrade claude-agent-sdk, or use return_mode='auto' to fall back "
+                    "to the forced return_result tool automatically (or 'tool' to "
+                    "force it)."
                 )
-            return _ReturnPlan("output_format", schema)
-        obj_schema, unwrap_key = _as_object_schema(schema)
-        return _ReturnPlan("tool", obj_schema, unwrap_key, RETURN_TOOL_FULLNAME)
+            return ReturnPlan("output_format", schema)
+        obj_schema, unwrap_key = as_object_schema(schema)
+        return ReturnPlan("tool", obj_schema, unwrap_key, RETURN_TOOL_FULLNAME)
 
     def build_options(self) -> Any:
         """Construct ``ClaudeAgentOptions`` from the agent definition (no API call)."""
@@ -561,7 +478,7 @@ class RunnableAgent:
                 t for t in disallowed if t != RETURN_TOOL_FULLNAME
             ]
 
-        kwargs["system_prompt"] = _with_return_instruction(
+        kwargs["system_prompt"] = render_tool_return_instruction(
             kwargs.get("system_prompt") or "",
             obj_schema,
             self.agent_def.returns.description,
@@ -638,7 +555,7 @@ def _extract_artifact(
     # a list of SDK messages
     if isinstance(raw, list) and raw:
         if return_tool:
-            captured = _extract_return_tool_input(raw, unwrap_key)
+            captured = extract_return_tool_input(raw, unwrap_key)
             if captured is not None:
                 return captured
         # the output_format result surfaces as ResultMessage.structured_output
@@ -683,7 +600,7 @@ def realize_sdk(
     ``'tool'`` to force that fallback (e.g. for models / extended-thinking modes
     that cannot honor ``output_format``).
     """
-    agents = _coerce_agents(target, policy=policy)
+    agents = coerce_agents(target, policy=policy)
     if len(agents) != 1:
         raise ValueError(
             f"backend='sdk' realizes exactly one agent; got {len(agents)}. "
@@ -757,8 +674,8 @@ def _resolve_skills_for_mcp(target: RealizeTarget) -> list[Skill]:
             out.extend(_resolve_skills_for_mcp(item))
         return out
     if isinstance(target, AgentDefinition):
-        return [_resolve_skill(target.source_skill or target.name)]
-    return [_resolve_skill(target)]
+        return [resolve_skill(target.source_skill or target.name)]
+    return [resolve_skill(target)]
 
 
 backends.register("mcp", realize_mcp)

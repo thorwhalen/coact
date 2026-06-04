@@ -317,3 +317,38 @@ def test_execute_accepts_and_ignores_context():
     r = realize(_agent(), backend="litellm", completion=comp)
     artifact, _ = r.execute("t", context={"k": "v"})
     assert artifact == "ok" and "context" not in captured
+
+
+# --- fallback observability + non-string input (gap coverage) ---------------
+
+
+def test_response_format_error_recorded_in_info():
+    # the swallowed error that forced the no-response_format retry is surfaced.
+    schema = {"type": "object", "properties": {"a": {"type": "string"}}}
+
+    def flaky(**kwargs):
+        if "response_format" in kwargs:
+            raise RuntimeError("provider rejects response_format")
+        return _resp('{"a": "ok"}')
+
+    r = realize(_agent(schema=schema), backend="litellm", completion=flaky)
+    _, info = r.execute("task")
+    assert "response_format_error" in info
+    assert "provider rejects response_format" in info["response_format_error"]
+
+
+def test_no_response_format_error_on_clean_success():
+    schema = {"type": "object", "properties": {"a": {"type": "string"}}}
+    r = realize(_agent(schema=schema), backend="litellm", completion=lambda **k: _resp('{"a":"x"}'))
+    _, info = r.execute("task")
+    assert "response_format_error" not in info
+
+
+def test_to_user_text_repr_fallback_for_unserializable():
+    from coact.realize_litellm import _to_user_text
+
+    class _NotJson:
+        def __repr__(self):
+            return "<weird>"
+
+    assert _to_user_text(_NotJson()) == "<weird>"

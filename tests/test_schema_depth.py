@@ -1,6 +1,6 @@
 """Tests for the deepened schema_ref resolver: annotation -> typed JSON Schema.
 
-Covers ``coact.base._annotation_to_schema`` and the dataclass / TypedDict
+Covers ``coact.schema._annotation_to_schema`` and the dataclass / TypedDict
 structural builder behind ``resolve_schema_ref`` (offline; no LLM).
 """
 
@@ -9,7 +9,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional, TypedDict
 
-from coact.base import _annotation_to_schema, resolve_schema_ref
+import pytest
+
+from coact.schema import _annotation_to_schema, resolve_schema_ref
 
 
 # --- annotation -> schema fragment ------------------------------------------
@@ -97,3 +99,39 @@ def test_typeddict_resolves_to_typed_properties_required_by_total():
     assert schema["properties"]["issues"] == {"type": "array", "items": {"type": "string"}}
     # a total=True TypedDict marks all keys required
     assert set(schema["required"]) == {"summary", "issues"}
+
+
+# --- resolver edge cases (gap coverage) -------------------------------------
+
+
+class _Loose(TypedDict, total=False):
+    a: str
+    b: int
+
+
+def test_typeddict_total_false_has_no_required():
+    schema = resolve_schema_ref(f"{__name__}:_Loose")
+    assert schema["type"] == "object"
+    assert "required" not in schema  # total=False -> nothing required
+    assert schema["properties"]["a"] == {"type": "string"}
+
+
+def test_resolve_schema_ref_non_type_returns_none():
+    # a plain function is neither pydantic/dataclass/TypedDict -> None
+    assert resolve_schema_ref("json:dumps") is None
+
+
+def test_resolve_schema_ref_pydantic_model_when_available():
+    pytest.importorskip("pydantic")
+    import sys
+
+    from pydantic import BaseModel
+
+    class _PydFinding(BaseModel):
+        title: str
+        score: int = 0
+
+    sys.modules[__name__]._PydFinding = _PydFinding
+    schema = resolve_schema_ref(f"{__name__}:_PydFinding")
+    assert schema["type"] == "object"
+    assert "title" in schema["properties"] and "score" in schema["properties"]

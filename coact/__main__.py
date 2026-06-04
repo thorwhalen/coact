@@ -21,6 +21,7 @@ from coact import complete as _complete
 from coact import emit_agent as _emit
 from coact import plan_completion as _plan
 from coact import realize as _realize
+from coact import scaffold_fleet as _scaffold_fleet
 from coact.analysis import back as _back
 from coact.analysis import diff as _diff
 from coact.analysis import estimate as _estimate
@@ -58,8 +59,13 @@ def realize(
     dest: str | None = None,
     scope: str = "project",
     skills_source: str | None = None,
+    dry_run: bool = False,
 ) -> str:
-    """Realize an agent/skill via a backend (host materializes files; sdk/mcp build runnables)."""
+    """Realize an agent/skill via a backend (host materializes files; sdk/mcp build runnables).
+
+    ``--dry-run`` (host only) previews the files that *would* be written/linked
+    without touching the filesystem.
+    """
     if backend == "host":
         res = _realize(
             target,
@@ -67,8 +73,10 @@ def realize(
             dest=dest,
             scope=scope,
             skills_source=skills_source,
+            dry_run=dry_run,
         )
-        lines = [f"Realized (host) into {res.agents_dir}:"]
+        head = "Would realize (host, dry-run)" if res.dry_run else "Realized (host)"
+        lines = [f"{head} into {res.agents_dir}:"]
         lines += [f"  agent: {p}" for p in res.agents.values()]
         lines += [f"  skill: {p}" for p in res.skills.values()]
         lines += [f"  ! {w}" for w in res.warnings]
@@ -108,10 +116,21 @@ def back(agent: str) -> str:
     return _back(agent).to_string()
 
 
+@argh.arg("agents", nargs="+", help="Agent .md files / skill sources to wire")
+def scaffold(
+    agents: list, *, dest: str | None = None, agents_dir: str = ".claude/agents"
+) -> str:
+    """Emit a STARTER multi-agent fleet shim you own (sequential; D8 — not a topology engine)."""
+    result = _scaffold_fleet(list(agents), dest=dest, agents_dir=agents_dir)
+    if dest:
+        return f"Wrote starter fleet shim: {result}"
+    return str(result)
+
+
 def main() -> None:
     """Dispatch the coact CLI."""
     argh.dispatch_commands(
-        [plan, complete, emit, realize, diff, estimate, inventory, back]
+        [plan, complete, emit, realize, diff, estimate, inventory, back, scaffold]
     )
 
 

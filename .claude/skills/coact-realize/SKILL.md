@@ -40,6 +40,20 @@ Useful kwargs: `scope="project"` (vs user), `dest=`, `skills_source=`,
 `link=True`. Realizing here is "materialize files + verify discovery" — it does
 **not** stand up a new runtime, which is why it's the default.
 
+Look before you leap — `dry_run=True` previews exactly what would be written and
+linked, touching nothing on disk (the returned `RealizedHost` has `dry_run=True`):
+
+```python
+preview = realize(agent, backend="host", dry_run=True)
+preview.agents     # {name: Path that WOULD be written}
+preview.skills     # {name: Path that WOULD be linked}
+preview.warnings   # e.g. a referenced skill that can't be resolved
+```
+
+```bash
+coact realize .claude/skills/ux-analyst --backend host --dry-run
+```
+
 ## sdk (an aw-compatible runnable)
 
 ```python
@@ -82,6 +96,28 @@ coact estimate .claude/agents/a.md .claude/agents/b.md
 
 If the set shares skills or declares an input contract, `estimate` flags it as
 interdependent and steers you back to `backend="host"`. See `coact-analyze`.
+
+## If you do fan out: scaffold a starter (you own it)
+
+When a running fleet genuinely pays off, `scaffold_fleet` emits a **starter**
+Python shim wiring the realized `sdk` agents under an `aw` coordinator — a thin
+**sequential** hand-off with `TODO` markers you reshape into the real control flow:
+
+```python
+from coact import scaffold_fleet
+
+scaffold_fleet([agent_a, agent_b])                 # -> the shim source (str)
+scaffold_fleet([agent_a, agent_b], dest="fleet.py")  # -> writes it, returns the Path
+```
+
+```bash
+coact scaffold .claude/agents/a.md .claude/agents/b.md   # prints the shim
+```
+
+This is the **one** topology-adjacent thing coact emits (DECISIONS D8): it renders
+source and stops — no LLM, no runtime, no graph. coact writes the starter once and
+never runs it; the topology (branches, fan-out, retries) is yours to own, against
+`aw.orchestration` or the Agent SDK. coact is not LangGraph.
 
 ## Boundaries
 
