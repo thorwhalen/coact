@@ -30,6 +30,7 @@ It is glue, not a new framework: it builds on [`skill`](https://github.com/thorw
 pip install coact            # core: COMPLETE + host realize + analysis (no LLM needed)
 pip install coact[sdk]       # + the Claude Agent SDK realize backend (and aw)
 pip install coact[mcp]       # + the py2mcp/FastMCP realize backend
+pip install coact[litellm]   # + the provider-agnostic LiteLLM realize backend
 ```
 
 ## Quick start
@@ -120,12 +121,17 @@ coact:
 | `host` (default) | materialize `.claude/agents/*.md` + link skills; the **host agent** (Claude Code) executes | cheapest — no fan-out |
 | `sdk` | a `RunnableAgent` backed by the Claude Agent SDK that **satisfies `aw.AgenticStep`** (`execute(input, context) -> (artifact, info)`), so it drops into `aw` workflows | in-process |
 | `mcp` | expose a skill's declared Python tools as a FastMCP server (via `py2mcp`) for any MCP client | tool server |
+| `litellm` | a `RunnableLLMAgent` (also `aw.AgenticStep`) backed by **LiteLLM** — realize the *same* definition against any provider (OpenAI, Gemini, Mistral, Ollama, …); proof the definition isn't Anthropic-specific | in-process |
 
 ```python
 agent_step = realize(agent, backend="sdk")          # aw-compatible runnable
 artifact, info = agent_step.execute(task, context={})
 
 server = realize(".claude/skills/ux-analyst", backend="mcp")   # FastMCP handle
+
+# same definition, a different provider — map model selectors however you like
+llm_step = realize(agent, backend="litellm", model_map={"sonnet": "openai/gpt-4o"})
+artifact, info = llm_step.execute(task)             # info["backend"] == "litellm"
 ```
 
 ## Two boundaries to know

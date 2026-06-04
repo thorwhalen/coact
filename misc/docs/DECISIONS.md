@@ -169,3 +169,39 @@ public package version is a deliberate, owner-initiated act — gating it behind
 explicit `[publish]` marker keeps CI honest (green when it should be) and makes the
 release moment intentional. To ship: set the `PYPI_PASSWORD` repo secret, then land
 a commit whose message contains `[publish]`.
+
+> **Footgun, learned the hard way:** once the `PYPI_PASSWORD` secret exists, the
+> gate is satisfied by the literal substring `[publish]` appearing **anywhere** in a
+> main-bound commit message — including a commit that merely *documents* the marker.
+> Never put the literal marker in a commit subject/body or a squash-merged PR body
+> unless you intend to release. (`0.0.3` published exactly this way: the secret was
+> added mid-session, and a CI-gating commit whose message explained the marker
+> tripped it. The artifact was the clean pre-D6 foundation, so no harm — but the
+> lesson stands.) File content (this file, the pyproject comment) is safe; only
+> commit/PR **messages** feed the gate.
+
+## D12 — A LiteLLM realization backend proves the definition is provider-portable
+
+The `host`/`sdk` backends realize against the Anthropic stack. To make good on the
+core thesis — *one canonical `AgentDefinition`, portable across the agent stack* —
+a `litellm` backend realizes the **same** definition against **any** provider
+LiteLLM speaks (OpenAI, Anthropic, Gemini, Mistral, Ollama, …). The mapping:
+
+- persona (`prompt`) → system message;
+- return contract → LiteLLM `response_format` (`json_schema`) **and** a system-prompt
+  instruction (belt-and-suspenders, since provider support for structured output
+  varies — mirrors the D6 fallback philosophy);
+- model selector (`sonnet`/`opus`/`haiku`) → a LiteLLM model string via an
+  **open-closed, data-driven** `model_map` (override per call to target any provider);
+  an explicit LiteLLM string in `model` is used verbatim.
+
+It is an `aw.AgenticStep`-compatible `RunnableLLMAgent` (like the `sdk` backend), the
+completion call is **injectable** (unit-testable with no API key), and it
+**self-registers** into `coact.realize.backends` on import — *no core change*, the
+open-closed extension point working as designed.
+
+**Why LiteLLM over the OpenAI-Agents SDK:** the OpenAI-Agents SDK models tools as
+Python callables, but a coact definition carries tool *names* (host-resolved), which
+don't map cleanly; LiteLLM's chat-completion-with-structured-output maps exactly onto
+what a definition actually carries (persona + return contract). Topology stays out
+(D8): one definition → one runnable. LangGraph/CrewAI *realizers* remain deferred.
