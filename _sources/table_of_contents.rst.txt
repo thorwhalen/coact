@@ -4,7 +4,10 @@
 
    module_docs/coact
    module_docs/coact/base
+   module_docs/coact/complete
    module_docs/coact/emit
    module_docs/coact/frontmatter
+   module_docs/coact/policy
    module_docs/coact/stores
+   module_docs/coact/synthesis
    module_docs/coact/util

@@ -1,0 +1,4 @@
+coact.policy
+============
+.. automodule:: coact.policy
+   :members:

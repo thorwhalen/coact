@@ -1,0 +1,190 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coact.synthesis &mdash; coact 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="coact.util" href="util.html" />
+    <link rel="prev" title="coact.stores" href="stores.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            coact
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">coact.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complete.html">coact.complete</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emit.html">coact.emit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="policy.html">coact.policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stores.html">coact.stores</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">coact.synthesis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#coact.synthesis.DEFAULT_RETURN_SCHEMA"><code class="docutils literal notranslate"><span class="pre">DEFAULT_RETURN_SCHEMA</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.synthesis.render_return_contract_section"><code class="docutils literal notranslate"><span class="pre">render_return_contract_section()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.synthesis.synthesize_persona"><code class="docutils literal notranslate"><span class="pre">synthesize_persona()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.synthesis.synthesize_return_contract"><code class="docutils literal notranslate"><span class="pre">synthesize_return_contract()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">coact.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">coact</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">coact.synthesis</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/coact/synthesis.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-coact.synthesis">
+<span id="coact-synthesis"></span><h1>coact.synthesis<a class="headerlink" href="#module-coact.synthesis" title="Link to this heading"></a></h1>
+<p>Persona &amp; return-contract synthesis — the two real “extras” of a skill→agent lift.</p>
+<p>COACT_SPEC §5.5 / §3.2. A skill body is <em>procedural</em>, not a persona, and skills
+return <em>nothing</em>. The two fields that actually turn a skill into an agent are the
+<strong>system prompt (persona/identity)</strong> and the <strong>return contract (consumable
+output)</strong>. This module synthesizes both.</p>
+<p>This PR ships the <strong>template</strong> path (no LLM, always available, a sound default).
+The optional <strong>LLM-assisted</strong> path (a richer persona drafted from the skill body
+via an injected facade) is added on top in a later milestone — both paths obey
+the same rules: author-pinned <code class="docutils literal notranslate"><span class="pre">coact:</span> <span class="pre">persona</span></code> / <code class="docutils literal notranslate"><span class="pre">coact:</span> <span class="pre">returns</span></code> always win
+(inspectable, overridable, LLM-assisted-but-not-required, DECISIONS D10).</p>
+<p>Crucially the persona <strong>references</strong> the skill by name and instructs the agent to
+follow it — it never copies the skill body (point-don’t-copy / SSOT, §3.3).</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="coact.synthesis.DEFAULT_RETURN_SCHEMA">
+<span class="sig-prename descclassname"><span class="pre">coact.synthesis.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_RETURN_SCHEMA</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'properties':</span> <span class="pre">{'result':</span> <span class="pre">{'description':</span> <span class="pre">'The</span> <span class="pre">primary</span> <span class="pre">artifact</span> <span class="pre">or</span> <span class="pre">finding.'},</span> <span class="pre">'status':</span> <span class="pre">{'enum':</span> <span class="pre">['ok',</span> <span class="pre">'partial',</span> <span class="pre">'failed'],</span> <span class="pre">'type':</span> <span class="pre">'string'},</span> <span class="pre">'summary':</span> <span class="pre">{'description':</span> <span class="pre">'One-paragraph</span> <span class="pre">summary</span> <span class="pre">of</span> <span class="pre">what</span> <span class="pre">was</span> <span class="pre">done.',</span> <span class="pre">'type':</span> <span class="pre">'string'}},</span> <span class="pre">'required':</span> <span class="pre">['summary',</span> <span class="pre">'status'],</span> <span class="pre">'type':</span> <span class="pre">'object'}</span></span><a class="headerlink" href="#coact.synthesis.DEFAULT_RETURN_SCHEMA" title="Link to this definition"></a></dt>
+<dd><p>A generic-but-useful default return schema (used when the author pins none).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.synthesis.render_return_contract_section">
+<span class="sig-prename descclassname"><span class="pre">coact.synthesis.</span></span><span class="sig-name descname"><span class="pre">render_return_contract_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#coact.base.ReturnContract" title="coact.base.ReturnContract"><span class="pre">ReturnContract</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/coact/synthesis.html#render_return_contract_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.synthesis.render_return_contract_section" title="Link to this definition"></a></dt>
+<dd><p>Render the human/model-facing “Return contract” markdown for a persona body.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rc</span> <span class="o">=</span> <span class="n">ReturnContract</span><span class="p">(</span><span class="n">json_schema</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">},</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;findings&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;Return contract&#39;</span> <span class="ow">in</span> <span class="n">render_return_contract_section</span><span class="p">(</span><span class="n">rc</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.synthesis.synthesize_persona">
+<span class="sig-prename descclassname"><span class="pre">coact.synthesis.</span></span><span class="sig-name descname"><span class="pre">synthesize_persona</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skill</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Skill</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_contract</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#coact.base.ReturnContract" title="coact.base.ReturnContract"><span class="pre">ReturnContract</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">tools</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_skills</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'skill'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'coact-frontmatter'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'policy'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'inferred'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'synthesized-template'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'synthesized-llm'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'default'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/coact/synthesis.html#synthesize_persona"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.synthesis.synthesize_persona" title="Link to this definition"></a></dt>
+<dd><p>Synthesize the system prompt (persona) for an agent derived from <code class="docutils literal notranslate"><span class="pre">skill</span></code>.</p>
+<p>The template wraps the skill’s intent as an identity, states operating
+invariants, and appends the return contract — while <strong>pointing at</strong> the
+source skill rather than inlining it (§3.3).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">skill.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Skill</span><span class="p">,</span> <span class="n">SkillMeta</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Skill</span><span class="p">(</span><span class="n">meta</span><span class="o">=</span><span class="n">SkillMeta</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;ux-analyst&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Analyze UX bundles.&#39;</span><span class="p">),</span> <span class="n">body</span><span class="o">=</span><span class="s1">&#39;steps&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rc</span> <span class="o">=</span> <span class="n">ReturnContract</span><span class="p">(</span><span class="n">json_schema</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">},</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;findings&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">persona</span><span class="p">,</span> <span class="n">src</span> <span class="o">=</span> <span class="n">synthesize_persona</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">return_contract</span><span class="o">=</span><span class="n">rc</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Read&#39;</span><span class="p">,</span> <span class="s1">&#39;Grep&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;ux-analyst&#39;</span> <span class="ow">in</span> <span class="n">persona</span> <span class="ow">and</span> <span class="s1">&#39;Return contract&#39;</span> <span class="ow">in</span> <span class="n">persona</span> <span class="ow">and</span> <span class="n">src</span> <span class="o">==</span> <span class="s1">&#39;synthesized-template&#39;</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.synthesis.synthesize_return_contract">
+<span class="sig-prename descclassname"><span class="pre">coact.synthesis.</span></span><span class="sig-name descname"><span class="pre">synthesize_return_contract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skill</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Skill</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">coact_meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="frontmatter.html#coact.frontmatter.CoactMeta" title="coact.frontmatter.CoactMeta"><span class="pre">CoactMeta</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base.html#coact.base.ReturnContract" title="coact.base.ReturnContract"><span class="pre">ReturnContract</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'skill'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'coact-frontmatter'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'policy'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'inferred'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'synthesized-template'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'synthesized-llm'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'default'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/coact/synthesis.html#synthesize_return_contract"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.synthesis.synthesize_return_contract" title="Link to this definition"></a></dt>
+<dd><p>Choose the agent’s return contract: author-pinned, else a template default.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">skill.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Skill</span><span class="p">,</span> <span class="n">SkillMeta</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Skill</span><span class="p">(</span><span class="n">meta</span><span class="o">=</span><span class="n">SkillMeta</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">),</span> <span class="n">body</span><span class="o">=</span><span class="s1">&#39;z&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rc</span><span class="p">,</span> <span class="n">src</span> <span class="o">=</span> <span class="n">synthesize_return_contract</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">coact_meta</span><span class="o">=</span><span class="n">CoactMeta</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rc</span><span class="o">.</span><span class="n">json_schema</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span> <span class="n">src</span>
+<span class="go">(&#39;object&#39;, &#39;synthesized-template&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rc2</span><span class="p">,</span> <span class="n">src2</span> <span class="o">=</span> <span class="n">synthesize_return_contract</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">coact_meta</span><span class="o">=</span><span class="n">CoactMeta</span><span class="p">(</span><span class="n">returns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;schema_ref&#39;</span><span class="p">:</span> <span class="s1">&#39;m:N&#39;</span><span class="p">}))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rc2</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span> <span class="n">src2</span>
+<span class="go">(&#39;m:N&#39;, &#39;coact-frontmatter&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="stores.html" class="btn btn-neutral float-left" title="coact.stores" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="util.html" class="btn btn-neutral float-right" title="coact.util" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
