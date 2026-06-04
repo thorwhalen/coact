@@ -57,6 +57,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize.html">coact.realize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/schema.html">coact.schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/stores.html">coact.stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/synthesis.html">coact.synthesis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/util.html">coact.util</a></li>
@@ -111,7 +114,6 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
@@ -119,13 +121,22 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">skill.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Skill</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">skill.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">skill.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_project_root</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">coact.complete</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolve_skill</span><span class="p">,</span> <span class="n">complete</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.complete</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_skill</span><span class="p">,</span> <span class="n">complete</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.emit</span><span class="w"> </span><span class="kn">import</span> <span class="n">emit_agent</span><span class="p">,</span> <span class="n">from_claude_agent_md</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.frontmatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_coact_meta</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompletionPolicy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.return_contract</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">RETURN_TOOL_FULLNAME</span><span class="p">,</span>
+    <span class="n">RETURN_TOOL_NAME</span><span class="p">,</span>
+    <span class="n">RETURN_TOOL_SERVER</span><span class="p">,</span>
+    <span class="n">ReturnPlan</span><span class="p">,</span>
+    <span class="n">as_object_schema</span><span class="p">,</span>
+    <span class="n">auto_return_mode</span><span class="p">,</span>
+    <span class="n">extract_return_tool_input</span><span class="p">,</span>
+    <span class="n">render_tool_return_instruction</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.stores</span><span class="w"> </span><span class="kn">import</span> <span class="n">agents_dir</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_requirements</span>
 
@@ -162,7 +173,9 @@
 <span class="c1"># ---------------------------------------------------------------------------</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_coerce_agents</span><span class="p">(</span>
+<div class="viewcode-block" id="coerce_agents">
+<a class="viewcode-back" href="../../module_docs/coact/realize.html#coact.coerce_agents">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">coerce_agents</span><span class="p">(</span>
     <span class="n">target</span><span class="p">:</span> <span class="n">RealizeTarget</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">policy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletionPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">AgentDefinition</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve a realize target to a list of :class:`AgentDefinition`.</span>
@@ -177,13 +190,14 @@
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
         <span class="n">out</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AgentDefinition</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">target</span><span class="p">:</span>
-            <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_coerce_agents</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">))</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">coerce_agents</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">out</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.md&quot;</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;SKILL.md&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">from_claude_agent_md</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())]</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">complete</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">complete</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)]</span></div>
+
 
 
 <span class="c1"># ---------------------------------------------------------------------------</span>
@@ -195,13 +209,19 @@
 <a class="viewcode-back" href="../../module_docs/coact/realize.html#coact.RealizedHost">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RealizedHost</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The materialized result of host realization (files the host will discover).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The materialized result of host realization (files the host will discover).</span>
+
+<span class="sd">    When produced by a ``dry_run`` the paths are what *would* be written/linked</span>
+<span class="sd">    (``dry_run=True`` is recorded so the caller / CLI can label the preview);</span>
+<span class="sd">    nothing on disk is touched.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">agents</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="n">skills</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="n">agents_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">skills_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">warnings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span></div>
+    <span class="n">warnings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
 
@@ -216,6 +236,7 @@
     <span class="n">link</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">skills_source</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">policy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletionPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RealizedHost</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Materialize agents (+ linked skills) so the host agent runs them.</span>
@@ -225,27 +246,45 @@
 <span class="sd">    discovers both. ``skills_source`` (a dir or list of dirs each holding</span>
 <span class="sd">    ``&lt;name&gt;/SKILL.md``) is searched first; otherwise skills are resolved by name</span>
 <span class="sd">    via the local store / project. Verifies discovery and reports anything missing.</span>
+
+<span class="sd">    Pass ``dry_run=True`` to *preview* — the returned :class:`RealizedHost` lists</span>
+<span class="sd">    the agent files that would be written and the skills that would link (with the</span>
+<span class="sd">    same unresolvable-skill warnings), but **no file or symlink is created**. This</span>
+<span class="sd">    mirrors :func:`coact.complete.plan_completion`&#39;s look-before-you-leap contract</span>
+<span class="sd">    for the one backend that mutates the filesystem (progressive disclosure).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">agents</span> <span class="o">=</span> <span class="n">_coerce_agents</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span>
+    <span class="n">agents</span> <span class="o">=</span> <span class="n">coerce_agents</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span>
     <span class="n">out_dir</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">Path</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">else</span> <span class="n">agents_dir</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="n">scope</span><span class="p">,</span> <span class="n">project_dir</span><span class="o">=</span><span class="n">project_dir</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">skills_target</span> <span class="o">=</span> <span class="n">out_dir</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;skills&quot;</span>
     <span class="n">sources</span> <span class="o">=</span> <span class="n">_as_source_list</span><span class="p">(</span><span class="n">skills_source</span><span class="p">)</span>
 
-    <span class="n">result</span> <span class="o">=</span> <span class="n">RealizedHost</span><span class="p">(</span><span class="n">agents_dir</span><span class="o">=</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">skills_dir</span><span class="o">=</span><span class="n">skills_target</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">RealizedHost</span><span class="p">(</span>
+        <span class="n">agents_dir</span><span class="o">=</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">skills_dir</span><span class="o">=</span><span class="n">skills_target</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ad</span> <span class="ow">in</span> <span class="n">agents</span><span class="p">:</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">agents</span><span class="p">[</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">emit_agent</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="s2">&quot;claude-agents-md&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">out_dir</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">agents</span><span class="p">[</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">out_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.md&quot;</span>
+            <span class="k">if</span> <span class="n">dry_run</span>
+            <span class="k">else</span> <span class="n">emit_agent</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="s2">&quot;claude-agents-md&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">out_dir</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">link</span><span class="p">:</span>
-        <span class="n">skills_target</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
+            <span class="n">skills_target</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">ad</span> <span class="ow">in</span> <span class="n">agents</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">skill_name</span> <span class="ow">in</span> <span class="n">ad</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
                 <span class="n">linked</span> <span class="o">=</span> <span class="n">_link_skill</span><span class="p">(</span>
-                    <span class="n">skill_name</span><span class="p">,</span> <span class="n">skills_target</span><span class="p">,</span> <span class="n">sources</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span>
+                    <span class="n">skill_name</span><span class="p">,</span>
+                    <span class="n">skills_target</span><span class="p">,</span>
+                    <span class="n">sources</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span>
+                    <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
+                    <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="n">linked</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">result</span><span class="o">.</span><span class="n">skills</span><span class="p">[</span><span class="n">skill_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">linked</span>
@@ -255,16 +294,17 @@
                         <span class="sa">f</span><span class="s2">&quot;could not be resolved to link into </span><span class="si">{</span><span class="n">skills_target</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="p">)</span>
 
-    <span class="c1"># verify discovery</span>
-    <span class="k">for</span> <span class="n">ad</span> <span class="ow">in</span> <span class="n">agents</span><span class="p">:</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">agents</span><span class="p">[</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;agent file not written: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">skill_name</span> <span class="ow">in</span> <span class="n">ad</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">link</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">skills_target</span> <span class="o">/</span> <span class="n">skill_name</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;skill </span><span class="si">{</span><span class="n">skill_name</span><span class="si">!r}</span><span class="s2"> not discoverable in </span><span class="si">{</span><span class="n">skills_target</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
+    <span class="c1"># verify discovery — only meaningful once files actually exist (real run).</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ad</span> <span class="ow">in</span> <span class="n">agents</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">agents</span><span class="p">[</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;agent file not written: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">skill_name</span> <span class="ow">in</span> <span class="n">ad</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">link</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">skills_target</span> <span class="o">/</span> <span class="n">skill_name</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;skill </span><span class="si">{</span><span class="n">skill_name</span><span class="si">!r}</span><span class="s2"> not discoverable in </span><span class="si">{</span><span class="n">skills_target</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
     <span class="k">return</span> <span class="n">result</span></div>
 
 
@@ -285,7 +325,7 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">candidate</span> <span class="o">/</span> <span class="s2">&quot;SKILL.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="k">return</span> <span class="n">candidate</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_resolve_skill</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">source_path</span>
+        <span class="k">return</span> <span class="n">resolve_skill</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">source_path</span>
     <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
 
@@ -296,6 +336,7 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">sources</span><span class="o">=</span><span class="p">(),</span>
     <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Symlink one referenced skill into ``skills_target``; None if unresolved.</span>
 
@@ -305,7 +346,8 @@
 <span class="sd">    user&#39;s and is never touched; a working coact symlink is kept unless ``force``;</span>
 <span class="sd">    the source is resolved **before** any existing link is removed, so a failed</span>
 <span class="sd">    re-link can never destroy a previously working one; a dangling symlink is</span>
-<span class="sd">    re-linked rather than reported as discoverable.</span>
+<span class="sd">    re-linked rather than reported as discoverable. With ``dry_run`` the source is</span>
+<span class="sd">    resolved (read-only) to predict the outcome, but no symlink is created.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dest</span> <span class="o">=</span> <span class="n">skills_target</span> <span class="o">/</span> <span class="n">name</span>
 
@@ -320,6 +362,10 @@
     <span class="k">if</span> <span class="n">source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Can&#39;t resolve a replacement: never delete; report only if it resolves.</span>
         <span class="k">return</span> <span class="n">dest</span> <span class="k">if</span> <span class="n">dest</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="c1"># Source resolves, so a (re)link *would* happen here — predict it, mutate nothing.</span>
+        <span class="k">return</span> <span class="n">dest</span>
 
     <span class="c1"># Safe to (re)create the link now that we have a valid source. At this point</span>
     <span class="c1"># any existing dest is a symlink (good/broken) — real entries returned above.</span>
@@ -347,75 +393,11 @@
 <span class="c1"># --- D6 return-contract realization -----------------------------------------</span>
 <span class="c1">#</span>
 <span class="c1"># The return contract reaches the SDK by one of two mechanisms (DECISIONS D6):</span>
-<span class="c1">#</span>
-<span class="c1"># - ``output_format``: the native structured-output option. Used when the</span>
-<span class="c1">#   installed ``ClaudeAgentOptions`` exposes the field (SDK ≥ 0.1.x).</span>
-<span class="c1"># - ``tool``: a forced ``return_result`` tool whose ``input_schema`` IS the</span>
-<span class="c1">#   return schema, plus a system-prompt instruction to call it. The fallback for</span>
-<span class="c1">#   older SDKs that lack ``output_format`` (and selectable explicitly via</span>
-<span class="c1">#   ``return_mode=&#39;tool&#39;`` for models / extended-thinking modes that cannot honor</span>
-<span class="c1">#   ``output_format`` at runtime). The structured result is then recovered from</span>
-<span class="c1">#   the tool-use block&#39;s ``input`` in the message stream — no extra plumbing.</span>
-
-<span class="c1">#: In-process SDK MCP server + tool names for the forced return path.</span>
-<span class="n">RETURN_TOOL_SERVER</span> <span class="o">=</span> <span class="s2">&quot;coact_return&quot;</span>
-<span class="n">RETURN_TOOL_NAME</span> <span class="o">=</span> <span class="s2">&quot;return_result&quot;</span>
-<span class="c1">#: How Claude references the tool (``mcp__&lt;server&gt;__&lt;tool&gt;``).</span>
-<span class="n">RETURN_TOOL_FULLNAME</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;mcp__</span><span class="si">{</span><span class="n">RETURN_TOOL_SERVER</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">&quot;</span>
-
-
-<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">_ReturnPlan</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;How an agent&#39;s return contract is realized for the SDK (resolved once).&quot;&quot;&quot;</span>
-
-    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &quot;none&quot; | &quot;output_format&quot; | &quot;tool&quot;</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span>
-    <span class="n">unwrap_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">tool_fullname</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_auto_return_mode</span><span class="p">(</span><span class="n">option_field_names</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pick the return mode in ``auto``: native ``output_format`` if the SDK has it.</span>
-
-<span class="sd">    &gt;&gt;&gt; _auto_return_mode({&#39;system_prompt&#39;, &#39;output_format&#39;})</span>
-<span class="sd">    &#39;output_format&#39;</span>
-<span class="sd">    &gt;&gt;&gt; _auto_return_mode({&#39;system_prompt&#39;})  # older SDK without the field</span>
-<span class="sd">    &#39;tool&#39;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;output_format&quot;</span> <span class="k">if</span> <span class="s2">&quot;output_format&quot;</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">option_field_names</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;tool&quot;</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_as_object_schema</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Coerce a return schema to a valid object ``inputSchema`` for the return tool.</span>
-
-<span class="sd">    The Agent SDK passes a dict ``input_schema`` through unchanged only when it is</span>
-<span class="sd">    an object schema with **both** ``type: object`` and ``properties``; any other</span>
-<span class="sd">    dict is misread as a ``{param: type}`` map (and mangled). So:</span>
-
-<span class="sd">    - An object schema *with* ``properties`` → passed through, no wrapping.</span>
-<span class="sd">    - A free-form object schema (``type: object`` but no ``properties``) → given an</span>
-<span class="sd">      empty ``properties`` key so the SDK passes it through verbatim. Crucially it</span>
-<span class="sd">      is **not** wrapped: wrapping a free-form object under ``result`` would make a</span>
-<span class="sd">      model&#39;s own single-key ``{result: ...}`` output indistinguishable from the</span>
-<span class="sd">      wrapper (a silent-collapse hazard).</span>
-<span class="sd">    - Any non-object schema (array / scalar) → wrapped under a ``result`` key, with</span>
-<span class="sd">      that key returned so extraction can unwrap it.</span>
-
-<span class="sd">    &gt;&gt;&gt; _as_object_schema({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {&#39;a&#39;: {}}})[1] is None</span>
-<span class="sd">    True</span>
-<span class="sd">    &gt;&gt;&gt; _as_object_schema({&#39;type&#39;: &#39;object&#39;})  # free-form object: passed through, not wrapped</span>
-<span class="sd">    ({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {}}, None)</span>
-<span class="sd">    &gt;&gt;&gt; _as_object_schema({&#39;type&#39;: &#39;array&#39;, &#39;items&#39;: {&#39;type&#39;: &#39;string&#39;}})</span>
-<span class="sd">    ({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {&#39;result&#39;: {&#39;type&#39;: &#39;array&#39;, &#39;items&#39;: {&#39;type&#39;: &#39;string&#39;}}}, &#39;required&#39;: [&#39;result&#39;]}, &#39;result&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s2">&quot;properties&quot;</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">schema</span><span class="p">,</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">schema</span><span class="p">,</span> <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{}},</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="p">(</span>
-        <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="n">schema</span><span class="p">},</span> <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]},</span>
-        <span class="s2">&quot;result&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+<span class="c1"># the native ``output_format`` option, or a forced ``return_result`` tool. The</span>
+<span class="c1"># backend-agnostic pieces (naming, ReturnPlan, mode selection, object-schema</span>
+<span class="c1"># coercion, instruction rendering, tool-use extraction) live in</span>
+<span class="c1"># :mod:`coact.return_contract`; what stays here is the SDK-specific *wiring*</span>
+<span class="c1"># (the in-process MCP server, ``ClaudeAgentOptions``, ``mcp_servers`` coercion).</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_coerce_mcp_servers</span><span class="p">(</span><span class="n">servers</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
@@ -466,68 +448,6 @@
     <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">warnings</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_with_return_instruction</span><span class="p">(</span>
-    <span class="n">system_prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj_schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Append the &quot;you MUST call return_result&quot; instruction to a system prompt.&quot;&quot;&quot;</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-
-    <span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="n">description</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">schema_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">obj_schema</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">instruction</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">## Return contract</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;When you have finished, you MUST call the `</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">` tool &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;exactly once with your final result</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">. Its arguments must conform &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;to this JSON Schema:</span><span class="se">\n\n</span><span class="s2">```json</span><span class="se">\n</span><span class="si">{</span><span class="n">schema_json</span><span class="si">}</span><span class="se">\n</span><span class="s2">```</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;Do not return the result as prose — call `</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">` instead.&quot;</span>
-    <span class="p">)</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">system_prompt</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">instruction</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_is_return_tool</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;True if ``name`` denotes coact&#39;s forced return tool (server-scoped).</span>
-
-<span class="sd">    Matches the full MCP name, or any prefix variant scoped to coact&#39;s own server</span>
-<span class="sd">    (``…__coact_return__return_result``). Deliberately does **not** match a bare</span>
-<span class="sd">    ``return_result`` or a ``return_result`` on a *different* MCP server, so a</span>
-<span class="sd">    user&#39;s own same-named tool is never mistaken for the return contract.</span>
-
-<span class="sd">    &gt;&gt;&gt; _is_return_tool(&#39;mcp__coact_return__return_result&#39;)</span>
-<span class="sd">    True</span>
-<span class="sd">    &gt;&gt;&gt; _is_return_tool(&#39;mcp__other_server__return_result&#39;)</span>
-<span class="sd">    False</span>
-<span class="sd">    &gt;&gt;&gt; _is_return_tool(&#39;Read&#39;)</span>
-<span class="sd">    False</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="n">RETURN_TOOL_FULLNAME</span> <span class="ow">or</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;__</span><span class="si">{</span><span class="n">RETURN_TOOL_SERVER</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_extract_return_tool_input</span><span class="p">(</span><span class="n">messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">unwrap_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recover the forced ``return_result`` tool-use input from SDK messages, or None.</span>
-
-<span class="sd">    Scans assistant messages for a tool-use block calling the return tool and</span>
-<span class="sd">    returns its ``input`` (the last one wins). When the schema was wrapped (a</span>
-<span class="sd">    non-object return type), the single ``result`` key is unwrapped.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">found</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
-        <span class="n">content</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">continue</span>
-        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="n">block_input</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s2">&quot;input&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">block_input</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_is_return_tool</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-                <span class="n">found</span> <span class="o">=</span> <span class="n">block_input</span>
-    <span class="k">if</span> <span class="n">found</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">unwrap_key</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">found</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">set</span><span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="n">unwrap_key</span><span class="p">}:</span>
-        <span class="k">return</span> <span class="n">found</span><span class="p">[</span><span class="n">unwrap_key</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">found</span>
-
-
 <div class="viewcode-block" id="RunnableAgent">
 <a class="viewcode-back" href="../../module_docs/coact/realize.html#coact.RunnableAgent">[docs]</a>
 <span class="nd">@dataclass</span>
@@ -550,7 +470,7 @@
     <span class="c1">#: thinking that cannot honor output_format). See DECISIONS D6.</span>
     <span class="n">return_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_resolved_return</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_ReturnPlan</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resolved_return</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReturnPlan</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Resolve how this agent&#39;s return contract maps onto the SDK (no API call).</span>
 
 <span class="sd">        Honors ``return_mode`` and, in ``&#39;auto&#39;``, the installed SDK&#39;s</span>
@@ -571,7 +491,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">schema</span><span class="p">:</span>
             <span class="c1"># Distinguish &quot;no contract&quot; from &quot;contract declared but unresolved&quot;.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
-                <span class="k">return</span> <span class="n">_ReturnPlan</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">return</span> <span class="n">ReturnPlan</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="p">{})</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Return contract references schema_ref &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">ref</span><span class="si">!r}</span><span class="s2">, which could not be resolved to a &quot;</span>
@@ -580,7 +500,7 @@
             <span class="p">)</span>
         <span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_mode</span>
         <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
-            <span class="n">mode</span> <span class="o">=</span> <span class="n">_auto_return_mode</span><span class="p">(</span><span class="n">option_fields</span><span class="p">)</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="n">auto_return_mode</span><span class="p">(</span><span class="n">option_fields</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;output_format&quot;</span><span class="p">:</span>
             <span class="c1"># An explicit output_format request must not be silently swallowed by</span>
             <span class="c1"># _filter_kwargs on an SDK that lacks the field (the &#39;auto&#39; path would</span>
@@ -588,11 +508,14 @@
             <span class="k">if</span> <span class="s2">&quot;output_format&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">option_fields</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;return_mode=&#39;output_format&#39; but the installed claude_agent_sdk &quot;</span>
-                    <span class="s2">&quot;has no output_format option; use return_mode=&#39;tool&#39; (or &#39;auto&#39;).&quot;</span>
+                    <span class="s2">&quot;has no output_format option (it predates structured output). &quot;</span>
+                    <span class="s2">&quot;Upgrade claude-agent-sdk, or use return_mode=&#39;auto&#39; to fall back &quot;</span>
+                    <span class="s2">&quot;to the forced return_result tool automatically (or &#39;tool&#39; to &quot;</span>
+                    <span class="s2">&quot;force it).&quot;</span>
                 <span class="p">)</span>
-            <span class="k">return</span> <span class="n">_ReturnPlan</span><span class="p">(</span><span class="s2">&quot;output_format&quot;</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-        <span class="n">obj_schema</span><span class="p">,</span> <span class="n">unwrap_key</span> <span class="o">=</span> <span class="n">_as_object_schema</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_ReturnPlan</span><span class="p">(</span><span class="s2">&quot;tool&quot;</span><span class="p">,</span> <span class="n">obj_schema</span><span class="p">,</span> <span class="n">unwrap_key</span><span class="p">,</span> <span class="n">RETURN_TOOL_FULLNAME</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ReturnPlan</span><span class="p">(</span><span class="s2">&quot;output_format&quot;</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+        <span class="n">obj_schema</span><span class="p">,</span> <span class="n">unwrap_key</span> <span class="o">=</span> <span class="n">as_object_schema</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ReturnPlan</span><span class="p">(</span><span class="s2">&quot;tool&quot;</span><span class="p">,</span> <span class="n">obj_schema</span><span class="p">,</span> <span class="n">unwrap_key</span><span class="p">,</span> <span class="n">RETURN_TOOL_FULLNAME</span><span class="p">)</span>
 
 <div class="viewcode-block" id="RunnableAgent.build_options">
 <a class="viewcode-back" href="../../module_docs/coact/realize.html#coact.RunnableAgent.build_options">[docs]</a>
@@ -664,7 +587,7 @@
                 <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">disallowed</span> <span class="k">if</span> <span class="n">t</span> <span class="o">!=</span> <span class="n">RETURN_TOOL_FULLNAME</span>
             <span class="p">]</span>
 
-        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_with_return_instruction</span><span class="p">(</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">render_tool_return_instruction</span><span class="p">(</span>
             <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="n">obj_schema</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
@@ -745,7 +668,7 @@
     <span class="c1"># a list of SDK messages</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">raw</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">return_tool</span><span class="p">:</span>
-            <span class="n">captured</span> <span class="o">=</span> <span class="n">_extract_return_tool_input</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">unwrap_key</span><span class="p">)</span>
+            <span class="n">captured</span> <span class="o">=</span> <span class="n">extract_return_tool_input</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">unwrap_key</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">captured</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">captured</span>
         <span class="c1"># the output_format result surfaces as ResultMessage.structured_output</span>
@@ -792,7 +715,7 @@
 <span class="sd">    ``&#39;tool&#39;`` to force that fallback (e.g. for models / extended-thinking modes</span>
 <span class="sd">    that cannot honor ``output_format``).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">agents</span> <span class="o">=</span> <span class="n">_coerce_agents</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span>
+    <span class="n">agents</span> <span class="o">=</span> <span class="n">coerce_agents</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;backend=&#39;sdk&#39; realizes exactly one agent; got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
@@ -870,8 +793,8 @@
             <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_resolve_skills_for_mcp</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">out</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">AgentDefinition</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">_resolve_skill</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">source_skill</span> <span class="ow">or</span> <span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">_resolve_skill</span><span class="p">(</span><span class="n">target</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">resolve_skill</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">source_skill</span> <span class="ow">or</span> <span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">resolve_skill</span><span class="p">(</span><span class="n">target</span><span class="p">)]</span>
 
 
 <span class="n">backends</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mcp&quot;</span><span class="p">,</span> <span class="n">realize_mcp</span><span class="p">)</span>

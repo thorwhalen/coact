@@ -57,6 +57,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize.html">coact.realize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/schema.html">coact.schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/stores.html">coact.stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/synthesis.html">coact.synthesis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/util.html">coact.util</a></li>
@@ -107,15 +110,14 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">skill.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Skill</span><span class="p">,</span> <span class="n">SkillMeta</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">skill.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_project_root</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">coact.complete</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolve_skill</span><span class="p">,</span> <span class="n">complete</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.complete</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_skill</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.frontmatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_coact_meta</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">coact.realize</span><span class="w"> </span><span class="kn">import</span> <span class="n">_coerce_agents</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.realize</span><span class="w"> </span><span class="kn">import</span> <span class="n">coerce_agents</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.stores</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentStore</span>
 
 <span class="c1"># ---------------------------------------------------------------------------</span>
@@ -167,8 +169,8 @@
 <span class="sd">    &gt;&gt;&gt; any(f == &#39;prompt&#39; and cls.startswith(&#39;extra&#39;) for f, cls, _ in d.rows)</span>
 <span class="sd">    True</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">sk</span> <span class="o">=</span> <span class="n">_resolve_skill</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">Skill</span><span class="p">)</span> <span class="k">else</span> <span class="n">skill</span>
-    <span class="n">ad</span> <span class="o">=</span> <span class="n">agent</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">AgentDefinition</span><span class="p">)</span> <span class="k">else</span> <span class="n">_coerce_agents</span><span class="p">(</span><span class="n">agent</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">sk</span> <span class="o">=</span> <span class="n">resolve_skill</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">Skill</span><span class="p">)</span> <span class="k">else</span> <span class="n">skill</span>
+    <span class="n">ad</span> <span class="o">=</span> <span class="n">agent</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">AgentDefinition</span><span class="p">)</span> <span class="k">else</span> <span class="n">coerce_agents</span><span class="p">(</span><span class="n">agent</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="n">rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="p">(</span>
@@ -252,7 +254,7 @@
 <span class="sd">    &gt;&gt;&gt; est.interdependent, est.shared_skills</span>
 <span class="sd">    (True, [&#39;shared&#39;])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ads</span> <span class="o">=</span> <span class="n">_coerce_agents</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span>
+    <span class="n">ads</span> <span class="o">=</span> <span class="n">coerce_agents</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span>
     <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ads</span><span class="p">)</span>
 
     <span class="c1"># interdependence heuristics: shared skills, or any declared input contract.</span>
@@ -381,7 +383,7 @@
 <span class="sd">    &gt;&gt;&gt; &#39;lossy&#39; in sk.body.lower()</span>
 <span class="sd">    True</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ad</span> <span class="o">=</span> <span class="n">agent</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">AgentDefinition</span><span class="p">)</span> <span class="k">else</span> <span class="n">_coerce_agents</span><span class="p">(</span><span class="n">agent</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ad</span> <span class="o">=</span> <span class="n">agent</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">AgentDefinition</span><span class="p">)</span> <span class="k">else</span> <span class="n">coerce_agents</span><span class="p">(</span><span class="n">agent</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">referenced</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ad</span><span class="o">.</span><span class="n">skills</span> <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
     <span class="n">refs_note</span> <span class="o">=</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Referenced skills (procedure may live here): </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">referenced</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>

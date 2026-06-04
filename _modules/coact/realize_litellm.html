@@ -57,6 +57,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize.html">coact.realize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/schema.html">coact.schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/stores.html">coact.stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/synthesis.html">coact.synthesis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/util.html">coact.util</a></li>
@@ -114,7 +117,8 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompletionPolicy</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">coact.realize</span><span class="w"> </span><span class="kn">import</span> <span class="n">RealizeTarget</span><span class="p">,</span> <span class="n">_coerce_agents</span><span class="p">,</span> <span class="n">backends</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.realize</span><span class="w"> </span><span class="kn">import</span> <span class="n">RealizeTarget</span><span class="p">,</span> <span class="n">coerce_agents</span><span class="p">,</span> <span class="n">backends</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.return_contract</span><span class="w"> </span><span class="kn">import</span> <span class="n">render_json_return_instruction</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_requirements</span>
 
 <span class="c1">#: Map coact&#39;s model *selectors* to LiteLLM model strings. Data, not code — pass a</span>
@@ -128,16 +132,6 @@
 <span class="p">}</span>
 <span class="c1">#: Used when the definition pins no model and none maps.</span>
 <span class="n">DEFAULT_MODEL</span> <span class="o">=</span> <span class="s2">&quot;openai/gpt-4o-mini&quot;</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_json_return_instruction</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The portable structured-output fallback: ask for JSON conforming to a schema.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">(</span>
-        <span class="s2">&quot;## Return contract</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="s2">&quot;Respond with a single JSON value conforming to this JSON Schema. Output &quot;</span>
-        <span class="s2">&quot;JSON only — no prose, no code fences.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;```json</span><span class="se">\n</span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span><span class="w"> </span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">```&quot;</span>
-    <span class="p">)</span>
 
 
 <div class="viewcode-block" id="RunnableLLMAgent">
@@ -193,7 +187,7 @@
         <span class="n">system</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">prompt</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">schema</span><span class="p">:</span>
-            <span class="n">system</span> <span class="o">=</span> <span class="p">(</span><span class="n">system</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">_json_return_instruction</span><span class="p">(</span><span class="n">schema</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">system</span> <span class="o">=</span> <span class="p">(</span><span class="n">system</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">render_json_return_instruction</span><span class="p">(</span><span class="n">schema</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">user</span> <span class="o">=</span> <span class="n">input_data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">_to_user_text</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
         <span class="n">messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">system</span><span class="p">:</span>
@@ -235,7 +229,9 @@
             <span class="n">check_requirements</span><span class="p">({</span><span class="s2">&quot;litellm&quot;</span><span class="p">:</span> <span class="s2">&quot;litellm&quot;</span><span class="p">},</span> <span class="n">feature</span><span class="o">=</span><span class="s2">&quot;realize(backend=&#39;litellm&#39;)&quot;</span><span class="p">)</span>
             <span class="n">completion</span> <span class="o">=</span> <span class="n">_default_litellm_completion</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_kwargs</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
-        <span class="n">raw</span><span class="p">,</span> <span class="n">response_format_used</span> <span class="o">=</span> <span class="n">_complete_with_fallback</span><span class="p">(</span><span class="n">completion</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">raw</span><span class="p">,</span> <span class="n">response_format_used</span><span class="p">,</span> <span class="n">fallback_error</span> <span class="o">=</span> <span class="n">_complete_with_fallback</span><span class="p">(</span>
+            <span class="n">completion</span><span class="p">,</span> <span class="n">kwargs</span>
+        <span class="p">)</span>
         <span class="n">has_schema</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">schema</span><span class="p">())</span>
         <span class="n">artifact</span> <span class="o">=</span> <span class="n">_extract_litellm_artifact</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">has_schema</span><span class="o">=</span><span class="n">has_schema</span><span class="p">)</span>
         <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
@@ -246,6 +242,11 @@
             <span class="s2">&quot;response_format_used&quot;</span><span class="p">:</span> <span class="n">response_format_used</span><span class="p">,</span>
             <span class="s2">&quot;raw&quot;</span><span class="p">:</span> <span class="n">raw</span><span class="p">,</span>
         <span class="p">}</span>
+        <span class="c1"># Surface (don&#39;t bury) the error that forced the no-response_format retry,</span>
+        <span class="c1"># so a caller can tell &quot;provider rejected structured output&quot; from a real</span>
+        <span class="c1"># network/auth failure that we happened to recover from on the retry.</span>
+        <span class="k">if</span> <span class="n">fallback_error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">info</span><span class="p">[</span><span class="s2">&quot;response_format_error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">fallback_error</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">artifact</span><span class="p">,</span> <span class="n">info</span></div>
 </div>
 
@@ -263,20 +264,27 @@
         <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_complete_with_fallback</span><span class="p">(</span><span class="n">completion</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_complete_with_fallback</span><span class="p">(</span>
+    <span class="n">completion</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">Exception</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Call ``completion``; if ``response_format`` is rejected, retry once without it.</span>
 
-<span class="sd">    Returns ``(response, response_format_used)``. The structured schema is still</span>
-<span class="sd">    requested via the system-prompt instruction, so dropping ``response_format`` on a</span>
-<span class="sd">    provider that doesn&#39;t support it degrades gracefully instead of hard-failing.</span>
+<span class="sd">    Returns ``(response, response_format_used, fallback_error)``. The schema is</span>
+<span class="sd">    still requested via the system-prompt instruction, so dropping</span>
+<span class="sd">    ``response_format`` on a provider that doesn&#39;t support it degrades gracefully</span>
+<span class="sd">    instead of hard-failing. The ``except`` is deliberately broad — providers</span>
+<span class="sd">    signal &quot;structured output unsupported&quot; with wildly different exception types —</span>
+<span class="sd">    but the caught error is **returned** (not swallowed) so ``execute`` can record</span>
+<span class="sd">    it in ``info[&#39;response_format_error&#39;]``: a transient network/auth failure on</span>
+<span class="sd">    the first call that the retry happens to mask stays observable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s2">&quot;response_format&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">completion</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">completion</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">completion</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">True</span>
-    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">completion</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
         <span class="n">retry</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">&quot;response_format&quot;</span><span class="p">}</span>
-        <span class="k">return</span> <span class="n">completion</span><span class="p">(</span><span class="o">**</span><span class="n">retry</span><span class="p">),</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">completion</span><span class="p">(</span><span class="o">**</span><span class="n">retry</span><span class="p">),</span> <span class="kc">False</span><span class="p">,</span> <span class="n">error</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_default_litellm_completion</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
@@ -370,7 +378,7 @@
 <span class="sd">    ``model_map`` overrides how coact model selectors (``sonnet``/``opus``/``haiku``)</span>
 <span class="sd">    map to LiteLLM model strings — point them at any provider to prove portability.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">agents</span> <span class="o">=</span> <span class="n">_coerce_agents</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span>
+    <span class="n">agents</span> <span class="o">=</span> <span class="n">coerce_agents</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;backend=&#39;litellm&#39; realizes exactly one agent; got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>

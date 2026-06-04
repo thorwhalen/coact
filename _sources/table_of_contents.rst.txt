@@ -13,6 +13,9 @@
    module_docs/coact/policy
    module_docs/coact/realize
    module_docs/coact/realize_litellm
+   module_docs/coact/return_contract
+   module_docs/coact/scaffold
+   module_docs/coact/schema
    module_docs/coact/stores
    module_docs/coact/synthesis
    module_docs/coact/util

@@ -1,0 +1,261 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coact.scaffold &mdash; coact 0.0.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=47de8214"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            coact
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/analysis.html">coact.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/base.html">coact.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/complete.html">coact.complete</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/emit.html">coact.emit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/llm.html">coact.llm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize.html">coact.realize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/schema.html">coact.schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/stores.html">coact.stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/synthesis.html">coact.synthesis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/util.html">coact.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">coact</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">coact.scaffold</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for coact.scaffold</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Scaffold a *starter* multi-agent shim — the one topology-adjacent thing coact emits.</span>
+
+<span class="sd">COACT_SPEC §6.4 / DECISIONS D8. coact emits agent *definitions* + tool/MCP wiring</span>
+<span class="sd">and **stops at topology** — it is not LangGraph, and a subagent definition can&#39;t</span>
+<span class="sd">express graphs/edges/cycles. The single sanctioned exception is *scaffolding*: for</span>
+<span class="sd">a multi-agent run, coact may emit a **starter Python file** that wires N realized</span>
+<span class="sd">``sdk`` agents under an ``aw`` coordinator, &quot;clearly marked as a starting point the</span>
+<span class="sd">user owns.&quot; That file is data coact writes once, not a runtime coact operates.</span>
+
+<span class="sd">:func:`scaffold_fleet` is exactly that emitter: it takes the same targets</span>
+<span class="sd">``realize`` accepts (agents, skills, ``*.md`` files, or a list) and returns — or</span>
+<span class="sd">writes — a runnable, heavily-commented sequential-pipeline starter the user then</span>
+<span class="sd">reshapes. It runs **no LLM and stands up no runtime** (it only renders source);</span>
+<span class="sd">the emitted shim defers all execution to ``coact.realize(..., backend=&#39;sdk&#39;)`` and</span>
+<span class="sd">all topology to the human who owns it.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompletionPolicy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.realize</span><span class="w"> </span><span class="kn">import</span> <span class="n">RealizeTarget</span><span class="p">,</span> <span class="n">coerce_agents</span>
+
+<span class="c1">#: Default filename when ``dest`` is a directory.</span>
+<span class="n">DEFAULT_SHIM_NAME</span> <span class="o">=</span> <span class="s2">&quot;fleet.py&quot;</span>
+
+
+<div class="viewcode-block" id="scaffold_fleet">
+<a class="viewcode-back" href="../../module_docs/coact/scaffold.html#coact.scaffold_fleet">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">scaffold_fleet</span><span class="p">(</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">RealizeTarget</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">dest</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">agents_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.claude/agents&quot;</span><span class="p">,</span>
+    <span class="n">policy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletionPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Emit a starter shim wiring the target agents as a runnable ``sdk`` fleet.</span>
+
+<span class="sd">    ``target`` is anything :func:`coact.realize` accepts (an</span>
+<span class="sd">    :class:`~coact.base.AgentDefinition`, a skill source, an agent ``*.md`` path,</span>
+<span class="sd">    or a list of these). Returns the shim **source string**; if ``dest`` is given</span>
+<span class="sd">    (a file path, or a directory in which ``fleet.py`` is written) the file is</span>
+<span class="sd">    written and its :class:`~pathlib.Path` returned instead.</span>
+
+<span class="sd">    The shim references each agent by name under ``agents_dir`` and chains them</span>
+<span class="sd">    **sequentially** — a deliberately thin starting point. It is the *only*</span>
+<span class="sd">    topology-adjacent artifact coact produces (DECISIONS D8): coact writes it once</span>
+<span class="sd">    and never runs it; you own the control flow from there.</span>
+
+<span class="sd">    &gt;&gt;&gt; from coact import AgentDefinition</span>
+<span class="sd">    &gt;&gt;&gt; shim = scaffold_fleet([AgentDefinition(name=&#39;collector&#39;, description=&#39;x&#39;),</span>
+<span class="sd">    ...                         AgentDefinition(name=&#39;summarizer&#39;, description=&#39;y&#39;)])</span>
+<span class="sd">    &gt;&gt;&gt; &#39;AGENTS = [&quot;collector&quot;, &quot;summarizer&quot;]&#39; in shim</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; &#39;backend=&quot;sdk&quot;&#39; in shim and &#39;YOU OWN THIS FILE&#39; in shim</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">agents</span> <span class="o">=</span> <span class="n">coerce_agents</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">agents</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;scaffold_fleet needs at least one agent to wire.&quot;</span><span class="p">)</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">_render_fleet_shim</span><span class="p">([</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">ad</span> <span class="ow">in</span> <span class="n">agents</span><span class="p">],</span> <span class="n">agents_dir</span><span class="o">=</span><span class="n">agents_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dest</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">source</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">or</span> <span class="n">out</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="n">DEFAULT_SHIM_NAME</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_render_fleet_shim</span><span class="p">(</span><span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">agents_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render the starter-shim source for ``names`` (pure string build, no I/O).&quot;&quot;&quot;</span>
+    <span class="n">agents_literal</span> <span class="o">=</span> <span class="s2">&quot;[&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">names</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span>
+    <span class="n">agents_dir_literal</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">agents_dir</span><span class="p">)</span>
+    <span class="c1"># NOTE: this is a code *template*. Keep it dependency-light and runnable as-is;</span>
+    <span class="c1"># every coact-specific concern (cost gate, D8 boundary, ownership) is stated in</span>
+    <span class="c1"># the emitted docstring/comments so the file is self-explanatory once on disk.</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;&quot;&quot;&quot;Starter multi-agent fleet — YOU OWN THIS FILE (coact scaffolded it).</span>
+
+<span class="s1">coact emits agent *definitions* and stops at topology (DECISIONS D8): it is not</span>
+<span class="s1">LangGraph. This starter wires the agents below as a simple SEQUENTIAL hand-off so</span>
+<span class="s1">you have a running fleet to shape. Replace the control flow with whatever the task</span>
+<span class="s1">needs — branches, parallel fan-out, validation, retries — using ``aw.orchestration``</span>
+<span class="s1">or the Claude Agent SDK directly. coact will not regenerate or overwrite your edits.</span>
+
+<span class="s1">Cost gate (DECISIONS D9): a running fleet costs ~an order of magnitude more tokens</span>
+<span class="s1">than a single host agent, and the premium is worst on *interdependent* tasks. Run</span>
+<span class="s1">``coact estimate </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">agents_dir</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39;/&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39;.md&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s1">`` first;</span>
+<span class="s1">prefer ``backend=&#39;host&#39;`` unless you have a real throughput/isolation need.</span>
+<span class="s1">&quot;&quot;&quot;</span>
+
+<span class="s1">from __future__ import annotations</span>
+
+<span class="s1">from pathlib import Path</span>
+
+<span class="s1">from coact import realize</span>
+
+<span class="s1">#: The agents this fleet coordinates, by name (each is one ``&lt;name&gt;.md`` definition).</span>
+<span class="s1">AGENTS = </span><span class="si">{</span><span class="n">agents_literal</span><span class="si">}</span>
+
+<span class="s1">#: Where the agent ``*.md`` definitions live (override per call).</span>
+<span class="s1">AGENTS_DIR = </span><span class="si">{</span><span class="n">agents_dir_literal</span><span class="si">}</span>
+
+
+<span class="s1">def build_fleet(agents_dir: str = AGENTS_DIR) -&gt; dict:</span>
+<span class="s1">    &quot;&quot;&quot;Realize each agent as an ``aw.AgenticStep``-compatible ``sdk`` runnable.&quot;&quot;&quot;</span>
+<span class="s1">    return </span><span class="se">{{</span>
+<span class="s1">        name: realize(Path(agents_dir) / f&quot;</span><span class="se">{{</span><span class="s1">name</span><span class="se">}}</span><span class="s1">.md&quot;, backend=&quot;sdk&quot;)</span>
+<span class="s1">        for name in AGENTS</span>
+<span class="s1">    </span><span class="se">}}</span>
+
+
+<span class="s1">def run(task, *, agents_dir: str = AGENTS_DIR):</span>
+<span class="s1">    &quot;&quot;&quot;Run the fleet over ``task``. STARTER: a sequential hand-off — edit me.</span>
+
+<span class="s1">    Each agent&#39;s ``(artifact, info)`` feeds the next. Insert your real topology</span>
+<span class="s1">    where marked: inspect ``artifact`` / ``info`` to branch, validate, retry, or</span>
+<span class="s1">    fan out (e.g. with ``aw.orchestration.AgenticWorkflow``).</span>
+<span class="s1">    &quot;&quot;&quot;</span>
+<span class="s1">    steps = build_fleet(agents_dir)</span>
+<span class="s1">    artifact, infos = task, []</span>
+<span class="s1">    for name in AGENTS:</span>
+<span class="s1">        artifact, info = steps[name].execute(artifact, context=</span><span class="se">{{}}</span><span class="s1">)</span>
+<span class="s1">        infos.append(info)</span>
+<span class="s1">        # TODO(you): branch / validate / retry / fan out on artifact + info here.</span>
+<span class="s1">    return artifact, infos</span>
+
+
+<span class="s1">if __name__ == &quot;__main__&quot;:</span>
+<span class="s1">    import sys</span>
+
+<span class="s1">    result, _ = run(sys.argv[1] if len(sys.argv) &gt; 1 else &quot;&quot;)</span>
+<span class="s1">    print(result)</span>
+<span class="s1">&#39;&#39;&#39;</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

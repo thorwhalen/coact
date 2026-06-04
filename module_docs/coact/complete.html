@@ -56,6 +56,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">coact.complete</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#coact.complete.complete"><code class="docutils literal notranslate"><span class="pre">complete()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.complete.plan_completion"><code class="docutils literal notranslate"><span class="pre">plan_completion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.complete.resolve_skill"><code class="docutils literal notranslate"><span class="pre">resolve_skill()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="emit.html">coact.emit</a></li>
@@ -64,6 +65,9 @@
 <li class="toctree-l1"><a class="reference internal" href="policy.html">coact.policy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="realize.html">coact.realize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema.html">coact.schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stores.html">coact.stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="synthesis.html">coact.synthesis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="util.html">coact.util</a></li>
@@ -141,6 +145,14 @@ model name) to <em>draft</em> a richer persona — the mechanical path needs non
 <span class="go">True</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.complete.resolve_skill">
+<span class="sig-prename descclassname"><span class="pre">coact.complete.</span></span><span class="sig-name descname"><span class="pre">resolve_skill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Skill</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Skill</span></span></span><a class="reference internal" href="../../_modules/coact/complete.html#resolve_skill"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.complete.resolve_skill" title="Link to this definition"></a></dt>
+<dd><p>Resolve a Skill from an object, a path, or a key/name.</p>
+<p>Resolution order for strings: filesystem path → local store key → project
+<code class="docutils literal notranslate"><span class="pre">.claude/skills/&lt;name&gt;</span></code>.</p>
 </dd></dl>
 
 </section>

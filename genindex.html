@@ -57,6 +57,9 @@
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/policy.html">coact.policy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/realize.html">coact.realize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_docs/coact/return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_docs/coact/scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_docs/coact/schema.html">coact.schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/stores.html">coact.stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/synthesis.html">coact.synthesis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/util.html">coact.util</a></li>
@@ -140,6 +143,10 @@
         <li><a href="module_docs/coact/stores.html#coact.stores.AgentStore">(class in coact.stores)</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/coact/return_contract.html#coact.return_contract.as_object_schema">as_object_schema() (in module coact.return_contract)</a>
+</li>
+      <li><a href="module_docs/coact/return_contract.html#coact.return_contract.auto_return_mode">auto_return_mode() (in module coact.return_contract)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -252,8 +259,6 @@
         <li><a href="module_docs/coact/llm.html#module-coact.llm">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     coact.policy
 
@@ -268,11 +273,34 @@
         <li><a href="module_docs/coact/realize.html#module-coact.realize">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     coact.realize_litellm
 
       <ul>
         <li><a href="module_docs/coact/realize_litellm.html#module-coact.realize_litellm">module</a>
+</li>
+      </ul></li>
+      <li>
+    coact.return_contract
+
+      <ul>
+        <li><a href="module_docs/coact/return_contract.html#module-coact.return_contract">module</a>
+</li>
+      </ul></li>
+      <li>
+    coact.scaffold
+
+      <ul>
+        <li><a href="module_docs/coact/scaffold.html#module-coact.scaffold">module</a>
+</li>
+      </ul></li>
+      <li>
+    coact.schema
+
+      <ul>
+        <li><a href="module_docs/coact/schema.html#module-coact.schema">module</a>
 </li>
       </ul></li>
       <li>
@@ -304,6 +332,8 @@
         <li><a href="module_docs/coact/frontmatter.html#coact.frontmatter.CoactMeta">(class in coact.frontmatter)</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/coact/realize.html#coact.realize.coerce_agents">coerce_agents() (in module coact.realize)</a>
+</li>
       <li><a href="module_docs/coact.html#coact.complete">complete() (in module coact)</a>
 
       <ul>
@@ -336,9 +366,11 @@
 </li>
       <li><a href="module_docs/coact/policy.html#coact.policy.default_policy">default_policy (in module coact.policy)</a>
 </li>
+      <li><a href="module_docs/coact/synthesis.html#coact.synthesis.DEFAULT_RETURN_SCHEMA">DEFAULT_RETURN_SCHEMA (in module coact.synthesis)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="module_docs/coact/synthesis.html#coact.synthesis.DEFAULT_RETURN_SCHEMA">DEFAULT_RETURN_SCHEMA (in module coact.synthesis)</a>
+      <li><a href="module_docs/coact/scaffold.html#coact.scaffold.DEFAULT_SHIM_NAME">DEFAULT_SHIM_NAME (in module coact.scaffold)</a>
 </li>
       <li><a href="module_docs/coact.html#coact.diff">diff() (in module coact)</a>
 
@@ -386,6 +418,8 @@
         <li><a href="module_docs/coact.html#coact.RunnableLLMAgent.execute">(coact.RunnableLLMAgent method)</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/coact/return_contract.html#coact.return_contract.extract_return_tool_input">extract_return_tool_input() (in module coact.return_contract)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -454,6 +488,8 @@
         <li><a href="module_docs/coact.html#coact.ReturnContract.is_empty">(coact.ReturnContract method)</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/coact/return_contract.html#coact.return_contract.is_return_tool">is_return_tool() (in module coact.return_contract)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -491,6 +527,12 @@
         <li><a href="module_docs/coact/realize.html#module-coact.realize">coact.realize</a>
 </li>
         <li><a href="module_docs/coact/realize_litellm.html#module-coact.realize_litellm">coact.realize_litellm</a>
+</li>
+        <li><a href="module_docs/coact/return_contract.html#module-coact.return_contract">coact.return_contract</a>
+</li>
+        <li><a href="module_docs/coact/scaffold.html#module-coact.scaffold">coact.scaffold</a>
+</li>
+        <li><a href="module_docs/coact/schema.html#module-coact.schema">coact.schema</a>
 </li>
         <li><a href="module_docs/coact/stores.html#module-coact.stores">coact.stores</a>
 </li>
@@ -605,9 +647,13 @@
         <li><a href="module_docs/coact/base.html#coact.base.AgentPlan.render">(coact.base.AgentPlan method)</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/coact/return_contract.html#coact.return_contract.render_json_return_instruction">render_json_return_instruction() (in module coact.return_contract)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/coact/synthesis.html#coact.synthesis.render_return_contract_section">render_return_contract_section() (in module coact.synthesis)</a>
+</li>
+      <li><a href="module_docs/coact/return_contract.html#coact.return_contract.render_tool_return_instruction">render_tool_return_instruction() (in module coact.return_contract)</a>
 </li>
       <li><a href="module_docs/coact.html#coact.resolve_llm">resolve_llm() (in module coact)</a>
 
@@ -621,7 +667,9 @@
         <li><a href="module_docs/coact.html#coact.RunnableLLMAgent.resolve_model">(coact.RunnableLLMAgent method)</a>
 </li>
       </ul></li>
-      <li><a href="module_docs/coact/base.html#coact.base.resolve_schema_ref">resolve_schema_ref() (in module coact.base)</a>
+      <li><a href="module_docs/coact/schema.html#coact.schema.resolve_schema_ref">resolve_schema_ref() (in module coact.schema)</a>
+</li>
+      <li><a href="module_docs/coact/complete.html#coact.complete.resolve_skill">resolve_skill() (in module coact.complete)</a>
 </li>
       <li><a href="module_docs/coact.html#coact.CoactMeta.return_contract">return_contract() (coact.CoactMeta method)</a>
 
@@ -635,9 +683,9 @@
         <li><a href="module_docs/coact.html#coact.RunnableAgent.return_mode">(coact.RunnableAgent attribute)</a>
 </li>
       </ul></li>
-      <li><a href="module_docs/coact/realize.html#coact.realize.RETURN_TOOL_FULLNAME">RETURN_TOOL_FULLNAME (in module coact.realize)</a>
+      <li><a href="module_docs/coact/return_contract.html#coact.return_contract.RETURN_TOOL_FULLNAME">RETURN_TOOL_FULLNAME (in module coact.return_contract)</a>
 </li>
-      <li><a href="module_docs/coact/realize.html#coact.realize.RETURN_TOOL_SERVER">RETURN_TOOL_SERVER (in module coact.realize)</a>
+      <li><a href="module_docs/coact/return_contract.html#coact.return_contract.RETURN_TOOL_SERVER">RETURN_TOOL_SERVER (in module coact.return_contract)</a>
 </li>
       <li><a href="module_docs/coact.html#coact.ReturnContract">ReturnContract (class in coact)</a>
 
@@ -645,6 +693,8 @@
         <li><a href="module_docs/coact/base.html#coact.base.ReturnContract">(class in coact.base)</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/coact/return_contract.html#coact.return_contract.ReturnPlan">ReturnPlan (class in coact.return_contract)</a>
+</li>
       <li><a href="module_docs/coact.html#coact.RunnableAgent">RunnableAgent (class in coact)</a>
 
       <ul>
@@ -663,6 +713,14 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_docs/coact/__main__.html#coact.__main__.scaffold">scaffold() (in module coact.__main__)</a>
+</li>
+      <li><a href="module_docs/coact.html#coact.scaffold_fleet">scaffold_fleet() (in module coact)</a>
+
+      <ul>
+        <li><a href="module_docs/coact/scaffold.html#coact.scaffold.scaffold_fleet">(in module coact.scaffold)</a>
+</li>
+      </ul></li>
       <li><a href="module_docs/coact/base.html#coact.base.ReturnContract.schema">schema() (coact.base.ReturnContract method)</a>
 
       <ul>
@@ -675,14 +733,14 @@
         <li><a href="module_docs/coact/base.html#coact.base.AgentDefinition.source_skill">(coact.base.AgentDefinition attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/coact.html#coact.structured">structured() (in module coact)</a>
 
       <ul>
         <li><a href="module_docs/coact/llm.html#coact.llm.structured">(in module coact.llm)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/coact.html#coact.synthesize_persona">synthesize_persona() (in module coact)</a>
 
       <ul>

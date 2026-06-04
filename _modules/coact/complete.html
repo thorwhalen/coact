@@ -57,6 +57,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize.html">coact.realize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/schema.html">coact.schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/stores.html">coact.stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/synthesis.html">coact.synthesis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/util.html">coact.util</a></li>
@@ -153,7 +156,7 @@
 <span class="sd">    True</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">policy</span> <span class="o">=</span> <span class="n">policy</span> <span class="ow">or</span> <span class="n">default_policy</span>
-    <span class="n">skill</span> <span class="o">=</span> <span class="n">_resolve_skill</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="n">skill</span> <span class="o">=</span> <span class="n">resolve_skill</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
     <span class="n">coact_meta</span> <span class="o">=</span> <span class="n">parse_coact_meta</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span>
     <span class="n">prov</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FieldProvenance</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">warnings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -304,7 +307,9 @@
 <span class="c1"># ---------------------------------------------------------------------------</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_resolve_skill</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="n">SkillSource</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Skill</span><span class="p">:</span>
+<div class="viewcode-block" id="resolve_skill">
+<a class="viewcode-back" href="../../module_docs/coact/complete.html#coact.resolve_skill">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">resolve_skill</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="n">SkillSource</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Skill</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve a Skill from an object, a path, or a key/name.</span>
 
 <span class="sd">    Resolution order for strings: filesystem path → local store key → project</span>
@@ -335,7 +340,8 @@
         <span class="sa">f</span><span class="s2">&quot;Could not resolve skill </span><span class="si">{</span><span class="n">source</span><span class="si">!r}</span><span class="s2">: not a skill directory, a local &quot;</span>
         <span class="sa">f</span><span class="s2">&quot;store key, or a project skill. Looked in the local store and &quot;</span>
         <span class="sa">f</span><span class="s2">&quot;.claude/skills/.&quot;</span>
-    <span class="p">)</span>
+    <span class="p">)</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_skill_key</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>

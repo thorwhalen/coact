@@ -57,6 +57,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize.html">coact.realize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/schema.html">coact.schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/stores.html">coact.stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/synthesis.html">coact.synthesis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/util.html">coact.util</a></li>
@@ -110,6 +113,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact</span><span class="w"> </span><span class="kn">import</span> <span class="n">emit_agent</span> <span class="k">as</span> <span class="n">_emit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact</span><span class="w"> </span><span class="kn">import</span> <span class="n">plan_completion</span> <span class="k">as</span> <span class="n">_plan</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact</span><span class="w"> </span><span class="kn">import</span> <span class="n">realize</span> <span class="k">as</span> <span class="n">_realize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact</span><span class="w"> </span><span class="kn">import</span> <span class="n">scaffold_fleet</span> <span class="k">as</span> <span class="n">_scaffold_fleet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">back</span> <span class="k">as</span> <span class="n">_back</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">diff</span> <span class="k">as</span> <span class="n">_diff</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">estimate</span> <span class="k">as</span> <span class="n">_estimate</span>
@@ -158,8 +162,13 @@
     <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">scope</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;project&quot;</span><span class="p">,</span>
     <span class="n">skills_source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Realize an agent/skill via a backend (host materializes files; sdk/mcp build runnables).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Realize an agent/skill via a backend (host materializes files; sdk/mcp build runnables).</span>
+
+<span class="sd">    ``--dry-run`` (host only) previews the files that *would* be written/linked</span>
+<span class="sd">    without touching the filesystem.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;host&quot;</span><span class="p">:</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">_realize</span><span class="p">(</span>
             <span class="n">target</span><span class="p">,</span>
@@ -167,8 +176,10 @@
             <span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">,</span>
             <span class="n">scope</span><span class="o">=</span><span class="n">scope</span><span class="p">,</span>
             <span class="n">skills_source</span><span class="o">=</span><span class="n">skills_source</span><span class="p">,</span>
+            <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Realized (host) into </span><span class="si">{</span><span class="n">res</span><span class="o">.</span><span class="n">agents_dir</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">]</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="s2">&quot;Would realize (host, dry-run)&quot;</span> <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">dry_run</span> <span class="k">else</span> <span class="s2">&quot;Realized (host)&quot;</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">head</span><span class="si">}</span><span class="s2"> into </span><span class="si">{</span><span class="n">res</span><span class="o">.</span><span class="n">agents_dir</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">]</span>
         <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;  agent: </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">agents</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
         <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;  skill: </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">skills</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
         <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;  ! </span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">warnings</span><span class="p">]</span>
@@ -221,12 +232,26 @@
 
 
 
+<div class="viewcode-block" id="scaffold">
+<a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.scaffold">[docs]</a>
+<span class="nd">@argh</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="s2">&quot;agents&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Agent .md files / skill sources to wire&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">scaffold</span><span class="p">(</span>
+    <span class="n">agents</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">agents_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.claude/agents&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Emit a STARTER multi-agent fleet shim you own (sequential; D8 — not a topology engine).&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">_scaffold_fleet</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">agents</span><span class="p">),</span> <span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">,</span> <span class="n">agents_dir</span><span class="o">=</span><span class="n">agents_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dest</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Wrote starter fleet shim: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.main">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Dispatch the coact CLI.&quot;&quot;&quot;</span>
     <span class="n">argh</span><span class="o">.</span><span class="n">dispatch_commands</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">plan</span><span class="p">,</span> <span class="n">complete</span><span class="p">,</span> <span class="n">emit</span><span class="p">,</span> <span class="n">realize</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="n">inventory</span><span class="p">,</span> <span class="n">back</span><span class="p">]</span>
+        <span class="p">[</span><span class="n">plan</span><span class="p">,</span> <span class="n">complete</span><span class="p">,</span> <span class="n">emit</span><span class="p">,</span> <span class="n">realize</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="n">inventory</span><span class="p">,</span> <span class="n">back</span><span class="p">,</span> <span class="n">scaffold</span><span class="p">]</span>
     <span class="p">)</span></div>
 
 

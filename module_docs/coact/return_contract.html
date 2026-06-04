@@ -1,0 +1,256 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coact.return_contract &mdash; coact 0.0.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=47de8214"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="coact.scaffold" href="scaffold.html" />
+    <link rel="prev" title="coact.realize_litellm" href="realize_litellm.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            coact
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">coact.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">coact.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complete.html">coact.complete</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emit.html">coact.emit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="llm.html">coact.llm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="policy.html">coact.policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="realize.html">coact.realize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">coact.return_contract</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#coact.return_contract.RETURN_TOOL_FULLNAME"><code class="docutils literal notranslate"><span class="pre">RETURN_TOOL_FULLNAME</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.return_contract.RETURN_TOOL_SERVER"><code class="docutils literal notranslate"><span class="pre">RETURN_TOOL_SERVER</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.return_contract.ReturnPlan"><code class="docutils literal notranslate"><span class="pre">ReturnPlan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.return_contract.as_object_schema"><code class="docutils literal notranslate"><span class="pre">as_object_schema()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.return_contract.auto_return_mode"><code class="docutils literal notranslate"><span class="pre">auto_return_mode()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.return_contract.extract_return_tool_input"><code class="docutils literal notranslate"><span class="pre">extract_return_tool_input()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.return_contract.is_return_tool"><code class="docutils literal notranslate"><span class="pre">is_return_tool()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.return_contract.render_json_return_instruction"><code class="docutils literal notranslate"><span class="pre">render_json_return_instruction()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.return_contract.render_tool_return_instruction"><code class="docutils literal notranslate"><span class="pre">render_tool_return_instruction()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema.html">coact.schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stores.html">coact.stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="synthesis.html">coact.synthesis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">coact.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">coact</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">coact.return_contract</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/coact/return_contract.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-coact.return_contract">
+<span id="coact-return-contract"></span><h1>coact.return_contract<a class="headerlink" href="#module-coact.return_contract" title="Link to this heading"></a></h1>
+<p>Realizing a return contract — the backend-agnostic part of DECISIONS D6.</p>
+<p>The return contract (an agent’s final-message JSON Schema) reaches a runtime two
+ways, and the <em>how</em> is a cohesive, independently testable subsystem extracted
+here out of the (large) <a class="reference internal" href="realize.html#module-coact.realize" title="coact.realize"><code class="xref py py-mod docutils literal notranslate"><span class="pre">coact.realize</span></code></a>:</p>
+<ul class="simple">
+<li><p><strong>tool</strong> — a forced <code class="docutils literal notranslate"><span class="pre">return_result</span></code> MCP tool whose <code class="docutils literal notranslate"><span class="pre">input_schema</span></code> IS the
+schema, plus a system-prompt instruction to call it. The structured result is
+recovered from the tool-use block. Used by the <code class="docutils literal notranslate"><span class="pre">sdk</span></code> backend (older SDKs, or
+when <code class="docutils literal notranslate"><span class="pre">output_format</span></code> can’t be honored).</p></li>
+<li><p><strong>json</strong> — ask for a single JSON value conforming to the schema in the system
+prompt. Used by the provider-agnostic <code class="docutils literal notranslate"><span class="pre">litellm</span></code> backend (where structured
+<code class="docutils literal notranslate"><span class="pre">response_format</span></code> support varies).</p></li>
+</ul>
+<p>This module owns: the in-process return-tool naming, the <code class="docutils literal notranslate"><span class="pre">ReturnPlan</span></code> value,
+mode selection, the object-schema coercion the SDK tool needs, the two
+instruction renderers (sharing one schema-fence helper — DRY across backends),
+and the tool-use extraction. The SDK-specific <em>wiring</em> (building the in-process
+MCP server, <code class="docutils literal notranslate"><span class="pre">ClaudeAgentOptions</span></code>) stays in <a class="reference internal" href="realize.html#module-coact.realize" title="coact.realize"><code class="xref py py-mod docutils literal notranslate"><span class="pre">coact.realize</span></code></a>; the
+provider-specific response parsing stays in <a class="reference internal" href="realize_litellm.html#module-coact.realize_litellm" title="coact.realize_litellm"><code class="xref py py-mod docutils literal notranslate"><span class="pre">coact.realize_litellm</span></code></a>.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="coact.return_contract.RETURN_TOOL_FULLNAME">
+<span class="sig-prename descclassname"><span class="pre">coact.return_contract.</span></span><span class="sig-name descname"><span class="pre">RETURN_TOOL_FULLNAME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'mcp__coact_return__return_result'</span></span><a class="headerlink" href="#coact.return_contract.RETURN_TOOL_FULLNAME" title="Link to this definition"></a></dt>
+<dd><p>How Claude references the tool (<code class="docutils literal notranslate"><span class="pre">mcp__&lt;server&gt;__&lt;tool&gt;</span></code>).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="coact.return_contract.RETURN_TOOL_SERVER">
+<span class="sig-prename descclassname"><span class="pre">coact.return_contract.</span></span><span class="sig-name descname"><span class="pre">RETURN_TOOL_SERVER</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'coact_return'</span></span><a class="headerlink" href="#coact.return_contract.RETURN_TOOL_SERVER" title="Link to this definition"></a></dt>
+<dd><p>In-process SDK MCP server + tool names for the forced return path.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coact.return_contract.ReturnPlan">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">coact.return_contract.</span></span><span class="sig-name descname"><span class="pre">ReturnPlan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unwrap_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool_fullname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/coact/return_contract.html#ReturnPlan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.return_contract.ReturnPlan" title="Link to this definition"></a></dt>
+<dd><p>How an agent’s return contract is realized for the SDK (resolved once).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.return_contract.as_object_schema">
+<span class="sig-prename descclassname"><span class="pre">coact.return_contract.</span></span><span class="sig-name descname"><span class="pre">as_object_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/coact/return_contract.html#as_object_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.return_contract.as_object_schema" title="Link to this definition"></a></dt>
+<dd><p>Coerce a return schema to a valid object <code class="docutils literal notranslate"><span class="pre">inputSchema</span></code> for the return tool.</p>
+<p>The Agent SDK passes a dict <code class="docutils literal notranslate"><span class="pre">input_schema</span></code> through unchanged only when it is
+an object schema with <strong>both</strong> <code class="docutils literal notranslate"><span class="pre">type:</span> <span class="pre">object</span></code> and <code class="docutils literal notranslate"><span class="pre">properties</span></code>; any other
+dict is misread as a <code class="docutils literal notranslate"><span class="pre">{param:</span> <span class="pre">type}</span></code> map (and mangled). So:</p>
+<ul class="simple">
+<li><p>An object schema <em>with</em> <code class="docutils literal notranslate"><span class="pre">properties</span></code> → passed through, no wrapping.</p></li>
+<li><p>A free-form object schema (<code class="docutils literal notranslate"><span class="pre">type:</span> <span class="pre">object</span></code> but no <code class="docutils literal notranslate"><span class="pre">properties</span></code>) → given an
+empty <code class="docutils literal notranslate"><span class="pre">properties</span></code> key so the SDK passes it through verbatim. Crucially it
+is <strong>not</strong> wrapped: wrapping a free-form object under <code class="docutils literal notranslate"><span class="pre">result</span></code> would make a
+model’s own single-key <code class="docutils literal notranslate"><span class="pre">{result:</span> <span class="pre">...}</span></code> output indistinguishable from the
+wrapper (a silent-collapse hazard).</p></li>
+<li><p>Any non-object schema (array / scalar) → wrapped under a <code class="docutils literal notranslate"><span class="pre">result</span></code> key, with
+that key returned so extraction can unwrap it.</p></li>
+</ul>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">as_object_schema</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="p">{}}})[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">as_object_schema</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">})</span>  <span class="c1"># free-form object: passed through, not wrapped</span>
+<span class="go">({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {}}, None)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">as_object_schema</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;array&#39;</span><span class="p">,</span> <span class="s1">&#39;items&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">}})</span>
+<span class="go">({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {&#39;result&#39;: {&#39;type&#39;: &#39;array&#39;, &#39;items&#39;: {&#39;type&#39;: &#39;string&#39;}}}, &#39;required&#39;: [&#39;result&#39;]}, &#39;result&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.return_contract.auto_return_mode">
+<span class="sig-prename descclassname"><span class="pre">coact.return_contract.</span></span><span class="sig-name descname"><span class="pre">auto_return_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">option_field_names</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/coact/return_contract.html#auto_return_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.return_contract.auto_return_mode" title="Link to this definition"></a></dt>
+<dd><p>Pick the return mode in <code class="docutils literal notranslate"><span class="pre">auto</span></code>: native <code class="docutils literal notranslate"><span class="pre">output_format</span></code> if the SDK has it.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">auto_return_mode</span><span class="p">({</span><span class="s1">&#39;system_prompt&#39;</span><span class="p">,</span> <span class="s1">&#39;output_format&#39;</span><span class="p">})</span>
+<span class="go">&#39;output_format&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">auto_return_mode</span><span class="p">({</span><span class="s1">&#39;system_prompt&#39;</span><span class="p">})</span>  <span class="c1"># older SDK without the field</span>
+<span class="go">&#39;tool&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.return_contract.extract_return_tool_input">
+<span class="sig-prename descclassname"><span class="pre">coact.return_contract.</span></span><span class="sig-name descname"><span class="pre">extract_return_tool_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unwrap_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../_modules/coact/return_contract.html#extract_return_tool_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.return_contract.extract_return_tool_input" title="Link to this definition"></a></dt>
+<dd><p>Recover the forced <code class="docutils literal notranslate"><span class="pre">return_result</span></code> tool-use input from SDK messages, or None.</p>
+<p>Scans assistant messages for a tool-use block calling the return tool and
+returns its <code class="docutils literal notranslate"><span class="pre">input</span></code> (the last one wins). When the schema was wrapped (a
+non-object return type), the single <code class="docutils literal notranslate"><span class="pre">result</span></code> key is unwrapped.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.return_contract.is_return_tool">
+<span class="sig-prename descclassname"><span class="pre">coact.return_contract.</span></span><span class="sig-name descname"><span class="pre">is_return_tool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/coact/return_contract.html#is_return_tool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.return_contract.is_return_tool" title="Link to this definition"></a></dt>
+<dd><p>True if <code class="docutils literal notranslate"><span class="pre">name</span></code> denotes coact’s forced return tool (server-scoped).</p>
+<p>Matches the full MCP name, or any prefix variant scoped to coact’s own server
+(<code class="docutils literal notranslate"><span class="pre">…__coact_return__return_result</span></code>). Deliberately does <strong>not</strong> match a bare
+<code class="docutils literal notranslate"><span class="pre">return_result</span></code> or a <code class="docutils literal notranslate"><span class="pre">return_result</span></code> on a <em>different</em> MCP server, so a
+user’s own same-named tool is never mistaken for the return contract.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">is_return_tool</span><span class="p">(</span><span class="s1">&#39;mcp__coact_return__return_result&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_return_tool</span><span class="p">(</span><span class="s1">&#39;mcp__other_server__return_result&#39;</span><span class="p">)</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_return_tool</span><span class="p">(</span><span class="s1">&#39;Read&#39;</span><span class="p">)</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.return_contract.render_json_return_instruction">
+<span class="sig-prename descclassname"><span class="pre">coact.return_contract.</span></span><span class="sig-name descname"><span class="pre">render_json_return_instruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/coact/return_contract.html#render_json_return_instruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.return_contract.render_json_return_instruction" title="Link to this definition"></a></dt>
+<dd><p>The portable structured-output instruction: ask for JSON conforming to a schema (litellm).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.return_contract.render_tool_return_instruction">
+<span class="sig-prename descclassname"><span class="pre">coact.return_contract.</span></span><span class="sig-name descname"><span class="pre">render_tool_return_instruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system_prompt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/coact/return_contract.html#render_tool_return_instruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.return_contract.render_tool_return_instruction" title="Link to this definition"></a></dt>
+<dd><p>Append the “you MUST call return_result” instruction to a system prompt (sdk).</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="realize_litellm.html" class="btn btn-neutral float-left" title="coact.realize_litellm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scaffold.html" class="btn btn-neutral float-right" title="coact.scaffold" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
