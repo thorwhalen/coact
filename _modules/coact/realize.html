@@ -388,28 +388,86 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Coerce a return schema to a valid object ``inputSchema`` for the return tool.</span>
 
 <span class="sd">    The Agent SDK passes a dict ``input_schema`` through unchanged only when it is</span>
-<span class="sd">    an object schema (``type: object`` *and* ``properties``); any other dict is</span>
-<span class="sd">    misread as a ``{param: type}`` map. A non-object schema is therefore wrapped</span>
-<span class="sd">    under a ``result`` key, and that key is returned so extraction can unwrap it.</span>
+<span class="sd">    an object schema with **both** ``type: object`` and ``properties``; any other</span>
+<span class="sd">    dict is misread as a ``{param: type}`` map (and mangled). So:</span>
+
+<span class="sd">    - An object schema *with* ``properties`` → passed through, no wrapping.</span>
+<span class="sd">    - A free-form object schema (``type: object`` but no ``properties``) → given an</span>
+<span class="sd">      empty ``properties`` key so the SDK passes it through verbatim. Crucially it</span>
+<span class="sd">      is **not** wrapped: wrapping a free-form object under ``result`` would make a</span>
+<span class="sd">      model&#39;s own single-key ``{result: ...}`` output indistinguishable from the</span>
+<span class="sd">      wrapper (a silent-collapse hazard).</span>
+<span class="sd">    - Any non-object schema (array / scalar) → wrapped under a ``result`` key, with</span>
+<span class="sd">      that key returned so extraction can unwrap it.</span>
 
 <span class="sd">    &gt;&gt;&gt; _as_object_schema({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {&#39;a&#39;: {}}})[1] is None</span>
 <span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; _as_object_schema({&#39;type&#39;: &#39;object&#39;})  # free-form object: passed through, not wrapped</span>
+<span class="sd">    ({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {}}, None)</span>
 <span class="sd">    &gt;&gt;&gt; _as_object_schema({&#39;type&#39;: &#39;array&#39;, &#39;items&#39;: {&#39;type&#39;: &#39;string&#39;}})</span>
 <span class="sd">    ({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {&#39;result&#39;: {&#39;type&#39;: &#39;array&#39;, &#39;items&#39;: {&#39;type&#39;: &#39;string&#39;}}}, &#39;required&#39;: [&#39;result&#39;]}, &#39;result&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-        <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span>
-        <span class="ow">and</span> <span class="s2">&quot;properties&quot;</span> <span class="ow">in</span> <span class="n">schema</span>
-    <span class="p">):</span>
-        <span class="k">return</span> <span class="n">schema</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;properties&quot;</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">schema</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">schema</span><span class="p">,</span> <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{}},</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="n">schema</span><span class="p">},</span> <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]},</span>
         <span class="s2">&quot;result&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_with_return_instruction</span><span class="p">(</span><span class="n">system_prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj_schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_coerce_mcp_servers</span><span class="p">(</span><span class="n">servers</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Coerce coact&#39;s ``mcp_servers`` to the SDK&#39;s ``dict[name -&gt; config]`` shape.</span>
+
+<span class="sd">    ``AgentDefinition.mcp_servers`` is a list of *names or inline-dict configs* (the</span>
+<span class="sd">    portable, frontmatter-friendly form), but the Agent SDK wants a</span>
+<span class="sd">    ``dict[str, McpServerConfig]``. Returns ``(servers_dict, warnings)``:</span>
+
+<span class="sd">    - a dict is taken as-is (already keyed by name);</span>
+<span class="sd">    - an inline config dict is keyed by its ``name`` field, by its single key if it</span>
+<span class="sd">      is itself a ``{name: config}`` mapping, or positionally as a last resort;</span>
+<span class="sd">    - a bare **name string** cannot be turned into an SDK config here, so it is</span>
+<span class="sd">      reported in ``warnings`` (not silently dropped) — the ``host`` backend</span>
+<span class="sd">      resolves such names, the ``sdk`` backend needs an inline config.</span>
+
+<span class="sd">    &gt;&gt;&gt; _coerce_mcp_servers([])</span>
+<span class="sd">    ({}, [])</span>
+<span class="sd">    &gt;&gt;&gt; _coerce_mcp_servers({&#39;s&#39;: {&#39;type&#39;: &#39;sdk&#39;}})</span>
+<span class="sd">    ({&#39;s&#39;: {&#39;type&#39;: &#39;sdk&#39;}}, [])</span>
+<span class="sd">    &gt;&gt;&gt; d, w = _coerce_mcp_servers([&#39;bare_name&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; d, (&#39;bare_name&#39; in w[0])</span>
+<span class="sd">    ({}, True)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">servers</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{},</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">servers</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">servers</span><span class="p">),</span> <span class="p">[]</span>
+    <span class="n">out</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">warnings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">servers</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">out</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">values</span><span class="p">())),</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>  <span class="c1"># already a {name: config} mapping</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;server_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;mcp server </span><span class="si">{</span><span class="n">item</span><span class="si">!r}</span><span class="s2"> is a bare name with no inline config; the &quot;</span>
+                <span class="s2">&quot;sdk backend needs a config dict — declare it inline in the &quot;</span>
+                <span class="s2">&quot;coact: mcp block, or use backend=&#39;host&#39;.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unrecognized mcp_servers entry: </span><span class="si">{</span><span class="n">item</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">warnings</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_with_return_instruction</span><span class="p">(</span>
+    <span class="n">system_prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj_schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Append the &quot;you MUST call return_result&quot; instruction to a system prompt.&quot;&quot;&quot;</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
@@ -426,11 +484,22 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_is_return_tool</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;True if ``name`` denotes the forced return tool (full MCP name or bare).&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">(</span>
-        <span class="n">name</span> <span class="o">==</span> <span class="n">RETURN_TOOL_FULLNAME</span>
-        <span class="ow">or</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;__</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="ow">or</span> <span class="n">name</span> <span class="o">==</span> <span class="n">RETURN_TOOL_NAME</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;True if ``name`` denotes coact&#39;s forced return tool (server-scoped).</span>
+
+<span class="sd">    Matches the full MCP name, or any prefix variant scoped to coact&#39;s own server</span>
+<span class="sd">    (``…__coact_return__return_result``). Deliberately does **not** match a bare</span>
+<span class="sd">    ``return_result`` or a ``return_result`` on a *different* MCP server, so a</span>
+<span class="sd">    user&#39;s own same-named tool is never mistaken for the return contract.</span>
+
+<span class="sd">    &gt;&gt;&gt; _is_return_tool(&#39;mcp__coact_return__return_result&#39;)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; _is_return_tool(&#39;mcp__other_server__return_result&#39;)</span>
+<span class="sd">    False</span>
+<span class="sd">    &gt;&gt;&gt; _is_return_tool(&#39;Read&#39;)</span>
+<span class="sd">    False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="n">RETURN_TOOL_FULLNAME</span> <span class="ow">or</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;__</span><span class="si">{</span><span class="n">RETURN_TOOL_SERVER</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
 
 
@@ -485,25 +554,44 @@
 
 <span class="sd">        Honors ``return_mode`` and, in ``&#39;auto&#39;``, the installed SDK&#39;s</span>
 <span class="sd">        capabilities. ``.schema()`` resolves an inline schema or a ``schema_ref``</span>
-<span class="sd">        to canonical JSON Schema; an empty contract yields ``mode=&#39;none&#39;``.</span>
+<span class="sd">        to canonical JSON Schema. A *truly empty* contract yields ``mode=&#39;none&#39;``;</span>
+<span class="sd">        a *declared-but-unresolvable* one (a ``schema_ref`` that fails to import)</span>
+<span class="sd">        raises rather than silently dropping the contract.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;output_format&quot;</span><span class="p">,</span> <span class="s2">&quot;tool&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown return_mode </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">return_mode</span><span class="si">!r}</span><span class="s2">; &quot;</span>
+                <span class="s2">&quot;expected &#39;auto&#39;, &#39;output_format&#39;, or &#39;tool&#39;.&quot;</span>
+            <span class="p">)</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">claude_agent_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClaudeAgentOptions</span>
 
+        <span class="n">option_fields</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">ClaudeAgentOptions</span><span class="p">)}</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">schema</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">_ReturnPlan</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="c1"># Distinguish &quot;no contract&quot; from &quot;contract declared but unresolved&quot;.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">_ReturnPlan</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Return contract references schema_ref &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">ref</span><span class="si">!r}</span><span class="s2">, which could not be resolved to a &quot;</span>
+                <span class="s2">&quot;JSON Schema. Install the module that defines it, or supply an &quot;</span>
+                <span class="s2">&quot;inline json_schema.&quot;</span>
+            <span class="p">)</span>
         <span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_mode</span>
         <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
-            <span class="n">mode</span> <span class="o">=</span> <span class="n">_auto_return_mode</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">ClaudeAgentOptions</span><span class="p">))</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="n">_auto_return_mode</span><span class="p">(</span><span class="n">option_fields</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;output_format&quot;</span><span class="p">:</span>
+            <span class="c1"># An explicit output_format request must not be silently swallowed by</span>
+            <span class="c1"># _filter_kwargs on an SDK that lacks the field (the &#39;auto&#39; path would</span>
+            <span class="c1"># have chosen &#39;tool&#39; instead).</span>
+            <span class="k">if</span> <span class="s2">&quot;output_format&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">option_fields</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;return_mode=&#39;output_format&#39; but the installed claude_agent_sdk &quot;</span>
+                    <span class="s2">&quot;has no output_format option; use return_mode=&#39;tool&#39; (or &#39;auto&#39;).&quot;</span>
+                <span class="p">)</span>
             <span class="k">return</span> <span class="n">_ReturnPlan</span><span class="p">(</span><span class="s2">&quot;output_format&quot;</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;tool&quot;</span><span class="p">:</span>
-            <span class="n">obj_schema</span><span class="p">,</span> <span class="n">unwrap_key</span> <span class="o">=</span> <span class="n">_as_object_schema</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">_ReturnPlan</span><span class="p">(</span><span class="s2">&quot;tool&quot;</span><span class="p">,</span> <span class="n">obj_schema</span><span class="p">,</span> <span class="n">unwrap_key</span><span class="p">,</span> <span class="n">RETURN_TOOL_FULLNAME</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Unknown return_mode </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">return_mode</span><span class="si">!r}</span><span class="s2">; &quot;</span>
-            <span class="s2">&quot;expected &#39;auto&#39;, &#39;output_format&#39;, or &#39;tool&#39;.&quot;</span>
-        <span class="p">)</span>
+        <span class="n">obj_schema</span><span class="p">,</span> <span class="n">unwrap_key</span> <span class="o">=</span> <span class="n">_as_object_schema</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_ReturnPlan</span><span class="p">(</span><span class="s2">&quot;tool&quot;</span><span class="p">,</span> <span class="n">obj_schema</span><span class="p">,</span> <span class="n">unwrap_key</span><span class="p">,</span> <span class="n">RETURN_TOOL_FULLNAME</span><span class="p">)</span>
 
 <div class="viewcode-block" id="RunnableAgent.build_options">
 <a class="viewcode-back" href="../../module_docs/coact/realize.html#coact.RunnableAgent.build_options">[docs]</a>
@@ -525,8 +613,11 @@
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;disallowed_tools&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">disallowed_tools</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">model</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">mcp_servers</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;mcp_servers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">mcp_servers</span>
+        <span class="c1"># Normalize mcp_servers to the SDK&#39;s dict shape on EVERY path (never hand</span>
+        <span class="c1"># the SDK a bare list); the return-tool fallback then merges into this dict.</span>
+        <span class="n">servers</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_coerce_mcp_servers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">mcp_servers</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">servers</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;mcp_servers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">servers</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">permission_mode</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;permission_mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">permission_mode</span>
         <span class="c1"># Wire the return contract (D6). The native output_format must be the</span>
@@ -544,13 +635,17 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add the forced ``return_result`` SDK MCP tool + instruction to ``kwargs``.&quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">claude_agent_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sdk_mcp_server</span><span class="p">,</span> <span class="n">tool</span>
 
-        <span class="n">desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s2">&quot;Return your final structured result.&quot;</span>
+        <span class="n">desc</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s2">&quot;Return your final structured result.&quot;</span>
+        <span class="p">)</span>
 
         <span class="nd">@tool</span><span class="p">(</span><span class="n">RETURN_TOOL_NAME</span><span class="p">,</span> <span class="n">desc</span><span class="p">,</span> <span class="n">obj_schema</span><span class="p">)</span>
         <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_return_result</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>  <span class="c1"># pragma: no cover - runs in the SDK loop</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Result recorded.&quot;</span><span class="p">}]}</span>
 
         <span class="n">server</span> <span class="o">=</span> <span class="n">create_sdk_mcp_server</span><span class="p">(</span><span class="n">RETURN_TOOL_SERVER</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">_return_result</span><span class="p">])</span>
+        <span class="c1"># build_options already normalized mcp_servers to a dict (or left it unset);</span>
+        <span class="c1"># merge ours in without clobbering the agent&#39;s own servers.</span>
         <span class="n">existing</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mcp_servers&quot;</span><span class="p">)</span>
         <span class="n">servers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">existing</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">existing</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
         <span class="n">servers</span><span class="p">[</span><span class="n">RETURN_TOOL_SERVER</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span>
@@ -560,6 +655,13 @@
         <span class="k">if</span> <span class="n">RETURN_TOOL_FULLNAME</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed</span><span class="p">:</span>
             <span class="n">allowed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RETURN_TOOL_FULLNAME</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;allowed_tools&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">allowed</span>
+        <span class="c1"># The forced contract takes precedence: never leave the return tool sitting</span>
+        <span class="c1"># in disallowed_tools (where it would be unreachable and break the contract).</span>
+        <span class="n">disallowed</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;disallowed_tools&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">disallowed</span> <span class="ow">and</span> <span class="n">RETURN_TOOL_FULLNAME</span> <span class="ow">in</span> <span class="n">disallowed</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;disallowed_tools&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">disallowed</span> <span class="k">if</span> <span class="n">t</span> <span class="o">!=</span> <span class="n">RETURN_TOOL_FULLNAME</span>
+            <span class="p">]</span>
 
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_with_return_instruction</span><span class="p">(</span>
             <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
@@ -575,6 +677,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the agent over ``input_data``; return ``(artifact, info)`` (aw protocol).&quot;&quot;&quot;</span>
         <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_options</span><span class="p">()</span>
         <span class="n">plan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolved_return</span><span class="p">()</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">mcp_warnings</span> <span class="o">=</span> <span class="n">_coerce_mcp_servers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">mcp_servers</span><span class="p">)</span>
         <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_from</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
         <span class="n">runner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="ow">or</span> <span class="n">_default_sdk_runner</span>
         <span class="n">raw</span> <span class="o">=</span> <span class="n">runner</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
@@ -588,6 +691,7 @@
             <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
             <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="s2">&quot;sdk&quot;</span><span class="p">,</span>
             <span class="s2">&quot;return_mode&quot;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span>
+            <span class="s2">&quot;warnings&quot;</span><span class="p">:</span> <span class="n">mcp_warnings</span><span class="p">,</span>
             <span class="s2">&quot;raw&quot;</span><span class="p">:</span> <span class="n">raw</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">artifact</span><span class="p">,</span> <span class="n">info</span></div>
@@ -600,13 +704,24 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_default_sdk_runner</span><span class="p">(</span><span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run a real Agent SDK ``query`` to completion, collecting messages.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run a real Agent SDK session to completion, collecting messages.</span>
+
+<span class="sd">    Uses :class:`ClaudeSDKClient` (streaming mode) rather than the one-shot</span>
+<span class="sd">    ``query(prompt=&lt;str&gt;)`` helper. This is required for the D6 ``tool`` fallback:</span>
+<span class="sd">    in-process SDK MCP servers (the forced ``return_result`` tool) are wired over</span>
+<span class="sd">    the bidirectional control protocol, which is initialized **only** in streaming</span>
+<span class="sd">    mode — a string prompt to ``query()`` runs one-shot and never calls</span>
+<span class="sd">    ``initialize()``, leaving the return tool unreachable. Streaming is harmless</span>
+<span class="sd">    for the ``output_format`` / ``none`` paths, so it is the single robust path.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">claude_agent_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">query</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">claude_agent_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClaudeSDKClient</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_collect</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">message</span> <span class="k">async</span> <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">query</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)]</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">ClaudeSDKClient</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">message</span> <span class="k">async</span> <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">receive_response</span><span class="p">()]</span>
 
     <span class="k">return</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">_collect</span><span class="p">())</span>
 
@@ -632,6 +747,11 @@
             <span class="n">captured</span> <span class="o">=</span> <span class="n">_extract_return_tool_input</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">unwrap_key</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">captured</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">captured</span>
+        <span class="c1"># the output_format result surfaces as ResultMessage.structured_output</span>
+        <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">:</span>
+            <span class="n">structured</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s2">&quot;structured_output&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">structured</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">structured</span>
         <span class="c1"># otherwise concatenate text blocks across assistant messages</span>
         <span class="n">texts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">:</span>
@@ -645,6 +765,11 @@
                 <span class="n">texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">texts</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
+        <span class="c1"># a ResultMessage carries the final text in `.result` when no blocks remain</span>
+        <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s2">&quot;result&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">result</span>
     <span class="k">return</span> <span class="n">raw</span>
 
 
