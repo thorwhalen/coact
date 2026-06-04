@@ -289,25 +289,81 @@ def _as_object_schema(schema: dict) -> tuple[dict, Optional[str]]:
     """Coerce a return schema to a valid object ``inputSchema`` for the return tool.
 
     The Agent SDK passes a dict ``input_schema`` through unchanged only when it is
-    an object schema (``type: object`` *and* ``properties``); any other dict is
-    misread as a ``{param: type}`` map. A non-object schema is therefore wrapped
-    under a ``result`` key, and that key is returned so extraction can unwrap it.
+    an object schema with **both** ``type: object`` and ``properties``; any other
+    dict is misread as a ``{param: type}`` map (and mangled). So:
+
+    - An object schema *with* ``properties`` → passed through, no wrapping.
+    - A free-form object schema (``type: object`` but no ``properties``) → given an
+      empty ``properties`` key so the SDK passes it through verbatim. Crucially it
+      is **not** wrapped: wrapping a free-form object under ``result`` would make a
+      model's own single-key ``{result: ...}`` output indistinguishable from the
+      wrapper (a silent-collapse hazard).
+    - Any non-object schema (array / scalar) → wrapped under a ``result`` key, with
+      that key returned so extraction can unwrap it.
 
     >>> _as_object_schema({'type': 'object', 'properties': {'a': {}}})[1] is None
     True
+    >>> _as_object_schema({'type': 'object'})  # free-form object: passed through, not wrapped
+    ({'type': 'object', 'properties': {}}, None)
     >>> _as_object_schema({'type': 'array', 'items': {'type': 'string'}})
     ({'type': 'object', 'properties': {'result': {'type': 'array', 'items': {'type': 'string'}}}, 'required': ['result']}, 'result')
     """
-    if (
-        isinstance(schema, dict)
-        and schema.get("type") == "object"
-        and "properties" in schema
-    ):
-        return schema, None
+    if isinstance(schema, dict) and schema.get("type") == "object":
+        if "properties" in schema:
+            return schema, None
+        return {**schema, "properties": {}}, None
     return (
         {"type": "object", "properties": {"result": schema}, "required": ["result"]},
         "result",
     )
+
+
+def _coerce_mcp_servers(servers: Any) -> tuple[dict, list[str]]:
+    """Coerce coact's ``mcp_servers`` to the SDK's ``dict[name -> config]`` shape.
+
+    ``AgentDefinition.mcp_servers`` is a list of *names or inline-dict configs* (the
+    portable, frontmatter-friendly form), but the Agent SDK wants a
+    ``dict[str, McpServerConfig]``. Returns ``(servers_dict, warnings)``:
+
+    - a dict is taken as-is (already keyed by name);
+    - an inline config dict is keyed by its ``name`` field, by its single key if it
+      is itself a ``{name: config}`` mapping, or positionally as a last resort;
+    - a bare **name string** cannot be turned into an SDK config here, so it is
+      reported in ``warnings`` (not silently dropped) — the ``host`` backend
+      resolves such names, the ``sdk`` backend needs an inline config.
+
+    >>> _coerce_mcp_servers([])
+    ({}, [])
+    >>> _coerce_mcp_servers({'s': {'type': 'sdk'}})
+    ({'s': {'type': 'sdk'}}, [])
+    >>> d, w = _coerce_mcp_servers(['bare_name'])
+    >>> d, ('bare_name' in w[0])
+    ({}, True)
+    """
+    if not servers:
+        return {}, []
+    if isinstance(servers, dict):
+        return dict(servers), []
+    out: dict = {}
+    warnings: list[str] = []
+    for i, item in enumerate(servers):
+        if isinstance(item, dict):
+            name = item.get("name")
+            if isinstance(name, str):
+                out[name] = item
+            elif len(item) == 1 and isinstance(next(iter(item.values())), dict):
+                out.update(item)  # already a {name: config} mapping
+            else:
+                out[f"server_{i}"] = item
+        elif isinstance(item, str):
+            warnings.append(
+                f"mcp server {item!r} is a bare name with no inline config; the "
+                "sdk backend needs a config dict — declare it inline in the "
+                "coact: mcp block, or use backend='host'."
+            )
+        else:
+            warnings.append(f"unrecognized mcp_servers entry: {item!r}")
+    return out, warnings
 
 
 def _with_return_instruction(system_prompt: str, obj_schema: dict, description: str) -> str:
@@ -327,11 +383,22 @@ def _with_return_instruction(system_prompt: str, obj_schema: dict, description: 
 
 
 def _is_return_tool(name: str) -> bool:
-    """True if ``name`` denotes the forced return tool (full MCP name or bare)."""
-    return (
-        name == RETURN_TOOL_FULLNAME
-        or name.endswith(f"__{RETURN_TOOL_NAME}")
-        or name == RETURN_TOOL_NAME
+    """True if ``name`` denotes coact's forced return tool (server-scoped).
+
+    Matches the full MCP name, or any prefix variant scoped to coact's own server
+    (``…__coact_return__return_result``). Deliberately does **not** match a bare
+    ``return_result`` or a ``return_result`` on a *different* MCP server, so a
+    user's own same-named tool is never mistaken for the return contract.
+
+    >>> _is_return_tool('mcp__coact_return__return_result')
+    True
+    >>> _is_return_tool('mcp__other_server__return_result')
+    False
+    >>> _is_return_tool('Read')
+    False
+    """
+    return name == RETURN_TOOL_FULLNAME or name.endswith(
+        f"__{RETURN_TOOL_SERVER}__{RETURN_TOOL_NAME}"
     )
 
 
@@ -384,25 +451,44 @@ class RunnableAgent:
 
         Honors ``return_mode`` and, in ``'auto'``, the installed SDK's
         capabilities. ``.schema()`` resolves an inline schema or a ``schema_ref``
-        to canonical JSON Schema; an empty contract yields ``mode='none'``.
+        to canonical JSON Schema. A *truly empty* contract yields ``mode='none'``;
+        a *declared-but-unresolvable* one (a ``schema_ref`` that fails to import)
+        raises rather than silently dropping the contract.
         """
+        if self.return_mode not in ("auto", "output_format", "tool"):
+            raise ValueError(
+                f"Unknown return_mode {self.return_mode!r}; "
+                "expected 'auto', 'output_format', or 'tool'."
+            )
         from claude_agent_sdk import ClaudeAgentOptions
 
+        option_fields = {f.name for f in dataclasses.fields(ClaudeAgentOptions)}
         schema = self.agent_def.returns.schema()
         if not schema:
-            return _ReturnPlan("none", {})
+            # Distinguish "no contract" from "contract declared but unresolved".
+            if self.agent_def.returns.is_empty():
+                return _ReturnPlan("none", {})
+            raise ValueError(
+                f"Return contract references schema_ref "
+                f"{self.agent_def.returns.ref!r}, which could not be resolved to a "
+                "JSON Schema. Install the module that defines it, or supply an "
+                "inline json_schema."
+            )
         mode = self.return_mode
         if mode == "auto":
-            mode = _auto_return_mode(f.name for f in dataclasses.fields(ClaudeAgentOptions))
+            mode = _auto_return_mode(option_fields)
         if mode == "output_format":
+            # An explicit output_format request must not be silently swallowed by
+            # _filter_kwargs on an SDK that lacks the field (the 'auto' path would
+            # have chosen 'tool' instead).
+            if "output_format" not in option_fields:
+                raise ValueError(
+                    "return_mode='output_format' but the installed claude_agent_sdk "
+                    "has no output_format option; use return_mode='tool' (or 'auto')."
+                )
             return _ReturnPlan("output_format", schema)
-        if mode == "tool":
-            obj_schema, unwrap_key = _as_object_schema(schema)
-            return _ReturnPlan("tool", obj_schema, unwrap_key, RETURN_TOOL_FULLNAME)
-        raise ValueError(
-            f"Unknown return_mode {self.return_mode!r}; "
-            "expected 'auto', 'output_format', or 'tool'."
-        )
+        obj_schema, unwrap_key = _as_object_schema(schema)
+        return _ReturnPlan("tool", obj_schema, unwrap_key, RETURN_TOOL_FULLNAME)
 
     def build_options(self) -> Any:
         """Construct ``ClaudeAgentOptions`` from the agent definition (no API call)."""
@@ -422,8 +508,11 @@ class RunnableAgent:
             kwargs["disallowed_tools"] = list(self.agent_def.disallowed_tools)
         if self.agent_def.model:
             kwargs["model"] = self.agent_def.model
-        if self.agent_def.mcp_servers:
-            kwargs["mcp_servers"] = self.agent_def.mcp_servers
+        # Normalize mcp_servers to the SDK's dict shape on EVERY path (never hand
+        # the SDK a bare list); the return-tool fallback then merges into this dict.
+        servers, _ = _coerce_mcp_servers(self.agent_def.mcp_servers)
+        if servers:
+            kwargs["mcp_servers"] = servers
         if self.agent_def.permission_mode:
             kwargs["permission_mode"] = self.agent_def.permission_mode
         # Wire the return contract (D6). The native output_format must be the
@@ -447,6 +536,8 @@ class RunnableAgent:
             return {"content": [{"type": "text", "text": "Result recorded."}]}
 
         server = create_sdk_mcp_server(RETURN_TOOL_SERVER, tools=[_return_result])
+        # build_options already normalized mcp_servers to a dict (or left it unset);
+        # merge ours in without clobbering the agent's own servers.
         existing = kwargs.get("mcp_servers")
         servers = dict(existing) if isinstance(existing, dict) else {}
         servers[RETURN_TOOL_SERVER] = server
@@ -456,6 +547,13 @@ class RunnableAgent:
         if RETURN_TOOL_FULLNAME not in allowed:
             allowed.append(RETURN_TOOL_FULLNAME)
         kwargs["allowed_tools"] = allowed
+        # The forced contract takes precedence: never leave the return tool sitting
+        # in disallowed_tools (where it would be unreachable and break the contract).
+        disallowed = kwargs.get("disallowed_tools")
+        if disallowed and RETURN_TOOL_FULLNAME in disallowed:
+            kwargs["disallowed_tools"] = [
+                t for t in disallowed if t != RETURN_TOOL_FULLNAME
+            ]
 
         kwargs["system_prompt"] = _with_return_instruction(
             kwargs.get("system_prompt") or "",
@@ -469,6 +567,7 @@ class RunnableAgent:
         """Run the agent over ``input_data``; return ``(artifact, info)`` (aw protocol)."""
         options = self.build_options()
         plan = self._resolved_return()
+        _, mcp_warnings = _coerce_mcp_servers(self.agent_def.mcp_servers)
         prompt = self._prompt_from(input_data)
         runner = self.runner or _default_sdk_runner
         raw = runner(prompt, options)
@@ -482,6 +581,7 @@ class RunnableAgent:
             "model": self.agent_def.model,
             "backend": "sdk",
             "return_mode": plan.mode,
+            "warnings": mcp_warnings,
             "raw": raw,
         }
         return artifact, info
@@ -492,13 +592,24 @@ class RunnableAgent:
 
 
 def _default_sdk_runner(prompt: str, options: Any) -> list:
-    """Run a real Agent SDK ``query`` to completion, collecting messages."""
+    """Run a real Agent SDK session to completion, collecting messages.
+
+    Uses :class:`ClaudeSDKClient` (streaming mode) rather than the one-shot
+    ``query(prompt=<str>)`` helper. This is required for the D6 ``tool`` fallback:
+    in-process SDK MCP servers (the forced ``return_result`` tool) are wired over
+    the bidirectional control protocol, which is initialized **only** in streaming
+    mode — a string prompt to ``query()`` runs one-shot and never calls
+    ``initialize()``, leaving the return tool unreachable. Streaming is harmless
+    for the ``output_format`` / ``none`` paths, so it is the single robust path.
+    """
     import asyncio
 
-    from claude_agent_sdk import query
+    from claude_agent_sdk import ClaudeSDKClient
 
     async def _collect() -> list:
-        return [message async for message in query(prompt=prompt, options=options)]
+        async with ClaudeSDKClient(options=options) as client:
+            await client.query(prompt)
+            return [message async for message in client.receive_response()]
 
     return asyncio.run(_collect())
 
@@ -524,6 +635,11 @@ def _extract_artifact(
             captured = _extract_return_tool_input(raw, unwrap_key)
             if captured is not None:
                 return captured
+        # the output_format result surfaces as ResultMessage.structured_output
+        for message in raw:
+            structured = getattr(message, "structured_output", None)
+            if structured is not None:
+                return structured
         # otherwise concatenate text blocks across assistant messages
         texts: list[str] = []
         for message in raw:
@@ -537,6 +653,11 @@ def _extract_artifact(
                 texts.append(content)
         if texts:
             return "\n".join(texts)
+        # a ResultMessage carries the final text in `.result` when no blocks remain
+        for message in raw:
+            result = getattr(message, "result", None)
+            if isinstance(result, str) and result:
+                return result
     return raw
 
 
