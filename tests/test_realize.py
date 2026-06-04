@@ -38,7 +38,9 @@ def test_coerce_agent_definition_passthrough():
 
 
 def test_coerce_skill_completes_it():
-    s = Skill(meta=SkillMeta(name="auditor", description="Audit the bundle."), body="steps")
+    s = Skill(
+        meta=SkillMeta(name="auditor", description="Audit the bundle."), body="steps"
+    )
     out = _coerce_agents(s)
     assert len(out) == 1 and out[0].name == "auditor"
 
@@ -195,7 +197,10 @@ def test_as_object_schema_passes_object_through_and_wraps_others():
     assert _as_object_schema(obj) == (obj, None)
     wrapped, key = _as_object_schema({"type": "array", "items": {"type": "string"}})
     assert key == "result"
-    assert wrapped["properties"]["result"] == {"type": "array", "items": {"type": "string"}}
+    assert wrapped["properties"]["result"] == {
+        "type": "array",
+        "items": {"type": "string"},
+    }
     assert wrapped["required"] == ["result"]
 
 
@@ -237,7 +242,11 @@ def test_sdk_tool_fallback_extracts_structured_result():
 @pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
 def test_sdk_tool_fallback_unwraps_non_object_schema():
     # a top-level array return type is wrapped under `result` and unwrapped back
-    ad = _agent(returns=ReturnContract(json_schema={"type": "array", "items": {"type": "string"}}))
+    ad = _agent(
+        returns=ReturnContract(
+            json_schema={"type": "array", "items": {"type": "string"}}
+        )
+    )
 
     def fake_runner(prompt, options):
         from coact.realize import RETURN_TOOL_FULLNAME
@@ -253,7 +262,9 @@ def test_sdk_tool_fallback_unwraps_non_object_schema():
 def test_sdk_tool_fallback_ignores_other_tool_calls():
     from coact.realize import RETURN_TOOL_FULLNAME
 
-    ad = _agent(returns=ReturnContract(json_schema={"type": "object", "properties": {}}))
+    ad = _agent(
+        returns=ReturnContract(json_schema={"type": "object", "properties": {}})
+    )
 
     def fake_runner(prompt, options):
         return [
@@ -277,6 +288,229 @@ def test_sdk_return_mode_output_format_does_not_wrap():
 
 @pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
 def test_sdk_unknown_return_mode_raises():
-    ad = _agent(returns=ReturnContract(json_schema={"type": "object", "properties": {}}))
+    ad = _agent(
+        returns=ReturnContract(json_schema={"type": "object", "properties": {}})
+    )
     with pytest.raises(ValueError, match="Unknown return_mode"):
         realize(ad, backend="sdk", return_mode="bogus").build_options()
+
+
+# --- review fixes: helpers, naming, edge cases ------------------------------
+
+
+def test_as_object_schema_does_not_wrap_free_form_object():
+    # {'type':'object'} with no properties is passed through (with an empty
+    # properties key), NOT wrapped — so a model's {'result': ...} can't collapse.
+    from coact.realize import _as_object_schema
+
+    coerced, key = _as_object_schema({"type": "object"})
+    assert key is None
+    assert coerced == {"type": "object", "properties": {}}
+
+
+def test_is_return_tool_is_server_scoped():
+    from coact.realize import _is_return_tool
+
+    assert _is_return_tool("mcp__coact_return__return_result")
+    assert not _is_return_tool("mcp__other_server__return_result")
+    assert not _is_return_tool("return_result")  # bare name on no server
+    assert not _is_return_tool("Read")
+
+
+def test_coerce_mcp_servers_forms():
+    from coact.realize import _coerce_mcp_servers
+
+    assert _coerce_mcp_servers([]) == ({}, [])
+    assert _coerce_mcp_servers({"s": {"type": "sdk"}}) == ({"s": {"type": "sdk"}}, [])
+    # inline config dict keyed by its name field
+    d, w = _coerce_mcp_servers([{"name": "weather", "type": "stdio"}])
+    assert d == {"weather": {"name": "weather", "type": "stdio"}} and w == []
+    # bare name -> reported, not silently dropped
+    d, w = _coerce_mcp_servers(["bare"])
+    assert d == {} and any("bare" in m for m in w)
+
+
+def test_extract_return_tool_input_last_wins_direct():
+    from coact.realize import RETURN_TOOL_FULLNAME, _extract_return_tool_input
+
+    msgs = [
+        _msg(_tool_block(RETURN_TOOL_FULLNAME, {"v": 1})),
+        _msg(_tool_block(RETURN_TOOL_FULLNAME, {"v": 2})),
+    ]
+    assert _extract_return_tool_input(msgs, None) == {"v": 2}
+
+
+def test_extract_does_not_unwrap_when_extra_keys_present():
+    from coact.realize import _extract_return_tool_input
+
+    block = _tool_block(
+        "mcp__coact_return__return_result", {"result": ["a"], "extra": 1}
+    )
+    # the strict guard only unwraps a dict that is EXACTLY {result: ...}
+    assert _extract_return_tool_input([_msg(block)], "result") == {
+        "result": ["a"],
+        "extra": 1,
+    }
+
+
+# --- review fixes: behavior through the real RunnableAgent ------------------
+
+
+def _sdk_without_output_format(monkeypatch):
+    """Make the installed ClaudeAgentOptions appear to lack the output_format field."""
+    import dataclasses as _dc
+    import importlib
+
+    realize_mod = importlib.import_module("coact.realize")
+    from claude_agent_sdk import ClaudeAgentOptions
+
+    real_fields = _dc.fields
+
+    def fake_fields(cls):
+        flds = real_fields(cls)
+        if getattr(cls, "__name__", "") == "ClaudeAgentOptions":
+            return tuple(f for f in flds if f.name != "output_format")
+        return flds
+
+    monkeypatch.setattr(realize_mod.dataclasses, "fields", fake_fields)
+    return ClaudeAgentOptions
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_auto_falls_back_to_tool_when_sdk_lacks_output_format(monkeypatch):
+    from coact.realize import RETURN_TOOL_FULLNAME, RETURN_TOOL_SERVER
+
+    _sdk_without_output_format(monkeypatch)
+    schema = {"type": "object", "properties": {"score": {"type": "number"}}}
+    runnable = realize(
+        _agent(returns=ReturnContract(json_schema=schema)), backend="sdk"
+    )  # return_mode defaults to 'auto'
+    assert runnable._resolved_return().mode == "tool"
+    opts = runnable.build_options()
+    assert getattr(opts, "output_format", None) is None
+    assert RETURN_TOOL_SERVER in opts.mcp_servers
+    assert RETURN_TOOL_FULLNAME in opts.allowed_tools
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_explicit_output_format_raises_when_sdk_lacks_field(monkeypatch):
+    _sdk_without_output_format(monkeypatch)
+    ad = _agent(
+        returns=ReturnContract(json_schema={"type": "object", "properties": {}})
+    )
+    with pytest.raises(ValueError, match="no output_format option"):
+        realize(ad, backend="sdk", return_mode="output_format").build_options()
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_auto_wrap_round_trip_on_old_sdk(monkeypatch):
+    # the real fallback: 'auto' on an SDK without output_format, top-level array
+    _sdk_without_output_format(monkeypatch)
+    from coact.realize import RETURN_TOOL_FULLNAME
+
+    ad = _agent(
+        returns=ReturnContract(
+            json_schema={"type": "array", "items": {"type": "string"}}
+        )
+    )
+
+    def fake_runner(prompt, options):
+        return [_msg(_tool_block(RETURN_TOOL_FULLNAME, {"result": ["x", "y"]}))]
+
+    artifact, info = realize(ad, backend="sdk", runner=fake_runner).execute("go", {})
+    assert artifact == ["x", "y"]
+    assert info["return_mode"] == "tool"
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_unresolvable_schema_ref_raises_not_silently_dropped():
+    ad = _agent(returns=ReturnContract(ref="definitely.not:Real"))
+    with pytest.raises(ValueError, match="could not be resolved"):
+        realize(ad, backend="sdk", return_mode="tool").build_options()
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_tool_fallback_preserves_agents_own_mcp_servers():
+    from coact.realize import RETURN_TOOL_SERVER
+
+    ad = _agent(
+        mcp_servers=[{"name": "weather", "type": "stdio"}],
+        returns=ReturnContract(json_schema={"type": "object", "properties": {"a": {}}}),
+    )
+    opts = realize(ad, backend="sdk", return_mode="tool").build_options()
+    assert "weather" in opts.mcp_servers  # not clobbered by the return tool
+    assert RETURN_TOOL_SERVER in opts.mcp_servers
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_return_tool_removed_from_disallowed():
+    from coact.realize import RETURN_TOOL_FULLNAME
+
+    ad = _agent(
+        disallowed_tools=[RETURN_TOOL_FULLNAME],
+        returns=ReturnContract(json_schema={"type": "object", "properties": {"a": {}}}),
+    )
+    opts = realize(ad, backend="sdk", return_mode="tool").build_options()
+    assert RETURN_TOOL_FULLNAME in opts.allowed_tools
+    assert RETURN_TOOL_FULLNAME not in (getattr(opts, "disallowed_tools", []) or [])
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_execute_reports_return_mode_none_and_output_format():
+    # 'none': empty contract, prose result surfaces and return_mode == 'none'
+    artifact, info = realize(_agent(), backend="sdk", runner=lambda p, o: "x").execute(
+        "t", {}
+    )
+    assert artifact == "x" and info["return_mode"] == "none"
+    # 'output_format': info reports the mode (structured result via injected runner)
+    ad = _agent(
+        returns=ReturnContract(json_schema={"type": "object", "properties": {}})
+    )
+    _, info2 = realize(
+        ad, backend="sdk", return_mode="output_format", runner=lambda p, o: {"a": 1}
+    ).execute("t", {})
+    assert info2["return_mode"] == "output_format"
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_output_format_extracts_structured_output_from_result_message():
+    # output_format mode: the structured result rides on ResultMessage.structured_output
+    from types import SimpleNamespace
+
+    ad = _agent(
+        returns=ReturnContract(json_schema={"type": "object", "properties": {}})
+    )
+    payload = {"a": 1, "b": 2}
+
+    def fake_runner(prompt, options):
+        result_msg = SimpleNamespace(
+            structured_output=payload, result=None, content=None
+        )
+        return [_msg(_tool_block(None, None)), result_msg]
+
+    artifact, info = realize(
+        ad, backend="sdk", return_mode="output_format", runner=fake_runner
+    ).execute("t", {})
+    assert artifact == payload
+    assert info["return_mode"] == "output_format"
+
+
+@pytest.mark.skipif(not _HAS_SDK, reason="claude_agent_sdk not installed")
+def test_sdk_tool_mode_falls_back_to_text_when_tool_not_called():
+    # model ignores the forced tool and answers in prose -> surface the text
+    ad = _agent(
+        returns=ReturnContract(json_schema={"type": "object", "properties": {}})
+    )
+
+    def fake_runner(prompt, options):
+        from types import SimpleNamespace
+
+        text = SimpleNamespace(name=None, input=None, text="part1")
+        text2 = SimpleNamespace(name=None, input=None, text="part2")
+        return [_msg(text), _msg(text2)]
+
+    artifact, info = realize(
+        ad, backend="sdk", runner=fake_runner, return_mode="tool"
+    ).execute("t", {})
+    assert artifact == "part1\npart2"
+    assert info["return_mode"] == "tool"

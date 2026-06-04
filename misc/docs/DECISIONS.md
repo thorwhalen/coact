@@ -97,6 +97,29 @@ Schema) or inline `json_schema`. Realization mapping:
 JSON Schema chosen over Pydantic-in-core to avoid a hard pydantic dependency and
 to stay portable across the realization backends (§interop research).
 
+**Implementation notes (both `sdk` paths now wired).** `RunnableAgent.return_mode`
+= `auto | output_format | tool`. `auto` uses the native `output_format` when the
+installed `ClaudeAgentOptions` exposes the field, else the forced-tool fallback.
+Non-obvious gotchas that the build surfaced (recorded so they aren't re-discovered):
+
+- **The forced `return_result` tool requires SDK *streaming* mode.** In-process SDK
+  MCP servers are wired over the control protocol, which `query()` initializes
+  **only** when the prompt is *not* a plain string. So `_default_sdk_runner` uses
+  `ClaudeSDKClient` (always streaming) — a one-shot `query(prompt=<str>)` would
+  leave the return tool unreachable.
+- **`mcp_servers` is normalized to the SDK's `dict[name→config]` on every path.**
+  coact's model stores it as a list of names/inline-dicts; handing the SDK a bare
+  list is invalid and the fallback must merge (not clobber) the agent's own servers.
+  Bare names can't become SDK configs and are reported in `info["warnings"]`.
+- **A non-object return schema is wrapped under a `result` key** (the SDK passes a
+  dict `input_schema` through unchanged only when it has both `type` and
+  `properties`); a *free-form* object (`{type: object}` w/o `properties`) is given
+  an empty `properties` and passed through **unwrapped**, to avoid colliding with a
+  model's own `{result: …}` output. Extraction unwraps only an exact `{result}` dict.
+- A declared-but-unresolvable `schema_ref` **raises** at realize time rather than
+  silently dropping the contract; an explicit `output_format` on an SDK lacking the
+  field also raises (only `auto` silently degrades to `tool`).
+
 ## D7 — Validator registered into `skill.create.validators` (+ entry point)
 
 `coact` registers `coact_frontmatter` into `skill`'s validator registry at
