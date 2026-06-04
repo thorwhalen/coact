@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>coact.realize &mdash; coact 0.0.2 documentation</title>
+  <title>coact.realize &mdash; coact 0.0.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../../_static/documentation_options.js?v=47de8214"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -226,8 +226,10 @@
 <span class="sd">    via the local store / project. Verifies discovery and reports anything missing.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">agents</span> <span class="o">=</span> <span class="n">_coerce_agents</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span>
-    <span class="n">out_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span> <span class="k">if</span> <span class="n">dest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">agents_dir</span><span class="p">(</span>
-        <span class="n">scope</span><span class="o">=</span><span class="n">scope</span><span class="p">,</span> <span class="n">project_dir</span><span class="o">=</span><span class="n">project_dir</span>
+    <span class="n">out_dir</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">Path</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="n">agents_dir</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="n">scope</span><span class="p">,</span> <span class="n">project_dir</span><span class="o">=</span><span class="n">project_dir</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">skills_target</span> <span class="o">=</span> <span class="n">out_dir</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;skills&quot;</span>
@@ -341,6 +343,121 @@
     <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">accepted</span><span class="p">}</span>
 
 
+<span class="c1"># --- D6 return-contract realization -----------------------------------------</span>
+<span class="c1">#</span>
+<span class="c1"># The return contract reaches the SDK by one of two mechanisms (DECISIONS D6):</span>
+<span class="c1">#</span>
+<span class="c1"># - ``output_format``: the native structured-output option. Used when the</span>
+<span class="c1">#   installed ``ClaudeAgentOptions`` exposes the field (SDK ≥ 0.1.x).</span>
+<span class="c1"># - ``tool``: a forced ``return_result`` tool whose ``input_schema`` IS the</span>
+<span class="c1">#   return schema, plus a system-prompt instruction to call it. The fallback for</span>
+<span class="c1">#   older SDKs that lack ``output_format`` (and selectable explicitly via</span>
+<span class="c1">#   ``return_mode=&#39;tool&#39;`` for models / extended-thinking modes that cannot honor</span>
+<span class="c1">#   ``output_format`` at runtime). The structured result is then recovered from</span>
+<span class="c1">#   the tool-use block&#39;s ``input`` in the message stream — no extra plumbing.</span>
+
+<span class="c1">#: In-process SDK MCP server + tool names for the forced return path.</span>
+<span class="n">RETURN_TOOL_SERVER</span> <span class="o">=</span> <span class="s2">&quot;coact_return&quot;</span>
+<span class="n">RETURN_TOOL_NAME</span> <span class="o">=</span> <span class="s2">&quot;return_result&quot;</span>
+<span class="c1">#: How Claude references the tool (``mcp__&lt;server&gt;__&lt;tool&gt;``).</span>
+<span class="n">RETURN_TOOL_FULLNAME</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;mcp__</span><span class="si">{</span><span class="n">RETURN_TOOL_SERVER</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_ReturnPlan</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;How an agent&#39;s return contract is realized for the SDK (resolved once).&quot;&quot;&quot;</span>
+
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &quot;none&quot; | &quot;output_format&quot; | &quot;tool&quot;</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">unwrap_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">tool_fullname</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_auto_return_mode</span><span class="p">(</span><span class="n">option_field_names</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pick the return mode in ``auto``: native ``output_format`` if the SDK has it.</span>
+
+<span class="sd">    &gt;&gt;&gt; _auto_return_mode({&#39;system_prompt&#39;, &#39;output_format&#39;})</span>
+<span class="sd">    &#39;output_format&#39;</span>
+<span class="sd">    &gt;&gt;&gt; _auto_return_mode({&#39;system_prompt&#39;})  # older SDK without the field</span>
+<span class="sd">    &#39;tool&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;output_format&quot;</span> <span class="k">if</span> <span class="s2">&quot;output_format&quot;</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">option_field_names</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;tool&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_as_object_schema</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Coerce a return schema to a valid object ``inputSchema`` for the return tool.</span>
+
+<span class="sd">    The Agent SDK passes a dict ``input_schema`` through unchanged only when it is</span>
+<span class="sd">    an object schema (``type: object`` *and* ``properties``); any other dict is</span>
+<span class="sd">    misread as a ``{param: type}`` map. A non-object schema is therefore wrapped</span>
+<span class="sd">    under a ``result`` key, and that key is returned so extraction can unwrap it.</span>
+
+<span class="sd">    &gt;&gt;&gt; _as_object_schema({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {&#39;a&#39;: {}}})[1] is None</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; _as_object_schema({&#39;type&#39;: &#39;array&#39;, &#39;items&#39;: {&#39;type&#39;: &#39;string&#39;}})</span>
+<span class="sd">    ({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {&#39;result&#39;: {&#39;type&#39;: &#39;array&#39;, &#39;items&#39;: {&#39;type&#39;: &#39;string&#39;}}}, &#39;required&#39;: [&#39;result&#39;]}, &#39;result&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span>
+        <span class="ow">and</span> <span class="s2">&quot;properties&quot;</span> <span class="ow">in</span> <span class="n">schema</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="n">schema</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="n">schema</span><span class="p">},</span> <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]},</span>
+        <span class="s2">&quot;result&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_with_return_instruction</span><span class="p">(</span><span class="n">system_prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj_schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Append the &quot;you MUST call return_result&quot; instruction to a system prompt.&quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+    <span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="n">description</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">schema_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">obj_schema</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">instruction</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">## Return contract</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;When you have finished, you MUST call the `</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">` tool &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;exactly once with your final result</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">. Its arguments must conform &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;to this JSON Schema:</span><span class="se">\n\n</span><span class="s2">```json</span><span class="se">\n</span><span class="si">{</span><span class="n">schema_json</span><span class="si">}</span><span class="se">\n</span><span class="s2">```</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Do not return the result as prose — call `</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">` instead.&quot;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">system_prompt</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">instruction</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_return_tool</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;True if ``name`` denotes the forced return tool (full MCP name or bare).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">name</span> <span class="o">==</span> <span class="n">RETURN_TOOL_FULLNAME</span>
+        <span class="ow">or</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;__</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="ow">or</span> <span class="n">name</span> <span class="o">==</span> <span class="n">RETURN_TOOL_NAME</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_return_tool_input</span><span class="p">(</span><span class="n">messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">unwrap_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recover the forced ``return_result`` tool-use input from SDK messages, or None.</span>
+
+<span class="sd">    Scans assistant messages for a tool-use block calling the return tool and</span>
+<span class="sd">    returns its ``input`` (the last one wins). When the schema was wrapped (a</span>
+<span class="sd">    non-object return type), the single ``result`` key is unwrapped.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">block_input</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s2">&quot;input&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">block_input</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_is_return_tool</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="n">block_input</span>
+    <span class="k">if</span> <span class="n">found</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">unwrap_key</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">found</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">set</span><span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="n">unwrap_key</span><span class="p">}:</span>
+        <span class="k">return</span> <span class="n">found</span><span class="p">[</span><span class="n">unwrap_key</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">found</span>
+
+
 <div class="viewcode-block" id="RunnableAgent">
 <a class="viewcode-back" href="../../module_docs/coact/realize.html#coact.RunnableAgent">[docs]</a>
 <span class="nd">@dataclass</span>
@@ -357,6 +474,36 @@
     <span class="n">llm</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># reserved (SDK uses agent_def.model); kept for aw symmetry</span>
     <span class="n">runner</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">default_tools</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Read&quot;</span><span class="p">,</span> <span class="s2">&quot;Grep&quot;</span><span class="p">,</span> <span class="s2">&quot;Glob&quot;</span><span class="p">)</span>
+    <span class="c1">#: How the return contract is realized: ``&#39;auto&#39;`` (native output_format when</span>
+    <span class="c1">#: the SDK supports it, else the forced return tool), ``&#39;output_format&#39;``, or</span>
+    <span class="c1">#: ``&#39;tool&#39;`` (force the return_result tool — for older SDKs / extended</span>
+    <span class="c1">#: thinking that cannot honor output_format). See DECISIONS D6.</span>
+    <span class="n">return_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resolved_return</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_ReturnPlan</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resolve how this agent&#39;s return contract maps onto the SDK (no API call).</span>
+
+<span class="sd">        Honors ``return_mode`` and, in ``&#39;auto&#39;``, the installed SDK&#39;s</span>
+<span class="sd">        capabilities. ``.schema()`` resolves an inline schema or a ``schema_ref``</span>
+<span class="sd">        to canonical JSON Schema; an empty contract yields ``mode=&#39;none&#39;``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">claude_agent_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClaudeAgentOptions</span>
+
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">schema</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_ReturnPlan</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_mode</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="n">_auto_return_mode</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">ClaudeAgentOptions</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;output_format&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_ReturnPlan</span><span class="p">(</span><span class="s2">&quot;output_format&quot;</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;tool&quot;</span><span class="p">:</span>
+            <span class="n">obj_schema</span><span class="p">,</span> <span class="n">unwrap_key</span> <span class="o">=</span> <span class="n">_as_object_schema</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">_ReturnPlan</span><span class="p">(</span><span class="s2">&quot;tool&quot;</span><span class="p">,</span> <span class="n">obj_schema</span><span class="p">,</span> <span class="n">unwrap_key</span><span class="p">,</span> <span class="n">RETURN_TOOL_FULLNAME</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unknown return_mode </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">return_mode</span><span class="si">!r}</span><span class="s2">; &quot;</span>
+            <span class="s2">&quot;expected &#39;auto&#39;, &#39;output_format&#39;, or &#39;tool&#39;.&quot;</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="RunnableAgent.build_options">
 <a class="viewcode-back" href="../../module_docs/coact/realize.html#coact.RunnableAgent.build_options">[docs]</a>
@@ -371,8 +518,8 @@
             <span class="s2">&quot;system_prompt&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">prompt</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="n">tools</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">tools</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;allowed_tools&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tools</span><span class="p">)</span> <span class="k">if</span> <span class="n">tools</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">default_tools</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;allowed_tools&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">list</span><span class="p">(</span><span class="n">tools</span><span class="p">)</span> <span class="k">if</span> <span class="n">tools</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_tools</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">disallowed_tools</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;disallowed_tools&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">disallowed_tools</span><span class="p">)</span>
@@ -382,15 +529,43 @@
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;mcp_servers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">mcp_servers</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">permission_mode</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;permission_mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">permission_mode</span>
-        <span class="c1"># wire the return contract to the SDK&#39;s structured-output option (D6).</span>
-        <span class="c1"># The SDK only honors output_format when it is {&quot;type&quot;: &quot;json_schema&quot;,</span>
-        <span class="c1"># &quot;schema&quot;: &lt;schema&gt;}; a bare schema is silently ignored. `.schema()`</span>
-        <span class="c1"># also resolves a schema_ref into a canonical JSON Schema.</span>
-        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;output_format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;json_schema&quot;</span><span class="p">,</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">schema</span><span class="p">}</span>
+        <span class="c1"># Wire the return contract (D6). The native output_format must be the</span>
+        <span class="c1"># {&quot;type&quot;: &quot;json_schema&quot;, &quot;schema&quot;: &lt;schema&gt;} wrapper — a bare schema is</span>
+        <span class="c1"># silently ignored. The tool fallback injects a forced return_result tool.</span>
+        <span class="n">plan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolved_return</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">plan</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;output_format&quot;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;output_format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;json_schema&quot;</span><span class="p">,</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">schema</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="n">plan</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;tool&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_wire_return_tool</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">plan</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ClaudeAgentOptions</span><span class="p">(</span><span class="o">**</span><span class="n">_filter_kwargs</span><span class="p">(</span><span class="n">ClaudeAgentOptions</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">))</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_wire_return_tool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">obj_schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add the forced ``return_result`` SDK MCP tool + instruction to ``kwargs``.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">claude_agent_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sdk_mcp_server</span><span class="p">,</span> <span class="n">tool</span>
+
+        <span class="n">desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s2">&quot;Return your final structured result.&quot;</span>
+
+        <span class="nd">@tool</span><span class="p">(</span><span class="n">RETURN_TOOL_NAME</span><span class="p">,</span> <span class="n">desc</span><span class="p">,</span> <span class="n">obj_schema</span><span class="p">)</span>
+        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_return_result</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>  <span class="c1"># pragma: no cover - runs in the SDK loop</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Result recorded.&quot;</span><span class="p">}]}</span>
+
+        <span class="n">server</span> <span class="o">=</span> <span class="n">create_sdk_mcp_server</span><span class="p">(</span><span class="n">RETURN_TOOL_SERVER</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">_return_result</span><span class="p">])</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mcp_servers&quot;</span><span class="p">)</span>
+        <span class="n">servers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">existing</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">existing</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="n">servers</span><span class="p">[</span><span class="n">RETURN_TOOL_SERVER</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;mcp_servers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">servers</span>
+
+        <span class="n">allowed</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;allowed_tools&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="k">if</span> <span class="n">RETURN_TOOL_FULLNAME</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed</span><span class="p">:</span>
+            <span class="n">allowed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RETURN_TOOL_FULLNAME</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;allowed_tools&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">allowed</span>
+
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_with_return_instruction</span><span class="p">(</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">obj_schema</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="RunnableAgent.execute">
 <a class="viewcode-back" href="../../module_docs/coact/realize.html#coact.RunnableAgent.execute">[docs]</a>
@@ -399,14 +574,20 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the agent over ``input_data``; return ``(artifact, info)`` (aw protocol).&quot;&quot;&quot;</span>
         <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_options</span><span class="p">()</span>
+        <span class="n">plan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolved_return</span><span class="p">()</span>
         <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_from</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
         <span class="n">runner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="ow">or</span> <span class="n">_default_sdk_runner</span>
         <span class="n">raw</span> <span class="o">=</span> <span class="n">runner</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
-        <span class="n">artifact</span> <span class="o">=</span> <span class="n">_extract_artifact</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+        <span class="n">artifact</span> <span class="o">=</span> <span class="n">_extract_artifact</span><span class="p">(</span>
+            <span class="n">raw</span><span class="p">,</span>
+            <span class="n">return_tool</span><span class="o">=</span><span class="n">plan</span><span class="o">.</span><span class="n">tool_fullname</span> <span class="k">if</span> <span class="n">plan</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;tool&quot;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">unwrap_key</span><span class="o">=</span><span class="n">plan</span><span class="o">.</span><span class="n">unwrap_key</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;agent&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
             <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="s2">&quot;sdk&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;return_mode&quot;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span>
             <span class="s2">&quot;raw&quot;</span><span class="p">:</span> <span class="n">raw</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">artifact</span><span class="p">,</span> <span class="n">info</span></div>
@@ -430,16 +611,28 @@
     <span class="k">return</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">_collect</span><span class="p">())</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_extract_artifact</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Best-effort extraction of the agent&#39;s result from a runner&#39;s return value.&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_artifact</span><span class="p">(</span>
+    <span class="n">raw</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">return_tool</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">unwrap_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Best-effort extraction of the agent&#39;s result from a runner&#39;s return value.</span>
+
+<span class="sd">    In the D6 ``tool`` fallback (``return_tool`` set), the forced</span>
+<span class="sd">    ``return_result`` tool-use input is the canonical structured result and takes</span>
+<span class="sd">    precedence over any prose text blocks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">raw</span>
     <span class="c1"># a structured-output carrying object</span>
     <span class="n">structured</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="s2">&quot;structured_output&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">structured</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">structured</span>
-    <span class="c1"># a list of SDK messages -&gt; concatenate text blocks of the last assistant message</span>
+    <span class="c1"># a list of SDK messages</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">raw</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">return_tool</span><span class="p">:</span>
+            <span class="n">captured</span> <span class="o">=</span> <span class="n">_extract_return_tool_input</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">unwrap_key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">captured</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">captured</span>
+        <span class="c1"># otherwise concatenate text blocks across assistant messages</span>
         <span class="n">texts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">:</span>
             <span class="n">content</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -462,16 +655,26 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">llm</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">runner</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">return_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
     <span class="n">policy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletionPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RunnableAgent</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Realize a single agent as a runnable :class:`RunnableAgent` (aw-compatible).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Realize a single agent as a runnable :class:`RunnableAgent` (aw-compatible).</span>
+
+<span class="sd">    ``return_mode`` selects how the return contract reaches the SDK (DECISIONS</span>
+<span class="sd">    D6): ``&#39;auto&#39;`` uses native ``output_format`` when the installed SDK supports</span>
+<span class="sd">    it and otherwise falls back to a forced ``return_result`` tool; pass</span>
+<span class="sd">    ``&#39;tool&#39;`` to force that fallback (e.g. for models / extended-thinking modes</span>
+<span class="sd">    that cannot honor ``output_format``).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">agents</span> <span class="o">=</span> <span class="n">_coerce_agents</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;backend=&#39;sdk&#39; realizes exactly one agent; got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
             <span class="s2">&quot;Realize each separately (topology is out of scope — DECISIONS D8).&quot;</span>
         <span class="p">)</span>
-    <span class="k">return</span> <span class="n">RunnableAgent</span><span class="p">(</span><span class="n">agent_def</span><span class="o">=</span><span class="n">agents</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="n">runner</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">RunnableAgent</span><span class="p">(</span>
+        <span class="n">agent_def</span><span class="o">=</span><span class="n">agents</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="n">runner</span><span class="p">,</span> <span class="n">return_mode</span><span class="o">=</span><span class="n">return_mode</span>
+    <span class="p">)</span></div>
 
 
 
