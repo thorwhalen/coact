@@ -24,7 +24,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="coact.stores" href="stores.html" />
+    <link rel="next" title="coact.realize_litellm" href="realize_litellm.html" />
     <link rel="prev" title="coact.policy" href="policy.html" /> 
 </head>
 
@@ -75,6 +75,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#coact.realize.realize_sdk"><code class="docutils literal notranslate"><span class="pre">realize_sdk()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="realize_litellm.html">coact.realize_litellm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stores.html">coact.stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="synthesis.html">coact.synthesis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="util.html">coact.util</a></li>
@@ -179,7 +180,7 @@ thinking that cannot honor output_format). See DECISIONS D6.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="coact.realize.backends">
-<span class="sig-prename descclassname"><span class="pre">coact.realize.</span></span><span class="sig-name descname"><span class="pre">backends</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Registry</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Registry('realization_backends',</span> <span class="pre">keys=['host',</span> <span class="pre">'sdk',</span> <span class="pre">'mcp'])</span></span><a class="headerlink" href="#coact.realize.backends" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">coact.realize.</span></span><span class="sig-name descname"><span class="pre">backends</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Registry</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Registry('realization_backends',</span> <span class="pre">keys=['host',</span> <span class="pre">'sdk',</span> <span class="pre">'mcp',</span> <span class="pre">'litellm'])</span></span><a class="headerlink" href="#coact.realize.backends" title="Link to this definition"></a></dt>
 <dd><p>Registry of realization backends (<code class="docutils literal notranslate"><span class="pre">realize(target,</span> <span class="pre">backend=&lt;name&gt;)</span></code>).</p>
 </dd></dl>
 
@@ -237,7 +238,7 @@ that cannot honor <code class="docutils literal notranslate"><span class="pre">o
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="policy.html" class="btn btn-neutral float-left" title="coact.policy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="stores.html" class="btn btn-neutral float-right" title="coact.stores" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="realize_litellm.html" class="btn btn-neutral float-right" title="coact.realize_litellm" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
