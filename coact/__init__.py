@@ -56,6 +56,7 @@ from coact.realize import (
     realize_sdk,
 )
 from coact.realize import backends as realization_backends
+from coact.realize_litellm import RunnableLLMAgent, realize_litellm  # registers 'litellm'
 from coact.stores import AgentStore, agents_dir
 from coact.synthesis import synthesize_persona, synthesize_return_contract
 
@@ -80,8 +81,10 @@ __all__ = [
     "realize_host",
     "realize_sdk",
     "realize_mcp",
+    "realize_litellm",
     "RealizedHost",
     "RunnableAgent",
+    "RunnableLLMAgent",
     "realization_backends",
     # Synthesis & LLM facade
     "synthesize_persona",
