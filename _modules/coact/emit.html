@@ -47,6 +47,8 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/analysis.html">coact.analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/base.html">coact.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/complete.html">coact.complete</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/emit.html">coact.emit</a></li>
@@ -294,6 +296,51 @@
 
 
 <span class="n">emitters</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;sdk-agent-dict&quot;</span><span class="p">,</span> <span class="n">to_sdk_agent_dict</span><span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Optional aw-bridged emitters (CrewAI / OpenAI) — reuse aw&#39;s renderers</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="to_aw_agent_spec">
+<a class="viewcode-back" href="../../module_docs/coact/emit.html#coact.to_aw_agent_spec">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_aw_agent_spec</span><span class="p">(</span><span class="n">ad</span><span class="p">:</span> <span class="n">AgentDefinition</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adapt an :class:`AgentDefinition` to an ``aw.translators.AgentSpec``.</span>
+
+<span class="sd">    Lets coact reuse ``aw``&#39;s CrewAI / OpenAI / SKILL.md renderers (the</span>
+<span class="sd">    ``*_from_spec`` cores) instead of reimplementing them — the ecosystem</span>
+<span class="sd">    coordination point. Requires ``aw``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_requirements</span><span class="p">({</span><span class="s2">&quot;aw&quot;</span><span class="p">:</span> <span class="s2">&quot;aw&quot;</span><span class="p">},</span> <span class="n">feature</span><span class="o">=</span><span class="s2">&quot;aw-bridged emitters&quot;</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">aw.translators</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentSpec</span><span class="p">,</span> <span class="n">ToolSpec</span>
+
+    <span class="k">return</span> <span class="n">AgentSpec</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+        <span class="n">instructions</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">prompt</span> <span class="ow">or</span> <span class="n">ad</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+        <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">ToolSpec</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">tools</span> <span class="ow">or</span> <span class="p">[])],</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">model</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">source_class</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_register_aw_emitters</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register ``crewai`` / ``openai-tools`` emitters when ``aw`` is importable.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">aw.translators</span><span class="w"> </span><span class="kn">import</span> <span class="n">crewai_yaml_from_spec</span><span class="p">,</span> <span class="n">openai_tools_from_spec</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">emitters</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+        <span class="s2">&quot;crewai&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">ad</span><span class="p">:</span> <span class="n">crewai_yaml_from_spec</span><span class="p">(</span><span class="n">to_aw_agent_spec</span><span class="p">(</span><span class="n">ad</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">emitters</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+        <span class="s2">&quot;openai-tools&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">ad</span><span class="p">:</span> <span class="n">openai_tools_from_spec</span><span class="p">(</span><span class="n">to_aw_agent_spec</span><span class="p">(</span><span class="n">ad</span><span class="p">))</span>
+    <span class="p">)</span>
+
+
+<span class="n">_register_aw_emitters</span><span class="p">()</span>
 
 
 <span class="c1"># ---------------------------------------------------------------------------</span>

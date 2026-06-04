@@ -24,7 +24,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="coact.base" href="coact/base.html" />
+    <link rel="next" title="coact.__main__" href="coact/__main__.html" />
     <link rel="prev" title="Welcome to coact’s documentation!" href="../index.html" /> 
 </head>
 
@@ -87,9 +87,13 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.agents_dir"><code class="docutils literal notranslate"><span class="pre">agents_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.back"><code class="docutils literal notranslate"><span class="pre">back()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.complete"><code class="docutils literal notranslate"><span class="pre">complete()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.diff"><code class="docutils literal notranslate"><span class="pre">diff()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.emit_agent"><code class="docutils literal notranslate"><span class="pre">emit_agent()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.estimate"><code class="docutils literal notranslate"><span class="pre">estimate()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.from_claude_agent_md"><code class="docutils literal notranslate"><span class="pre">from_claude_agent_md()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.inventory"><code class="docutils literal notranslate"><span class="pre">inventory()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.parse_coact_meta"><code class="docutils literal notranslate"><span class="pre">parse_coact_meta()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.plan_completion"><code class="docutils literal notranslate"><span class="pre">plan_completion()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.realize"><code class="docutils literal notranslate"><span class="pre">realize()</span></code></a></li>
@@ -101,10 +105,13 @@
 <li class="toctree-l2"><a class="reference internal" href="#coact.structured"><code class="docutils literal notranslate"><span class="pre">structured()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.synthesize_persona"><code class="docutils literal notranslate"><span class="pre">synthesize_persona()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.synthesize_return_contract"><code class="docutils literal notranslate"><span class="pre">synthesize_return_contract()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.to_aw_agent_spec"><code class="docutils literal notranslate"><span class="pre">to_aw_agent_spec()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.to_claude_agent_md"><code class="docutils literal notranslate"><span class="pre">to_claude_agent_md()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.validate_coact_block"><code class="docutils literal notranslate"><span class="pre">validate_coact_block()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="coact/__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coact/analysis.html">coact.analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coact/base.html">coact.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coact/complete.html">coact.complete</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coact/emit.html">coact.emit</a></li>
@@ -412,6 +419,25 @@ constructed and unit-tested without a live API call (dependency injection).</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="coact.back">
+<span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">back</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Skill</span></span></span><a class="reference internal" href="../_modules/coact/analysis.html#back"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.back" title="Link to this definition"></a></dt>
+<dd><p>Best-effort, <strong>lossy</strong> agent→skill extraction (harvest an agent into a skill).</p>
+<p>Strips the persona/return-contract envelope down to a reusable skill stub
+(name + description + a pointer to the skills it referenced). The actual
+procedure usually lives in those referenced skills, so this cannot recover
+it — the result is a starting point the user fleshes out, not a faithful
+inverse of COMPLETE.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">coact</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sk</span> <span class="o">=</span> <span class="n">back</span><span class="p">(</span><span class="n">AgentDefinition</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Analyze.&#39;</span><span class="p">,</span> <span class="n">skills</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="s1">&#39;shared&#39;</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sk</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span>
+<span class="go">&#39;ux&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;lossy&#39;</span> <span class="ow">in</span> <span class="n">sk</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="coact.complete">
 <span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">complete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Skill</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">policy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="coact/policy.html#coact.policy.CompletionPolicy" title="coact.policy.CompletionPolicy"><span class="pre">CompletionPolicy</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">llm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="coact/base.html#coact.base.AgentDefinition" title="coact.base.AgentDefinition"><span class="pre">AgentDefinition</span></a></span></span><a class="reference internal" href="../_modules/coact/complete.html#complete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.complete" title="Link to this definition"></a></dt>
 <dd><p>Complete a skill into an <a class="reference internal" href="#coact.AgentDefinition" title="coact.AgentDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">AgentDefinition</span></code></a> (the plan’s agent).</p>
@@ -420,6 +446,22 @@ constructed and unit-tested without a live API call (dependency injection).</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ad</span> <span class="o">=</span> <span class="n">complete</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ad</span><span class="o">.</span><span class="n">skills</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Return contract&#39;</span> <span class="ow">in</span> <span class="n">ad</span><span class="o">.</span><span class="n">prompt</span><span class="p">)</span>
 <span class="go">(&#39;ux&#39;, [&#39;ux&#39;], True)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.diff">
+<span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skill</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="coact/analysis.html#coact.analysis.AgentDiff" title="coact.analysis.AgentDiff"><span class="pre">AgentDiff</span></a></span></span><a class="reference internal" href="../_modules/coact/analysis.html#diff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.diff" title="Link to this definition"></a></dt>
+<dd><p>Show what extras <code class="docutils literal notranslate"><span class="pre">agent</span></code> adds over its source <code class="docutils literal notranslate"><span class="pre">skill</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">skill</span></code> is any skill source; <code class="docutils literal notranslate"><span class="pre">agent</span></code> is an <a class="reference internal" href="#coact.AgentDefinition" title="coact.AgentDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">AgentDefinition</span></code></a>, an
+agent <code class="docutils literal notranslate"><span class="pre">*.md</span></code> path, or a skill source (which is completed first).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">skill.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Skill</span><span class="p">,</span> <span class="n">SkillMeta</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Skill</span><span class="p">(</span><span class="n">meta</span><span class="o">=</span><span class="n">SkillMeta</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Analyze bundles.&#39;</span><span class="p">),</span> <span class="n">body</span><span class="o">=</span><span class="s1">&#39;steps&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">coact</span><span class="w"> </span><span class="kn">import</span> <span class="n">complete</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">complete</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">any</span><span class="p">(</span><span class="n">f</span> <span class="o">==</span> <span class="s1">&#39;prompt&#39;</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;extra&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">rows</span><span class="p">)</span>
+<span class="go">True</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -439,6 +481,20 @@ returns the emitter’s value (str or dict).</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="coact.estimate">
+<span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="coact/analysis.html#coact.analysis.Estimate" title="coact.analysis.Estimate"><span class="pre">Estimate</span></a></span></span><a class="reference internal" href="../_modules/coact/analysis.html#estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.estimate" title="Link to this definition"></a></dt>
+<dd><p>Surface the fan-out cost tradeoff for an agent set (DECISIONS D9).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">coact</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">AgentDefinition</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">skills</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;shared&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">AgentDefinition</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">skills</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;shared&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">est</span> <span class="o">=</span> <span class="n">estimate</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">est</span><span class="o">.</span><span class="n">interdependent</span><span class="p">,</span> <span class="n">est</span><span class="o">.</span><span class="n">shared_skills</span>
+<span class="go">(True, [&#39;shared&#39;])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="coact.from_claude_agent_md">
 <span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">from_claude_agent_md</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="coact/base.html#coact.base.AgentDefinition" title="coact.base.AgentDefinition"><span class="pre">AgentDefinition</span></a></span></span><a class="reference internal" href="../_modules/coact/emit.html#from_claude_agent_md"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.from_claude_agent_md" title="Link to this definition"></a></dt>
 <dd><p>Parse <code class="docutils literal notranslate"><span class="pre">.claude/agents/*.md</span></code> content back into an <a class="reference internal" href="#coact.AgentDefinition" title="coact.AgentDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">AgentDefinition</span></code></a>.</p>
@@ -451,6 +507,18 @@ returns the emitter’s value (str or dict).</p>
 <span class="go">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">back</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">json_schema</span>
 <span class="go">{&#39;type&#39;: &#39;object&#39;}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.inventory">
+<span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">inventory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="coact/analysis.html#coact.analysis.Inventory" title="coact.analysis.Inventory"><span class="pre">Inventory</span></a></span></span><a class="reference internal" href="../_modules/coact/analysis.html#inventory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.inventory" title="Link to this definition"></a></dt>
+<dd><p>Enumerate skills, derived agents, and MCP-exposed tools in a project.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inv</span> <span class="o">=</span> <span class="n">inventory</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inv</span><span class="o">.</span><span class="n">skills</span><span class="p">,</span> <span class="n">inv</span><span class="o">.</span><span class="n">agents</span>
+<span class="go">([], [])</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -602,6 +670,15 @@ optional — absent one, the template path is a sound default (DECISIONS D10).</
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="coact.to_aw_agent_spec">
+<span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">to_aw_agent_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="coact/base.html#coact.base.AgentDefinition" title="coact.base.AgentDefinition"><span class="pre">AgentDefinition</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/coact/emit.html#to_aw_agent_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.to_aw_agent_spec" title="Link to this definition"></a></dt>
+<dd><p>Adapt an <a class="reference internal" href="#coact.AgentDefinition" title="coact.AgentDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">AgentDefinition</span></code></a> to an <code class="docutils literal notranslate"><span class="pre">aw.translators.AgentSpec</span></code>.</p>
+<p>Lets coact reuse <code class="docutils literal notranslate"><span class="pre">aw</span></code>’s CrewAI / OpenAI / SKILL.md renderers (the
+<code class="docutils literal notranslate"><span class="pre">*_from_spec</span></code> cores) instead of reimplementing them — the ecosystem
+coordination point. Requires <code class="docutils literal notranslate"><span class="pre">aw</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="coact.to_claude_agent_md">
 <span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">to_claude_agent_md</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="coact/base.html#coact.base.AgentDefinition" title="coact.base.AgentDefinition"><span class="pre">AgentDefinition</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/coact/emit.html#to_claude_agent_md"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.to_claude_agent_md" title="Link to this definition"></a></dt>
 <dd><p>Serialize an agent to <code class="docutils literal notranslate"><span class="pre">.claude/agents/&lt;name&gt;.md</span></code> content.</p>
@@ -637,7 +714,7 @@ spelling, <code class="docutils literal notranslate"><span class="pre">model</sp
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to coact’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="coact/base.html" class="btn btn-neutral float-right" title="coact.base" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="coact/__main__.html" class="btn btn-neutral float-right" title="coact.__main__" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -50,6 +50,8 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">coact.analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="base.html">coact.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="complete.html">coact.complete</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">coact.emit</a><ul>
@@ -57,6 +59,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#coact.emit.emit_agent"><code class="docutils literal notranslate"><span class="pre">emit_agent()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.emit.emitters"><code class="docutils literal notranslate"><span class="pre">emitters</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.emit.from_claude_agent_md"><code class="docutils literal notranslate"><span class="pre">from_claude_agent_md()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.emit.to_aw_agent_spec"><code class="docutils literal notranslate"><span class="pre">to_aw_agent_spec()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.emit.to_claude_agent_md"><code class="docutils literal notranslate"><span class="pre">to_claude_agent_md()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.emit.to_sdk_agent_dict"><code class="docutils literal notranslate"><span class="pre">to_sdk_agent_dict()</span></code></a></li>
 </ul>
@@ -166,6 +169,15 @@ returns the emitter’s value (str or dict).</p>
 <span class="go">{&#39;type&#39;: &#39;object&#39;}</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.emit.to_aw_agent_spec">
+<span class="sig-prename descclassname"><span class="pre">coact.emit.</span></span><span class="sig-name descname"><span class="pre">to_aw_agent_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#coact.base.AgentDefinition" title="coact.base.AgentDefinition"><span class="pre">AgentDefinition</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/coact/emit.html#to_aw_agent_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.emit.to_aw_agent_spec" title="Link to this definition"></a></dt>
+<dd><p>Adapt an <code class="xref py py-class docutils literal notranslate"><span class="pre">AgentDefinition</span></code> to an <code class="docutils literal notranslate"><span class="pre">aw.translators.AgentSpec</span></code>.</p>
+<p>Lets coact reuse <code class="docutils literal notranslate"><span class="pre">aw</span></code>’s CrewAI / OpenAI / SKILL.md renderers (the
+<code class="docutils literal notranslate"><span class="pre">*_from_spec</span></code> cores) instead of reimplementing them — the ecosystem
+coordination point. Requires <code class="docutils literal notranslate"><span class="pre">aw</span></code>.</p>
 </dd></dl>
 
 <dl class="py function">

@@ -1,0 +1,431 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coact.analysis &mdash; coact 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            coact
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/analysis.html">coact.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/base.html">coact.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/complete.html">coact.complete</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/emit.html">coact.emit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/llm.html">coact.llm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize.html">coact.realize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/stores.html">coact.stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/synthesis.html">coact.synthesis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/util.html">coact.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">coact</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">coact.analysis</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for coact.analysis</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Analysis utilities — small tools to *see and move between* the layers.</span>
+
+<span class="sd">COACT_SPEC §7. Thin tooling around the two transforms:</span>
+
+<span class="sd">- :func:`diff` — what extras an agent adds over its source skill (audit drift</span>
+<span class="sd">  between the SSOT skill and a derived agent).</span>
+<span class="sd">- :func:`estimate` — the §3.5 / DECISIONS-D9 cost gate: the implied fan-out token</span>
+<span class="sd">  multiplier of an agent set, flagging interdependent sets where multi-agent is a</span>
+<span class="sd">  poor fit.</span>
+<span class="sd">- :func:`inventory` — enumerate a project&#39;s reusable AI assets: skills, derived</span>
+<span class="sd">  agents, and MCP-exposed tools (reuses ``skill`` discovery; adds the agent + MCP</span>
+<span class="sd">  dimensions).</span>
+<span class="sd">- :func:`back` — best-effort, **lossy** agent→skill extraction (harvest an ad-hoc</span>
+<span class="sd">  agent back into reusable procedural knowledge).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">skill.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Skill</span><span class="p">,</span> <span class="n">SkillMeta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">skill.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_project_root</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.complete</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolve_skill</span><span class="p">,</span> <span class="n">complete</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.frontmatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_coact_meta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.realize</span><span class="w"> </span><span class="kn">import</span> <span class="n">_coerce_agents</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.stores</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentStore</span>
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># diff — the §3.2 extras-with-provenance table</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="c1"># Which AgentDefinition fields are skill-derived vs agent-only extras.</span>
+<span class="n">_SKILL_DERIVED</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;skills&quot;</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="AgentDiff">
+<a class="viewcode-back" href="../../module_docs/coact/analysis.html#coact.AgentDiff">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AgentDiff</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;What a derived agent adds over its source skill.&quot;&quot;&quot;</span>
+
+    <span class="n">skill_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">agent_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># field, class, value</span>
+
+<div class="viewcode-block" id="AgentDiff.render">
+<a class="viewcode-back" href="../../module_docs/coact/analysis.html#coact.AgentDiff.render">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Render the extras table for terminal display.&quot;&quot;&quot;</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;diff: skill </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">skill_name</span><span class="si">!r}</span><span class="s2"> → agent </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_name</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">fname</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">:</span>
+            <span class="n">shown</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">60</span> <span class="k">else</span> <span class="n">value</span><span class="p">[:</span><span class="mi">57</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">fname</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">width</span><span class="si">}}</span><span class="s2">  [</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">]  </span><span class="si">{</span><span class="n">shown</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="diff">
+<a class="viewcode-back" href="../../module_docs/coact/analysis.html#coact.diff">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">diff</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">agent</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AgentDiff</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Show what extras ``agent`` adds over its source ``skill``.</span>
+
+<span class="sd">    ``skill`` is any skill source; ``agent`` is an :class:`AgentDefinition`, an</span>
+<span class="sd">    agent ``*.md`` path, or a skill source (which is completed first).</span>
+
+<span class="sd">    &gt;&gt;&gt; from skill.base import Skill, SkillMeta</span>
+<span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name=&#39;ux&#39;, description=&#39;Analyze bundles.&#39;), body=&#39;steps&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; from coact import complete</span>
+<span class="sd">    &gt;&gt;&gt; d = diff(s, complete(s))</span>
+<span class="sd">    &gt;&gt;&gt; any(f == &#39;prompt&#39; and cls.startswith(&#39;extra&#39;) for f, cls, _ in d.rows)</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sk</span> <span class="o">=</span> <span class="n">_resolve_skill</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">Skill</span><span class="p">)</span> <span class="k">else</span> <span class="n">skill</span>
+    <span class="n">ad</span> <span class="o">=</span> <span class="n">agent</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">AgentDefinition</span><span class="p">)</span> <span class="k">else</span> <span class="n">_coerce_agents</span><span class="p">(</span><span class="n">agent</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;skills&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tools&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;model&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;memory&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;disallowed_tools&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;permission_mode&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;consumes&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;prompt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;returns&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[],</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">{}):</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">fname</span> <span class="o">==</span> <span class="s2">&quot;returns&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+                <span class="k">continue</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="n">value</span><span class="o">.</span><span class="n">ref</span> <span class="ow">or</span> <span class="s2">&quot;(inline schema)&quot;</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="s2">&quot;from skill&quot;</span> <span class="k">if</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">_SKILL_DERIVED</span> <span class="k">else</span> <span class="s2">&quot;extra (agent-only)&quot;</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">fname</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">_short</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">AgentDiff</span><span class="p">(</span><span class="n">skill_name</span><span class="o">=</span><span class="n">sk</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">agent_name</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">rows</span><span class="o">=</span><span class="n">rows</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># estimate — the cost gate</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="c1"># Anthropic&#39;s figures: one agent ≈ 4× a chat&#39;s tokens; a multi-agent system</span>
+<span class="c1"># ≈ 15× (an order of magnitude). The multiplier scales toward that ceiling.</span>
+<span class="n">_AGENT_FACTOR</span> <span class="o">=</span> <span class="mf">4.0</span>
+<span class="n">_FLEET_CEILING</span> <span class="o">=</span> <span class="mf">15.0</span>
+
+
+<div class="viewcode-block" id="Estimate">
+<a class="viewcode-back" href="../../module_docs/coact/analysis.html#coact.Estimate">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Estimate</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The implied cost tradeoff of realizing an agent set as a running fleet.&quot;&quot;&quot;</span>
+
+    <span class="n">n_agents</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">interdependent</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">shared_skills</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">token_multiplier_vs_chat</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">recommendation</span><span class="p">:</span> <span class="nb">str</span>
+
+<div class="viewcode-block" id="Estimate.render">
+<a class="viewcode-back" href="../../module_docs/coact/analysis.html#coact.Estimate.render">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Render the cost gate for terminal display.&quot;&quot;&quot;</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot;estimate: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_agents</span><span class="si">}</span><span class="s2"> agent(s)&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;  ~</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">token_multiplier_vs_chat</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">× the tokens of a single chat &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;(one agent ≈ </span><span class="si">{</span><span class="n">_AGENT_FACTOR</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">×, a fleet ≈ </span><span class="si">{</span><span class="n">_FLEET_CEILING</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">×)&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;  interdependent: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">interdependent</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot; (shared skills: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shared_skills</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_skills</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+            <span class="sa">f</span><span class="s2">&quot;  → </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">recommendation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="estimate">
+<a class="viewcode-back" href="../../module_docs/coact/analysis.html#coact.estimate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="n">agents</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Estimate</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Surface the fan-out cost tradeoff for an agent set (DECISIONS D9).</span>
+
+<span class="sd">    &gt;&gt;&gt; from coact import AgentDefinition</span>
+<span class="sd">    &gt;&gt;&gt; a = AgentDefinition(name=&#39;a&#39;, description=&#39;x&#39;, skills=[&#39;shared&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; b = AgentDefinition(name=&#39;b&#39;, description=&#39;y&#39;, skills=[&#39;shared&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; est = estimate([a, b])</span>
+<span class="sd">    &gt;&gt;&gt; est.interdependent, est.shared_skills</span>
+<span class="sd">    (True, [&#39;shared&#39;])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ads</span> <span class="o">=</span> <span class="n">_coerce_agents</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ads</span><span class="p">)</span>
+
+    <span class="c1"># interdependence heuristics: shared skills, or any declared input contract.</span>
+    <span class="n">skill_counts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">ad</span> <span class="ow">in</span> <span class="n">ads</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ad</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
+            <span class="n">skill_counts</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">skill_counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">shared</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">skill_counts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">has_consumes</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">consumes</span> <span class="k">for</span> <span class="n">ad</span> <span class="ow">in</span> <span class="n">ads</span><span class="p">)</span>
+    <span class="n">interdependent</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">shared</span><span class="p">)</span> <span class="ow">or</span> <span class="n">has_consumes</span>
+
+    <span class="n">multiplier</span> <span class="o">=</span> <span class="n">_AGENT_FACTOR</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">_FLEET_CEILING</span><span class="p">,</span> <span class="n">_AGENT_FACTOR</span> <span class="o">*</span> <span class="n">n</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">rec</span> <span class="o">=</span> <span class="s2">&quot;single agent — cheapest; realize with backend=&#39;host&#39;.&quot;</span>
+    <span class="k">elif</span> <span class="n">interdependent</span><span class="p">:</span>
+        <span class="n">rec</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;interdependent set — multi-agent is a POOR fit (shared context / &quot;</span>
+            <span class="s2">&quot;dependencies erase the isolation benefit). Prefer one host agent &quot;</span>
+            <span class="s2">&quot;running the skills sequentially (backend=&#39;host&#39;).&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rec</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;independent, breadth-first set — a running fleet may pay off if the &quot;</span>
+            <span class="s2">&quot;task value justifies the spend; otherwise prefer backend=&#39;host&#39;.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span>
+        <span class="n">n_agents</span><span class="o">=</span><span class="n">n</span><span class="p">,</span>
+        <span class="n">interdependent</span><span class="o">=</span><span class="n">interdependent</span><span class="p">,</span>
+        <span class="n">shared_skills</span><span class="o">=</span><span class="n">shared</span><span class="p">,</span>
+        <span class="n">token_multiplier_vs_chat</span><span class="o">=</span><span class="n">multiplier</span><span class="p">,</span>
+        <span class="n">recommendation</span><span class="o">=</span><span class="n">rec</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># inventory — a project&#39;s reusable AI assets</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Inventory">
+<a class="viewcode-back" href="../../module_docs/coact/analysis.html#coact.Inventory">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Inventory</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;One picture of a project&#39;s reusable AI assets.&quot;&quot;&quot;</span>
+
+    <span class="n">project</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">skills</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">agents</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">mcp_tools</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Inventory.render">
+<a class="viewcode-back" href="../../module_docs/coact/analysis.html#coact.Inventory.render">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Render the inventory for terminal display.&quot;&quot;&quot;</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;inventory: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  skills (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">skills</span><span class="p">)</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">skills</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;—&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  agents (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agents</span><span class="p">)</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agents</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;—&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;  mcp tools (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mcp_tools</span><span class="p">)</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mcp_tools</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;—&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="inventory">
+<a class="viewcode-back" href="../../module_docs/coact/analysis.html#coact.inventory">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">inventory</span><span class="p">(</span><span class="n">project</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Inventory</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumerate skills, derived agents, and MCP-exposed tools in a project.</span>
+
+<span class="sd">    &gt;&gt;&gt; import tempfile</span>
+<span class="sd">    &gt;&gt;&gt; inv = inventory(tempfile.mkdtemp())</span>
+<span class="sd">    &gt;&gt;&gt; inv.skills, inv.agents</span>
+<span class="sd">    ([], [])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project</span><span class="p">)</span> <span class="k">if</span> <span class="n">project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">find_project_root</span><span class="p">()</span> <span class="ow">or</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">())</span>
+    <span class="n">skills_dir</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;.claude&quot;</span> <span class="o">/</span> <span class="s2">&quot;skills&quot;</span>
+
+    <span class="n">skills</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">mcp_tools</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">skills_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">skills_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">child</span> <span class="o">/</span> <span class="s2">&quot;SKILL.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">continue</span>
+            <span class="n">skills</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">meta</span> <span class="o">=</span> <span class="n">parse_coact_meta</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">meta</span><span class="o">.</span><span class="n">mcp</span><span class="p">:</span>
+                <span class="n">module</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;module&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;functions&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]:</span>
+                    <span class="n">mcp_tools</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">agents_root</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;.claude&quot;</span> <span class="o">/</span> <span class="s2">&quot;agents&quot;</span>
+    <span class="n">agents</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">AgentStore</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">agents_root</span><span class="p">))</span> <span class="k">if</span> <span class="n">agents_root</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="p">[]</span>
+
+    <span class="k">return</span> <span class="n">Inventory</span><span class="p">(</span>
+        <span class="n">project</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">skills</span><span class="o">=</span><span class="n">skills</span><span class="p">,</span> <span class="n">agents</span><span class="o">=</span><span class="n">agents</span><span class="p">,</span> <span class="n">mcp_tools</span><span class="o">=</span><span class="n">mcp_tools</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># back — lossy agent → skill extraction</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="back">
+<a class="viewcode-back" href="../../module_docs/coact/analysis.html#coact.back">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">back</span><span class="p">(</span><span class="n">agent</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Skill</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Best-effort, **lossy** agent→skill extraction (harvest an agent into a skill).</span>
+
+<span class="sd">    Strips the persona/return-contract envelope down to a reusable skill stub</span>
+<span class="sd">    (name + description + a pointer to the skills it referenced). The actual</span>
+<span class="sd">    procedure usually lives in those referenced skills, so this cannot recover</span>
+<span class="sd">    it — the result is a starting point the user fleshes out, not a faithful</span>
+<span class="sd">    inverse of COMPLETE.</span>
+
+<span class="sd">    &gt;&gt;&gt; from coact import AgentDefinition</span>
+<span class="sd">    &gt;&gt;&gt; sk = back(AgentDefinition(name=&#39;ux&#39;, description=&#39;Analyze.&#39;, skills=[&#39;ux&#39;, &#39;shared&#39;]))</span>
+<span class="sd">    &gt;&gt;&gt; sk.meta.name</span>
+<span class="sd">    &#39;ux&#39;</span>
+<span class="sd">    &gt;&gt;&gt; &#39;lossy&#39; in sk.body.lower()</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ad</span> <span class="o">=</span> <span class="n">agent</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">AgentDefinition</span><span class="p">)</span> <span class="k">else</span> <span class="n">_coerce_agents</span><span class="p">(</span><span class="n">agent</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">referenced</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ad</span><span class="o">.</span><span class="n">skills</span> <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+    <span class="n">refs_note</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Referenced skills (procedure may live here): </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">referenced</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="k">if</span> <span class="n">referenced</span>
+        <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="p">)</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;# </span><span class="si">{</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">ad</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;&gt; Extracted from an agent definition (lossy: persona and return &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;contract were stripped; the procedure is not recovered).</span><span class="si">{</span><span class="n">refs_note</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;## Instructions</span><span class="se">\n\n</span><span class="s2">&lt;!-- Flesh out the procedural steps here. --&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">Skill</span><span class="p">(</span><span class="n">meta</span><span class="o">=</span><span class="n">SkillMeta</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">ad</span><span class="o">.</span><span class="n">description</span><span class="p">),</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># helpers</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_short</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

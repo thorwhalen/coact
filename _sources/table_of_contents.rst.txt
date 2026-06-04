@@ -3,6 +3,8 @@
    :caption: Contents:
 
    module_docs/coact
+   module_docs/coact/__main__
+   module_docs/coact/analysis
    module_docs/coact/base
    module_docs/coact/complete
    module_docs/coact/emit

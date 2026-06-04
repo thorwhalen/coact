@@ -1,0 +1,4 @@
+coact.__main__
+==============
+.. automodule:: coact.__main__
+   :members:
