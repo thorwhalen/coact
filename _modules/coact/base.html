@@ -1,0 +1,308 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coact.base &mdash; coact 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            coact
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/base.html">coact.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/emit.html">coact.emit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/stores.html">coact.stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/util.html">coact.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">coact</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">coact.base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for coact.base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Core data model for coact — the single in-memory representation of an agent.</span>
+
+<span class="sd">This module is the spine described in COACT_SPEC §3.1/§5.2: an</span>
+<span class="sd">:class:`AgentDefinition` is *one* object that can serialize to **both** the</span>
+<span class="sd">filesystem ``.claude/agents/*.md`` format and the Claude Agent SDK form (see</span>
+<span class="sd">:mod:`coact.emit`). It is a lossless **superset** of the host subagent schema,</span>
+<span class="sd">kept independent of the SDK type (DECISIONS D2) so coact&#39;s core carries no SDK</span>
+<span class="sd">or LLM import.</span>
+
+<span class="sd">Three dataclasses live here:</span>
+
+<span class="sd">- :class:`ReturnContract` — the agent&#39;s final-message schema (so a manager can</span>
+<span class="sd">  deterministically consume its output); the single most important &quot;extra&quot;.</span>
+<span class="sd">- :class:`AgentDefinition` — the SSOT object.</span>
+<span class="sd">- :class:`AgentPlan` / :class:`FieldProvenance` — the inspectable dry-run result</span>
+<span class="sd">  of COMPLETE, recording where every synthesized field came from.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="c1">#: Host model selector values (the Agent SDK ``model`` literal).</span>
+<span class="n">ModelName</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;sonnet&quot;</span><span class="p">,</span> <span class="s2">&quot;opus&quot;</span><span class="p">,</span> <span class="s2">&quot;haiku&quot;</span><span class="p">,</span> <span class="s2">&quot;inherit&quot;</span><span class="p">]</span>
+<span class="c1">#: Subagent memory scope.</span>
+<span class="n">MemoryScope</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;project&quot;</span><span class="p">,</span> <span class="s2">&quot;local&quot;</span><span class="p">]</span>
+
+<span class="c1">#: Provenance source tags — where a synthesized field&#39;s value originated.</span>
+<span class="n">ProvenanceSource</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span>
+    <span class="s2">&quot;skill&quot;</span><span class="p">,</span>  <span class="c1"># taken from the source SKILL.md (name/description/body)</span>
+    <span class="s2">&quot;coact-frontmatter&quot;</span><span class="p">,</span>  <span class="c1"># pinned by the author&#39;s `coact:` block</span>
+    <span class="s2">&quot;policy&quot;</span><span class="p">,</span>  <span class="c1"># stamped by the completion policy</span>
+    <span class="s2">&quot;inferred&quot;</span><span class="p">,</span>  <span class="c1"># heuristically derived (e.g. tools from resources)</span>
+    <span class="s2">&quot;synthesized-template&quot;</span><span class="p">,</span>  <span class="c1"># produced by the no-LLM template path</span>
+    <span class="s2">&quot;synthesized-llm&quot;</span><span class="p">,</span>  <span class="c1"># produced by the optional injected LLM</span>
+    <span class="s2">&quot;default&quot;</span><span class="p">,</span>  <span class="c1"># left at the dataclass default</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="ReturnContract">
+<a class="viewcode-back" href="../../module_docs/coact/base.html#coact.ReturnContract">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ReturnContract</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The agent&#39;s return contract: its final-message schema + a human summary.</span>
+
+<span class="sd">    Skills return nothing; agents must define a consumable output. The canonical</span>
+<span class="sd">    form is a JSON Schema dict (portable across realization backends, DECISIONS</span>
+<span class="sd">    D6). ``ref`` records a ``&#39;module:Name&#39;`` source if the schema was resolved</span>
+<span class="sd">    from a Pydantic model / dataclass / TypedDict.</span>
+
+<span class="sd">    &gt;&gt;&gt; rc = ReturnContract(json_schema={&#39;type&#39;: &#39;object&#39;}, description=&#39;findings&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; rc.is_empty()</span>
+<span class="sd">    False</span>
+<span class="sd">    &gt;&gt;&gt; ReturnContract().is_empty()</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">json_schema</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">ref</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+<div class="viewcode-block" id="ReturnContract.is_empty">
+<a class="viewcode-back" href="../../module_docs/coact/base.html#coact.ReturnContract.is_empty">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;True when no schema (inline or ref) has been set.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">json_schema</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span></div>
+
+
+<div class="viewcode-block" id="ReturnContract.to_dict">
+<a class="viewcode-back" href="../../module_docs/coact/base.html#coact.ReturnContract.to_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Serialize to a plain dict (for the agent-md ``coact:`` block), omitting empties.&quot;&quot;&quot;</span>
+        <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">json_schema</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="s2">&quot;json_schema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">json_schema</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="s2">&quot;schema_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span>
+        <span class="k">return</span> <span class="n">d</span></div>
+
+
+<div class="viewcode-block" id="ReturnContract.from_dict">
+<a class="viewcode-back" href="../../module_docs/coact/base.html#coact.ReturnContract.from_dict">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ReturnContract&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse from a ``coact: returns`` mapping (accepts ``schema_ref`` or ``json_schema``).</span>
+
+<span class="sd">        &gt;&gt;&gt; ReturnContract.from_dict({&#39;schema_ref&#39;: &#39;ov.schemas:UxFindings&#39;}).ref</span>
+<span class="sd">        &#39;ov.schemas:UxFindings&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">d</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">json_schema</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;json_schema&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{},</span>
+            <span class="n">ref</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;schema_ref&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">),</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AgentDefinition">
+<a class="viewcode-back" href="../../module_docs/coact/base.html#coact.AgentDefinition">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AgentDefinition</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The SSOT: one object, two serializations (filesystem md + SDK form).</span>
+
+<span class="sd">    Fields mirror the host subagent schema (snake_case here; coact owns the</span>
+<span class="sd">    mapping to the host&#39;s camelCase frontmatter names in :mod:`coact.emit`),</span>
+<span class="sd">    plus the coact-specific :attr:`returns` / :attr:`consumes`. ``tools=None``</span>
+<span class="sd">    means *inherit all tools*; an empty list means *no tools* — the distinction</span>
+<span class="sd">    is preserved.</span>
+
+<span class="sd">    &gt;&gt;&gt; ad = AgentDefinition(name=&#39;ux-analyst&#39;, description=&#39;Analyze UX bundles.&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; ad.name, ad.tools, ad.returns.is_empty()</span>
+<span class="sd">    (&#39;ux-analyst&#39;, None, True)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">tools</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">disallowed_tools</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ModelName</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">skills</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">memory</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">MemoryScope</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">mcp_servers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># names or inline dicts</span>
+    <span class="n">permission_mode</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">returns</span><span class="p">:</span> <span class="n">ReturnContract</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">ReturnContract</span><span class="p">)</span>
+    <span class="n">consumes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: Canonical key/name of the source skill this agent was completed from.</span>
+    <span class="n">source_skill</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="FieldProvenance">
+<a class="viewcode-back" href="../../module_docs/coact/base.html#coact.FieldProvenance">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FieldProvenance</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Where one :class:`AgentDefinition` field&#39;s value came from (dry-run audit).</span>
+
+<span class="sd">    &gt;&gt;&gt; FieldProvenance(&#39;model&#39;, &#39;sonnet&#39;, &#39;policy&#39;, &#39;default worker&#39;).source</span>
+<span class="sd">    &#39;policy&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">field</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">ProvenanceSource</span>
+    <span class="n">note</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="AgentPlan">
+<a class="viewcode-back" href="../../module_docs/coact/base.html#coact.AgentPlan">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AgentPlan</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The inspectable result of ``plan_completion``: the agent + its provenance.</span>
+
+<span class="sd">    Shows the proposed :class:`AgentDefinition` and, for each field, *why* it has</span>
+<span class="sd">    its value — so a user can review before any file is written or agent spawned</span>
+<span class="sd">    (progressive disclosure: dry-run first).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">agent</span><span class="p">:</span> <span class="n">AgentDefinition</span>
+    <span class="n">provenance</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FieldProvenance</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">warnings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AgentPlan.render">
+<a class="viewcode-back" href="../../module_docs/coact/base.html#coact.AgentPlan.render">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Render a human-readable provenance table for terminal display.</span>
+
+<span class="sd">        &gt;&gt;&gt; plan = AgentPlan(</span>
+<span class="sd">        ...     agent=AgentDefinition(name=&#39;x&#39;, description=&#39;y&#39;),</span>
+<span class="sd">        ...     provenance=[FieldProvenance(&#39;model&#39;, &#39;sonnet&#39;, &#39;policy&#39;, &#39;worker&#39;)],</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; &#39;model&#39; in plan.render() and &#39;policy&#39; in plan.render()</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;AgentPlan for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">provenance</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">provenance</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">shown</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shown</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">shown</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="p">:</span>
+                <span class="n">shown</span> <span class="o">=</span> <span class="n">shown</span><span class="p">[:</span><span class="mi">57</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span>
+            <span class="n">note</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;  — </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">note</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">note</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">field</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">width</span><span class="si">}}</span><span class="s2">  [</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s2">]  </span><span class="si">{</span><span class="n">shown</span><span class="si">}{</span><span class="n">note</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">warnings</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Warnings:&quot;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ! </span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">warnings</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

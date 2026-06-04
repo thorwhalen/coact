@@ -1,0 +1,358 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coact.emit &mdash; coact 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            coact
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/base.html">coact.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/emit.html">coact.emit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/stores.html">coact.stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/util.html">coact.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">coact</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">coact.emit</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for coact.emit</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Emitters: one :class:`~coact.base.AgentDefinition` → many serializations.</span>
+
+<span class="sd">COACT_SPEC §5.3. Emit targets are an open-closed ``skill``-style</span>
+<span class="sd">:class:`~skill.registry.Registry` (register, don&#39;t hardcode). Two ship by</span>
+<span class="sd">default:</span>
+
+<span class="sd">- ``claude-agents-md`` — the filesystem ``.claude/agents/&lt;name&gt;.md`` (host</span>
+<span class="sd">  frontmatter using the host&#39;s exact camelCase field names + the persona body).</span>
+<span class="sd">  coact-specific fields (the return contract, ``consumes``, ``source_skill``) are</span>
+<span class="sd">  carried in an additive ``coact:`` frontmatter sub-block so the round-trip is</span>
+<span class="sd">  lossless and the host still ignores them. Reuses ``skill.base`` frontmatter</span>
+<span class="sd">  helpers — coact writes no YAML by hand.</span>
+<span class="sd">- ``sdk-agent-dict`` — kwargs for ``claude_agent_sdk.AgentDefinition`` plus the</span>
+<span class="sd">  leftover ``query()`` options, built by **introspecting** the installed SDK</span>
+<span class="sd">  dataclass so it degrades gracefully across SDK versions (DECISIONS D2). The</span>
+<span class="sd">  SDK is imported lazily here only; core stays SDK-free.</span>
+
+<span class="sd">Future emitters (CrewAI / OpenAI via the ``aw`` adapter) register without</span>
+<span class="sd">touching this module. Topology is never emitted (DECISIONS D8).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">skill.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_frontmatter</span><span class="p">,</span> <span class="n">render_frontmatter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">skill.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span><span class="p">,</span> <span class="n">ReturnContract</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_requirements</span>
+
+<span class="c1">#: Registry of emit targets: ``AgentDefinition -&gt; serialized form`` (str or dict).</span>
+<span class="n">emitters</span><span class="p">:</span> <span class="n">Registry</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">AgentDefinition</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;emitters&quot;</span><span class="p">)</span>
+
+<span class="c1"># Mapping from AgentDefinition snake_case fields to the host&#39;s frontmatter names.</span>
+<span class="c1"># Only the host-recognized subagent fields appear here; coact-specific fields go</span>
+<span class="c1"># in the additive `coact:` sub-block.</span>
+<span class="n">_SNAKE_TO_HOST</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;disallowed_tools&quot;</span><span class="p">:</span> <span class="s2">&quot;disallowedTools&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;mcp_servers&quot;</span><span class="p">:</span> <span class="s2">&quot;mcpServers&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;permission_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;permissionMode&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">_HOST_TO_SNAKE</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">_SNAKE_TO_HOST</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># claude-agents-md</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="agent_to_frontmatter">
+<a class="viewcode-back" href="../../module_docs/coact/emit.html#coact.agent_to_frontmatter">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">agent_to_frontmatter</span><span class="p">(</span><span class="n">ad</span><span class="p">:</span> <span class="n">AgentDefinition</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build the host frontmatter dict for an agent (omitting empty fields).</span>
+
+<span class="sd">    &gt;&gt;&gt; ad = AgentDefinition(name=&#39;x&#39;, description=&#39;y&#39;, tools=[&#39;Read&#39;], model=&#39;haiku&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; fm = agent_to_frontmatter(ad)</span>
+<span class="sd">    &gt;&gt;&gt; fm[&#39;name&#39;], fm[&#39;tools&#39;], fm[&#39;model&#39;]</span>
+<span class="sd">    (&#39;x&#39;, [&#39;Read&#39;], &#39;haiku&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fm</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">ad</span><span class="o">.</span><span class="n">description</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">ad</span><span class="o">.</span><span class="n">tools</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fm</span><span class="p">[</span><span class="s2">&quot;tools&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">tools</span>
+    <span class="k">if</span> <span class="n">ad</span><span class="o">.</span><span class="n">disallowed_tools</span><span class="p">:</span>
+        <span class="n">fm</span><span class="p">[</span><span class="s2">&quot;disallowedTools&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">disallowed_tools</span>
+    <span class="k">if</span> <span class="n">ad</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
+        <span class="n">fm</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">model</span>
+    <span class="k">if</span> <span class="n">ad</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
+        <span class="n">fm</span><span class="p">[</span><span class="s2">&quot;skills&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">skills</span>
+    <span class="k">if</span> <span class="n">ad</span><span class="o">.</span><span class="n">memory</span><span class="p">:</span>
+        <span class="n">fm</span><span class="p">[</span><span class="s2">&quot;memory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">memory</span>
+    <span class="k">if</span> <span class="n">ad</span><span class="o">.</span><span class="n">mcp_servers</span><span class="p">:</span>
+        <span class="n">fm</span><span class="p">[</span><span class="s2">&quot;mcpServers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">mcp_servers</span>
+    <span class="k">if</span> <span class="n">ad</span><span class="o">.</span><span class="n">permission_mode</span><span class="p">:</span>
+        <span class="n">fm</span><span class="p">[</span><span class="s2">&quot;permissionMode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">permission_mode</span>
+
+    <span class="c1"># coact-specific fields in an additive, host-ignored sub-block.</span>
+    <span class="n">coact_block</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ad</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+        <span class="n">coact_block</span><span class="p">[</span><span class="s2">&quot;returns&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">ad</span><span class="o">.</span><span class="n">consumes</span><span class="p">:</span>
+        <span class="n">coact_block</span><span class="p">[</span><span class="s2">&quot;consumes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">consumes</span>
+    <span class="k">if</span> <span class="n">ad</span><span class="o">.</span><span class="n">source_skill</span><span class="p">:</span>
+        <span class="n">coact_block</span><span class="p">[</span><span class="s2">&quot;source_skill&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">source_skill</span>
+    <span class="k">if</span> <span class="n">coact_block</span><span class="p">:</span>
+        <span class="n">fm</span><span class="p">[</span><span class="s2">&quot;coact&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">coact_block</span>
+    <span class="k">return</span> <span class="n">fm</span></div>
+
+
+
+<div class="viewcode-block" id="to_claude_agent_md">
+<a class="viewcode-back" href="../../module_docs/coact/emit.html#coact.to_claude_agent_md">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_claude_agent_md</span><span class="p">(</span><span class="n">ad</span><span class="p">:</span> <span class="n">AgentDefinition</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Serialize an agent to ``.claude/agents/&lt;name&gt;.md`` content.</span>
+
+<span class="sd">    &gt;&gt;&gt; ad = AgentDefinition(name=&#39;ux&#39;, description=&#39;Analyze.&#39;, prompt=&#39;You are...&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; md = to_claude_agent_md(ad)</span>
+<span class="sd">    &gt;&gt;&gt; md.startswith(&#39;---&#39;) and &#39;name: ux&#39; in md and &#39;You are...&#39; in md</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">frontmatter</span> <span class="o">=</span> <span class="n">render_frontmatter</span><span class="p">(</span><span class="n">agent_to_frontmatter</span><span class="p">(</span><span class="n">ad</span><span class="p">))</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">prompt</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">frontmatter</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="from_claude_agent_md">
+<a class="viewcode-back" href="../../module_docs/coact/emit.html#coact.from_claude_agent_md">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">from_claude_agent_md</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AgentDefinition</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse ``.claude/agents/*.md`` content back into an :class:`AgentDefinition`.</span>
+
+<span class="sd">    The inverse of :func:`to_claude_agent_md` (lossless for all coact fields).</span>
+
+<span class="sd">    &gt;&gt;&gt; ad = AgentDefinition(name=&#39;ux&#39;, description=&#39;Analyze.&#39;, prompt=&#39;You are an analyst.&#39;,</span>
+<span class="sd">    ...     tools=[&#39;Read&#39;, &#39;Grep&#39;], model=&#39;sonnet&#39;,</span>
+<span class="sd">    ...     returns=ReturnContract(json_schema={&#39;type&#39;: &#39;object&#39;}, description=&#39;out&#39;))</span>
+<span class="sd">    &gt;&gt;&gt; back = from_claude_agent_md(to_claude_agent_md(ad))</span>
+<span class="sd">    &gt;&gt;&gt; (back.name, back.tools, back.model, back.prompt) == (ad.name, ad.tools, ad.model, ad.prompt)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; back.returns.json_schema</span>
+<span class="sd">    {&#39;type&#39;: &#39;object&#39;}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">meta</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="n">parse_frontmatter</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">coact_block</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;coact&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="k">return</span> <span class="n">AgentDefinition</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="n">prompt</span><span class="o">=</span><span class="n">body</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+        <span class="n">tools</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">),</span>
+        <span class="n">disallowed_tools</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;disallowedTools&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[],</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">),</span>
+        <span class="n">skills</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;skills&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[],</span>
+        <span class="n">memory</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;memory&quot;</span><span class="p">),</span>
+        <span class="n">mcp_servers</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mcpServers&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[],</span>
+        <span class="n">permission_mode</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;permissionMode&quot;</span><span class="p">),</span>
+        <span class="n">returns</span><span class="o">=</span><span class="n">ReturnContract</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">coact_block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;returns&quot;</span><span class="p">)),</span>
+        <span class="n">consumes</span><span class="o">=</span><span class="n">coact_block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;consumes&quot;</span><span class="p">),</span>
+        <span class="n">source_skill</span><span class="o">=</span><span class="n">coact_block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;source_skill&quot;</span><span class="p">),</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="n">emitters</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;claude-agents-md&quot;</span><span class="p">,</span> <span class="n">to_claude_agent_md</span><span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># sdk-agent-dict</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="c1"># AgentDefinition field -&gt; SDK AgentDefinition field name (camelCase where the</span>
+<span class="c1"># SDK uses it). Only fields the SDK might accept are listed; we filter against</span>
+<span class="c1"># the *installed* dataclass so missing ones fall through to `options`.</span>
+<span class="n">_AD_TO_SDK_FIELD</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;description&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="s2">&quot;prompt&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="s2">&quot;tools&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;model&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;skills&quot;</span><span class="p">:</span> <span class="s2">&quot;skills&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;memory&quot;</span><span class="p">:</span> <span class="s2">&quot;memory&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;mcp_servers&quot;</span><span class="p">:</span> <span class="s2">&quot;mcpServers&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;disallowed_tools&quot;</span><span class="p">:</span> <span class="s2">&quot;disallowedTools&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="to_sdk_agent_dict">
+<a class="viewcode-back" href="../../module_docs/coact/emit.html#coact.to_sdk_agent_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_sdk_agent_dict</span><span class="p">(</span><span class="n">ad</span><span class="p">:</span> <span class="n">AgentDefinition</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build Agent-SDK kwargs + leftover query options for one agent.</span>
+
+<span class="sd">    Returns ``{&#39;name&#39;, &#39;agent_kwargs&#39;, &#39;options&#39;}`` where ``agent_kwargs`` are</span>
+<span class="sd">    accepted by the *installed* ``claude_agent_sdk.AgentDefinition`` and</span>
+<span class="sd">    ``options`` holds fields that version cannot express (to be wired into</span>
+<span class="sd">    ``query()`` by the ``sdk`` realize backend). Requires the Agent SDK.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_requirements</span><span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;claude_agent_sdk&quot;</span><span class="p">:</span> <span class="s2">&quot;claude-agent-sdk&quot;</span><span class="p">},</span> <span class="n">feature</span><span class="o">=</span><span class="s2">&quot;sdk-agent-dict&quot;</span>
+    <span class="p">)</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">claude_agent_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span> <span class="k">as</span> <span class="n">SDKAgentDefinition</span>
+
+    <span class="n">accepted</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">SDKAgentDefinition</span><span class="p">)}</span>
+    <span class="n">agent_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">ad_field</span><span class="p">,</span> <span class="n">sdk_field</span> <span class="ow">in</span> <span class="n">_AD_TO_SDK_FIELD</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="n">ad_field</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[],</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">{}):</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">sdk_field</span> <span class="ow">in</span> <span class="n">accepted</span><span class="p">:</span>
+            <span class="n">agent_kwargs</span><span class="p">[</span><span class="n">sdk_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">options</span><span class="p">[</span><span class="n">ad_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c1"># description &amp; prompt are required by the SDK dataclass; ensure present.</span>
+    <span class="n">agent_kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="n">ad</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+    <span class="n">agent_kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;prompt&quot;</span><span class="p">,</span> <span class="n">ad</span><span class="o">.</span><span class="n">prompt</span> <span class="ow">or</span> <span class="n">ad</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ad</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+        <span class="n">options</span><span class="p">[</span><span class="s2">&quot;returns&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">returns</span>
+    <span class="k">if</span> <span class="n">ad</span><span class="o">.</span><span class="n">permission_mode</span><span class="p">:</span>
+        <span class="n">options</span><span class="p">[</span><span class="s2">&quot;permission_mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">permission_mode</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;agent_kwargs&quot;</span><span class="p">:</span> <span class="n">agent_kwargs</span><span class="p">,</span> <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">options</span><span class="p">}</span></div>
+
+
+
+<span class="n">emitters</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;sdk-agent-dict&quot;</span><span class="p">,</span> <span class="n">to_sdk_agent_dict</span><span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Dispatcher</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="emit_agent">
+<a class="viewcode-back" href="../../module_docs/coact/emit.html#coact.emit_agent">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">emit_agent</span><span class="p">(</span>
+    <span class="n">ad</span><span class="p">:</span> <span class="n">AgentDefinition</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;claude-agents-md&quot;</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Emit an agent to a registered target; optionally write a file target to ``dest``.</span>
+
+<span class="sd">    For string targets (e.g. ``claude-agents-md``) with ``dest`` given, writes</span>
+<span class="sd">    ``&lt;dest&gt;/&lt;name&gt;.md`` and returns the :class:`~pathlib.Path`. Otherwise</span>
+<span class="sd">    returns the emitter&#39;s value (str or dict).</span>
+
+<span class="sd">    &gt;&gt;&gt; ad = AgentDefinition(name=&#39;ux&#39;, description=&#39;Analyze.&#39;, prompt=&#39;You are...&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; emit_agent(ad).splitlines()[0]</span>
+<span class="sd">    &#39;---&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">emitter</span> <span class="o">=</span> <span class="n">emitters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">emitter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">available</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">emitters</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown emit target: </span><span class="si">{</span><span class="n">target</span><span class="si">!r}</span><span class="s2">. Available: </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">emitter</span><span class="p">(</span><span class="n">ad</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.md&quot;</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

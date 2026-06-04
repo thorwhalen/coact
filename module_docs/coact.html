@@ -1,0 +1,415 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coact &mdash; coact 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="coact.base" href="coact/base.html" />
+    <link rel="prev" title="Welcome to coact’s documentation!" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            coact
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">coact</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#coact.AgentDefinition"><code class="docutils literal notranslate"><span class="pre">AgentDefinition</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coact.AgentDefinition.source_skill"><code class="docutils literal notranslate"><span class="pre">AgentDefinition.source_skill</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.AgentPlan"><code class="docutils literal notranslate"><span class="pre">AgentPlan</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coact.AgentPlan.render"><code class="docutils literal notranslate"><span class="pre">AgentPlan.render()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.AgentStore"><code class="docutils literal notranslate"><span class="pre">AgentStore</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.CoactMeta"><code class="docutils literal notranslate"><span class="pre">CoactMeta</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coact.CoactMeta.from_frontmatter"><code class="docutils literal notranslate"><span class="pre">CoactMeta.from_frontmatter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coact.CoactMeta.is_empty"><code class="docutils literal notranslate"><span class="pre">CoactMeta.is_empty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coact.CoactMeta.return_contract"><code class="docutils literal notranslate"><span class="pre">CoactMeta.return_contract()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.FieldProvenance"><code class="docutils literal notranslate"><span class="pre">FieldProvenance</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.ReturnContract"><code class="docutils literal notranslate"><span class="pre">ReturnContract</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coact.ReturnContract.from_dict"><code class="docutils literal notranslate"><span class="pre">ReturnContract.from_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coact.ReturnContract.is_empty"><code class="docutils literal notranslate"><span class="pre">ReturnContract.is_empty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coact.ReturnContract.to_dict"><code class="docutils literal notranslate"><span class="pre">ReturnContract.to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.agents_dir"><code class="docutils literal notranslate"><span class="pre">agents_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.emit_agent"><code class="docutils literal notranslate"><span class="pre">emit_agent()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.from_claude_agent_md"><code class="docutils literal notranslate"><span class="pre">from_claude_agent_md()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.parse_coact_meta"><code class="docutils literal notranslate"><span class="pre">parse_coact_meta()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.register_validator"><code class="docutils literal notranslate"><span class="pre">register_validator()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.to_claude_agent_md"><code class="docutils literal notranslate"><span class="pre">to_claude_agent_md()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.validate_coact_block"><code class="docutils literal notranslate"><span class="pre">validate_coact_block()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coact/base.html">coact.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coact/emit.html">coact.emit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coact/frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coact/stores.html">coact.stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coact/util.html">coact.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">coact</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">coact</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/module_docs/coact.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-coact">
+<span id="coact"></span><h1>coact<a class="headerlink" href="#module-coact" title="Link to this heading"></a></h1>
+<p>coact — reuse your AI stuff across the layers of the modern agent stack.</p>
+<p><code class="docutils literal notranslate"><span class="pre">coact</span></code> (“co-act”: skills and agents acting as one reusable substrate) owns the
+two transitions the rest of the ecosystem doesn’t:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>python functions/scripts  →  .claude/skills/  →  .claude/agents/  →  running agents
+        (py2mcp, aw)            (skill pkg)         COMPLETE (coact)    REALIZE (coact)
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>COMPLETE</strong> lifts <code class="docutils literal notranslate"><span class="pre">.claude/skills/</span></code> into <code class="docutils literal notranslate"><span class="pre">.claude/agents/</span></code> definitions,
+adding the agent-only “extras” (persona, return contract, tool allowlist,
+model, memory).</p></li>
+<li><p><strong>REALIZE</strong> turns a completed definition into an actually running agent,
+picking an execution backend (host agent / Agent SDK / MCP-exposed).</p></li>
+</ul>
+<p>It is glue over <code class="docutils literal notranslate"><span class="pre">skill</span></code> (foundation), <code class="docutils literal notranslate"><span class="pre">aw</span></code> (runtime substrate), and
+<code class="docutils literal notranslate"><span class="pre">py2mcp</span></code> (tool exposure) — see <code class="docutils literal notranslate"><span class="pre">misc/docs/REUSE.md</span></code>.</p>
+<p>Simple usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">coact</span><span class="w"> </span><span class="kn">import</span> <span class="n">complete</span><span class="p">,</span> <span class="n">emit_agent</span><span class="p">,</span> <span class="n">realize</span>
+
+<span class="n">agent</span> <span class="o">=</span> <span class="n">complete</span><span class="p">(</span><span class="s1">&#39;.claude/skills/ux-analyst&#39;</span><span class="p">)</span>      <span class="c1"># Skill -&gt; AgentDefinition</span>
+<span class="n">emit_agent</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="s1">&#39;claude-agents-md&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;.claude/agents/&#39;</span><span class="p">)</span>
+<span class="n">realize</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;host&#39;</span><span class="p">)</span>                     <span class="c1"># materialize for Claude Code</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="coact.AgentDefinition">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">AgentDefinition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tools</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disallowed_tools</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal['sonnet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'opus'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'haiku'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'inherit']</span> <span class="pre">|</span> <span class="pre">None</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skills</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal['user'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'project'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'local']</span> <span class="pre">|</span> <span class="pre">None</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcp_servers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permission_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="coact/base.html#coact.base.ReturnContract" title="coact.base.ReturnContract"><span class="pre">ReturnContract</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consumes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_skill</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/coact/base.html#AgentDefinition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.AgentDefinition" title="Link to this definition"></a></dt>
+<dd><p>The SSOT: one object, two serializations (filesystem md + SDK form).</p>
+<p>Fields mirror the host subagent schema (snake_case here; coact owns the
+mapping to the host’s camelCase frontmatter names in <a class="reference internal" href="coact/emit.html#module-coact.emit" title="coact.emit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">coact.emit</span></code></a>),
+plus the coact-specific <code class="xref py py-attr docutils literal notranslate"><span class="pre">returns</span></code> / <code class="xref py py-attr docutils literal notranslate"><span class="pre">consumes</span></code>. <code class="docutils literal notranslate"><span class="pre">tools=None</span></code>
+means <em>inherit all tools</em>; an empty list means <em>no tools</em> — the distinction
+is preserved.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ad</span> <span class="o">=</span> <span class="n">AgentDefinition</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;ux-analyst&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Analyze UX bundles.&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ad</span><span class="o">.</span><span class="n">tools</span><span class="p">,</span> <span class="n">ad</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span>
+<span class="go">(&#39;ux-analyst&#39;, None, True)</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="coact.AgentDefinition.source_skill">
+<span class="sig-name descname"><span class="pre">source_skill</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#coact.AgentDefinition.source_skill" title="Link to this definition"></a></dt>
+<dd><p>Canonical key/name of the source skill this agent was completed from.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coact.AgentPlan">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">AgentPlan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="coact/base.html#coact.base.AgentDefinition" title="coact.base.AgentDefinition"><span class="pre">AgentDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">provenance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="coact/base.html#coact.base.FieldProvenance" title="coact.base.FieldProvenance"><span class="pre">FieldProvenance</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warnings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/coact/base.html#AgentPlan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.AgentPlan" title="Link to this definition"></a></dt>
+<dd><p>The inspectable result of <code class="docutils literal notranslate"><span class="pre">plan_completion</span></code>: the agent + its provenance.</p>
+<p>Shows the proposed <a class="reference internal" href="#coact.AgentDefinition" title="coact.AgentDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">AgentDefinition</span></code></a> and, for each field, <em>why</em> it has
+its value — so a user can review before any file is written or agent spawned
+(progressive disclosure: dry-run first).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coact.AgentPlan.render">
+<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/coact/base.html#AgentPlan.render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.AgentPlan.render" title="Link to this definition"></a></dt>
+<dd><p>Render a human-readable provenance table for terminal display.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plan</span> <span class="o">=</span> <span class="n">AgentPlan</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">agent</span><span class="o">=</span><span class="n">AgentDefinition</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">provenance</span><span class="o">=</span><span class="p">[</span><span class="n">FieldProvenance</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="s1">&#39;sonnet&#39;</span><span class="p">,</span> <span class="s1">&#39;policy&#39;</span><span class="p">,</span> <span class="s1">&#39;worker&#39;</span><span class="p">)],</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;model&#39;</span> <span class="ow">in</span> <span class="n">plan</span><span class="o">.</span><span class="n">render</span><span class="p">()</span> <span class="ow">and</span> <span class="s1">&#39;policy&#39;</span> <span class="ow">in</span> <span class="n">plan</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coact.AgentStore">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">AgentStore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">scope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'project'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/coact/stores.html#AgentStore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.AgentStore" title="Link to this definition"></a></dt>
+<dd><p>A <code class="docutils literal notranslate"><span class="pre">MutableMapping[str,</span> <span class="pre">AgentDefinition]</span></code> over a <code class="docutils literal notranslate"><span class="pre">.claude/agents/</span></code> dir.</p>
+<p>Keys are agent names; each agent is one <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;.md</span></code> file.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">coact.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span> <span class="o">=</span> <span class="n">AgentStore</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span><span class="p">[</span><span class="s1">&#39;ux&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AgentDefinition</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Analyze.&#39;</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="s1">&#39;You are...&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">store</span><span class="p">)</span>
+<span class="go">[&#39;ux&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span><span class="p">[</span><span class="s1">&#39;ux&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">description</span>
+<span class="go">&#39;Analyze.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">store</span><span class="p">[</span><span class="s1">&#39;ux&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">store</span><span class="p">)</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coact.CoactMeta">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">CoactMeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tools</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disallowed_tools</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permission_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skills</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consumes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">persona</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/coact/frontmatter.html#CoactMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.CoactMeta" title="Link to this definition"></a></dt>
+<dd><p>The parsed <code class="docutils literal notranslate"><span class="pre">coact:</span></code> block (every field optional; all default to absent).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">CoactMeta</span><span class="o">.</span><span class="n">from_frontmatter</span><span class="p">({</span><span class="s1">&#39;coact&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="s1">&#39;opus&#39;</span><span class="p">,</span> <span class="s1">&#39;tools&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Read&#39;</span><span class="p">]}})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">tools</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span>
+<span class="go">(&#39;opus&#39;, [&#39;Read&#39;], False)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">CoactMeta</span><span class="o">.</span><span class="n">from_frontmatter</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;x&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="coact.CoactMeta.from_frontmatter">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_frontmatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="coact/frontmatter.html#coact.frontmatter.CoactMeta" title="coact.frontmatter.CoactMeta"><span class="pre">CoactMeta</span></a></span></span><a class="reference internal" href="../_modules/coact/frontmatter.html#CoactMeta.from_frontmatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.CoactMeta.from_frontmatter" title="Link to this definition"></a></dt>
+<dd><p>Build from a full frontmatter dict (reads the <code class="docutils literal notranslate"><span class="pre">coact</span></code> sub-mapping).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coact.CoactMeta.is_empty">
+<span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/coact/frontmatter.html#CoactMeta.is_empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.CoactMeta.is_empty" title="Link to this definition"></a></dt>
+<dd><p>True when the block carries no author-provided information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coact.CoactMeta.return_contract">
+<span class="sig-name descname"><span class="pre">return_contract</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="coact/base.html#coact.base.ReturnContract" title="coact.base.ReturnContract"><span class="pre">ReturnContract</span></a></span></span><a class="reference internal" href="../_modules/coact/frontmatter.html#CoactMeta.return_contract"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.CoactMeta.return_contract" title="Link to this definition"></a></dt>
+<dd><p>The author-pinned <a class="reference internal" href="coact/base.html#coact.base.ReturnContract" title="coact.base.ReturnContract"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReturnContract</span></code></a>, if any.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coact.FieldProvenance">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">FieldProvenance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'skill'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'coact-frontmatter'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'policy'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'inferred'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'synthesized-template'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'synthesized-llm'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'default'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/coact/base.html#FieldProvenance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.FieldProvenance" title="Link to this definition"></a></dt>
+<dd><p>Where one <a class="reference internal" href="#coact.AgentDefinition" title="coact.AgentDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">AgentDefinition</span></code></a> field’s value came from (dry-run audit).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">FieldProvenance</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="s1">&#39;sonnet&#39;</span><span class="p">,</span> <span class="s1">&#39;policy&#39;</span><span class="p">,</span> <span class="s1">&#39;default worker&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">source</span>
+<span class="go">&#39;policy&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coact.ReturnContract">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">ReturnContract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/coact/base.html#ReturnContract"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.ReturnContract" title="Link to this definition"></a></dt>
+<dd><p>The agent’s return contract: its final-message schema + a human summary.</p>
+<p>Skills return nothing; agents must define a consumable output. The canonical
+form is a JSON Schema dict (portable across realization backends, DECISIONS
+D6). <code class="docutils literal notranslate"><span class="pre">ref</span></code> records a <code class="docutils literal notranslate"><span class="pre">'module:Name'</span></code> source if the schema was resolved
+from a Pydantic model / dataclass / TypedDict.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rc</span> <span class="o">=</span> <span class="n">ReturnContract</span><span class="p">(</span><span class="n">json_schema</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">},</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;findings&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rc</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ReturnContract</span><span class="p">()</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="coact.ReturnContract.from_dict">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="coact/base.html#coact.base.ReturnContract" title="coact.base.ReturnContract"><span class="pre">ReturnContract</span></a></span></span><a class="reference internal" href="../_modules/coact/base.html#ReturnContract.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.ReturnContract.from_dict" title="Link to this definition"></a></dt>
+<dd><p>Parse from a <code class="docutils literal notranslate"><span class="pre">coact:</span> <span class="pre">returns</span></code> mapping (accepts <code class="docutils literal notranslate"><span class="pre">schema_ref</span></code> or <code class="docutils literal notranslate"><span class="pre">json_schema</span></code>).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ReturnContract</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="s1">&#39;schema_ref&#39;</span><span class="p">:</span> <span class="s1">&#39;ov.schemas:UxFindings&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">ref</span>
+<span class="go">&#39;ov.schemas:UxFindings&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coact.ReturnContract.is_empty">
+<span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/coact/base.html#ReturnContract.is_empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.ReturnContract.is_empty" title="Link to this definition"></a></dt>
+<dd><p>True when no schema (inline or ref) has been set.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coact.ReturnContract.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/coact/base.html#ReturnContract.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.ReturnContract.to_dict" title="Link to this definition"></a></dt>
+<dd><p>Serialize to a plain dict (for the agent-md <code class="docutils literal notranslate"><span class="pre">coact:</span></code> block), omitting empties.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.agents_dir">
+<span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">agents_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">scope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'project'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../_modules/coact/stores.html#agents_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.agents_dir" title="Link to this definition"></a></dt>
+<dd><p>Resolve the <code class="docutils literal notranslate"><span class="pre">.claude/agents</span></code> directory for the given scope.</p>
+<p><code class="docutils literal notranslate"><span class="pre">scope='project'</span></code> resolves against the detected project root (or
+<code class="docutils literal notranslate"><span class="pre">project_dir</span></code>); <code class="docutils literal notranslate"><span class="pre">scope='global'</span></code> resolves against <code class="docutils literal notranslate"><span class="pre">~/.claude</span></code>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">agents_dir</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s1">&#39;global&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.claude/agents&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.emit_agent">
+<span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">emit_agent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="coact/base.html#coact.base.AgentDefinition" title="coact.base.AgentDefinition"><span class="pre">AgentDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'claude-agents-md'</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../_modules/coact/emit.html#emit_agent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.emit_agent" title="Link to this definition"></a></dt>
+<dd><p>Emit an agent to a registered target; optionally write a file target to <code class="docutils literal notranslate"><span class="pre">dest</span></code>.</p>
+<p>For string targets (e.g. <code class="docutils literal notranslate"><span class="pre">claude-agents-md</span></code>) with <code class="docutils literal notranslate"><span class="pre">dest</span></code> given, writes
+<code class="docutils literal notranslate"><span class="pre">&lt;dest&gt;/&lt;name&gt;.md</span></code> and returns the <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>. Otherwise
+returns the emitter’s value (str or dict).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ad</span> <span class="o">=</span> <span class="n">AgentDefinition</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Analyze.&#39;</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="s1">&#39;You are...&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">emit_agent</span><span class="p">(</span><span class="n">ad</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">&#39;---&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.from_claude_agent_md">
+<span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">from_claude_agent_md</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="coact/base.html#coact.base.AgentDefinition" title="coact.base.AgentDefinition"><span class="pre">AgentDefinition</span></a></span></span><a class="reference internal" href="../_modules/coact/emit.html#from_claude_agent_md"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.from_claude_agent_md" title="Link to this definition"></a></dt>
+<dd><p>Parse <code class="docutils literal notranslate"><span class="pre">.claude/agents/*.md</span></code> content back into an <a class="reference internal" href="#coact.AgentDefinition" title="coact.AgentDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">AgentDefinition</span></code></a>.</p>
+<p>The inverse of <a class="reference internal" href="#coact.to_claude_agent_md" title="coact.to_claude_agent_md"><code class="xref py py-func docutils literal notranslate"><span class="pre">to_claude_agent_md()</span></code></a> (lossless for all coact fields).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ad</span> <span class="o">=</span> <span class="n">AgentDefinition</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Analyze.&#39;</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="s1">&#39;You are an analyst.&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Read&#39;</span><span class="p">,</span> <span class="s1">&#39;Grep&#39;</span><span class="p">],</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;sonnet&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">returns</span><span class="o">=</span><span class="n">ReturnContract</span><span class="p">(</span><span class="n">json_schema</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">},</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;out&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">back</span> <span class="o">=</span> <span class="n">from_claude_agent_md</span><span class="p">(</span><span class="n">to_claude_agent_md</span><span class="p">(</span><span class="n">ad</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">back</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">back</span><span class="o">.</span><span class="n">tools</span><span class="p">,</span> <span class="n">back</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">back</span><span class="o">.</span><span class="n">prompt</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ad</span><span class="o">.</span><span class="n">tools</span><span class="p">,</span> <span class="n">ad</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">ad</span><span class="o">.</span><span class="n">prompt</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">back</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">json_schema</span>
+<span class="go">{&#39;type&#39;: &#39;object&#39;}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.parse_coact_meta">
+<span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">parse_coact_meta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Skill</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="coact/frontmatter.html#coact.frontmatter.CoactMeta" title="coact.frontmatter.CoactMeta"><span class="pre">CoactMeta</span></a></span></span><a class="reference internal" href="../_modules/coact/frontmatter.html#parse_coact_meta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.parse_coact_meta" title="Link to this definition"></a></dt>
+<dd><p>Parse a <a class="reference internal" href="#coact.CoactMeta" title="coact.CoactMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoactMeta</span></code></a> from a SKILL.md path/text/<code class="docutils literal notranslate"><span class="pre">Skill</span></code>/frontmatter dict.</p>
+<p>Accepts the several shapes coact callers have on hand:</p>
+<ul class="simple">
+<li><p>a <code class="xref py py-class docutils literal notranslate"><span class="pre">Skill</span></code> (uses its <code class="docutils literal notranslate"><span class="pre">source_path</span></code> to re-read the raw
+frontmatter, since <code class="docutils literal notranslate"><span class="pre">Skill.meta</span></code> drops the <code class="docutils literal notranslate"><span class="pre">coact</span></code> key);</p></li>
+<li><p>a filesystem path to a skill directory or a SKILL.md file;</p></li>
+<li><p>raw SKILL.md text;</p></li>
+<li><p>an already-parsed frontmatter dict.</p></li>
+</ul>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_coact_meta</span><span class="p">(</span><span class="s2">&quot;---</span><span class="se">\n</span><span class="s2">name: x</span><span class="se">\n</span><span class="s2">coact:</span><span class="se">\n</span><span class="s2">  model: haiku</span><span class="se">\n</span><span class="s2">---</span><span class="se">\n</span><span class="s2">body&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">model</span>
+<span class="go">&#39;haiku&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.register_validator">
+<span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">register_validator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/coact/frontmatter.html#register_validator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.register_validator" title="Link to this definition"></a></dt>
+<dd><p>Register the coact-block validator into <code class="docutils literal notranslate"><span class="pre">skill.create.validators</span></code> (idempotent).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.to_claude_agent_md">
+<span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">to_claude_agent_md</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="coact/base.html#coact.base.AgentDefinition" title="coact.base.AgentDefinition"><span class="pre">AgentDefinition</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/coact/emit.html#to_claude_agent_md"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.to_claude_agent_md" title="Link to this definition"></a></dt>
+<dd><p>Serialize an agent to <code class="docutils literal notranslate"><span class="pre">.claude/agents/&lt;name&gt;.md</span></code> content.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ad</span> <span class="o">=</span> <span class="n">AgentDefinition</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Analyze.&#39;</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="s1">&#39;You are...&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">md</span> <span class="o">=</span> <span class="n">to_claude_agent_md</span><span class="p">(</span><span class="n">ad</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">md</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;---&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;name: ux&#39;</span> <span class="ow">in</span> <span class="n">md</span> <span class="ow">and</span> <span class="s1">&#39;You are...&#39;</span> <span class="ow">in</span> <span class="n">md</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.validate_coact_block">
+<span class="sig-prename descclassname"><span class="pre">coact.</span></span><span class="sig-name descname"><span class="pre">validate_coact_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skill_or_meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Skill</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/coact/frontmatter.html#validate_coact_block"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.validate_coact_block" title="Link to this definition"></a></dt>
+<dd><p>Validate a <code class="docutils literal notranslate"><span class="pre">coact:</span></code> block, returning issue strings (empty = valid/absent).</p>
+<p>Additive: a skill with no <code class="docutils literal notranslate"><span class="pre">coact:</span></code> block passes trivially. Checks key
+spelling, <code class="docutils literal notranslate"><span class="pre">model</span></code>/<code class="docutils literal notranslate"><span class="pre">memory</span></code> enums, <code class="docutils literal notranslate"><span class="pre">mcp</span></code> entry shape, and that
+<code class="docutils literal notranslate"><span class="pre">returns</span></code> carries exactly one of <code class="docutils literal notranslate"><span class="pre">schema_ref</span></code>/<code class="docutils literal notranslate"><span class="pre">json_schema</span></code>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate_coact_block</span><span class="p">({</span><span class="s1">&#39;coact&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="s1">&#39;gpt-4&#39;</span><span class="p">}})</span>
+<span class="go">[&quot;coact.model: &#39;gpt-4&#39; is not one of sonnet, opus, haiku, inherit&quot;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate_coact_block</span><span class="p">({</span><span class="s1">&#39;coact&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;mcp&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;functions&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;f&#39;</span><span class="p">]}]}})</span>
+<span class="go">[&quot;coact.mcp[0]: missing required &#39;module&#39;&quot;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate_coact_block</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;ok&#39;</span><span class="p">})</span>
+<span class="go">[]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to coact’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="coact/base.html" class="btn btn-neutral float-right" title="coact.base" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

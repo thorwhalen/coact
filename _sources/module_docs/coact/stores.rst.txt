@@ -1,0 +1,4 @@
+coact.stores
+============
+.. automodule:: coact.stores
+   :members:
