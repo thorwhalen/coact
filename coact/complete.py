@@ -33,12 +33,17 @@ SkillSource = Union[str, Path, Skill]
 
 
 def plan_completion(
-    source: SkillSource, *, policy: Optional[CompletionPolicy] = None
+    source: SkillSource,
+    *,
+    policy: Optional[CompletionPolicy] = None,
+    llm: object = None,
 ) -> AgentPlan:
     """Plan the skill→agent completion, recording the provenance of every field.
 
     Accepts a :class:`~skill.base.Skill`, a path to a skill directory / SKILL.md,
-    or a skill key/name resolvable in the local store or project skills.
+    or a skill key/name resolvable in the local store or project skills. Pass an
+    optional ``llm`` (any ``callable(str)->str``, an ``aw`` ``StepConfig``, or a
+    model name) to *draft* a richer persona — the mechanical path needs none.
 
     >>> from skill.base import Skill, SkillMeta
     >>> s = Skill(meta=SkillMeta(name='auditor', description='Audit a bundle for issues.'), body='steps')
@@ -129,6 +134,7 @@ def plan_completion(
             return_contract=return_contract,
             tools=tools,
             extra_skills=[s for s in skills if s != name],
+            llm=llm,
         )
     prov.append(FieldProvenance("prompt", persona, persona_src, "system prompt / persona"))
 
@@ -162,7 +168,10 @@ def plan_completion(
 
 
 def complete(
-    source: SkillSource, *, policy: Optional[CompletionPolicy] = None
+    source: SkillSource,
+    *,
+    policy: Optional[CompletionPolicy] = None,
+    llm: object = None,
 ) -> AgentDefinition:
     """Complete a skill into an :class:`AgentDefinition` (the plan's agent).
 
@@ -172,7 +181,7 @@ def complete(
     >>> ad.name, ad.skills, ('Return contract' in ad.prompt)
     ('ux', ['ux'], True)
     """
-    return plan_completion(source, policy=policy).agent
+    return plan_completion(source, policy=policy, llm=llm).agent
 
 
 # ---------------------------------------------------------------------------
