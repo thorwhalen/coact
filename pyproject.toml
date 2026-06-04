@@ -159,8 +159,13 @@ force_run = false
 sdist = true
 wheel = true
 
+# Publishing is marker-gated: enabled=false means the publish job is SKIPPED on
+# routine pushes (keeping main green) and runs ONLY when a commit message
+# contains publish_marker ("[publish]"). Releasing coact to PyPI is a deliberate,
+# owner-initiated act — flip the marker into a commit (and ensure PYPI_PASSWORD
+# is set on the repo) when you mean to ship. See DECISIONS.md D11.
 [tool.wads.ci.publish]
-enabled = true
+enabled = false
 skip_ci_marker = "[skip ci]"
 publish_marker = "[publish]"
 
