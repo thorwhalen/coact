@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/complete.html">coact.complete</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/emit.html">coact.emit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/llm.html">coact.llm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize.html">coact.realize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/stores.html">coact.stores</a></li>
@@ -120,12 +121,17 @@
 <div class="viewcode-block" id="plan_completion">
 <a class="viewcode-back" href="../../module_docs/coact/complete.html#coact.plan_completion">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">plan_completion</span><span class="p">(</span>
-    <span class="n">source</span><span class="p">:</span> <span class="n">SkillSource</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">policy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletionPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">SkillSource</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">policy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletionPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">llm</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AgentPlan</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plan the skill→agent completion, recording the provenance of every field.</span>
 
 <span class="sd">    Accepts a :class:`~skill.base.Skill`, a path to a skill directory / SKILL.md,</span>
-<span class="sd">    or a skill key/name resolvable in the local store or project skills.</span>
+<span class="sd">    or a skill key/name resolvable in the local store or project skills. Pass an</span>
+<span class="sd">    optional ``llm`` (any ``callable(str)-&gt;str``, an ``aw`` ``StepConfig``, or a</span>
+<span class="sd">    model name) to *draft* a richer persona — the mechanical path needs none.</span>
 
 <span class="sd">    &gt;&gt;&gt; from skill.base import Skill, SkillMeta</span>
 <span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name=&#39;auditor&#39;, description=&#39;Audit a bundle for issues.&#39;), body=&#39;steps&#39;)</span>
@@ -216,6 +222,7 @@
             <span class="n">return_contract</span><span class="o">=</span><span class="n">return_contract</span><span class="p">,</span>
             <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
             <span class="n">extra_skills</span><span class="o">=</span><span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">skills</span> <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="n">name</span><span class="p">],</span>
+            <span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">&quot;prompt&quot;</span><span class="p">,</span> <span class="n">persona</span><span class="p">,</span> <span class="n">persona_src</span><span class="p">,</span> <span class="s2">&quot;system prompt / persona&quot;</span><span class="p">))</span>
 
@@ -252,7 +259,10 @@
 <div class="viewcode-block" id="complete">
 <a class="viewcode-back" href="../../module_docs/coact/complete.html#coact.complete">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span>
-    <span class="n">source</span><span class="p">:</span> <span class="n">SkillSource</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">policy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletionPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">SkillSource</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">policy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletionPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">llm</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AgentDefinition</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Complete a skill into an :class:`AgentDefinition` (the plan&#39;s agent).</span>
 
@@ -262,7 +272,7 @@
 <span class="sd">    &gt;&gt;&gt; ad.name, ad.skills, (&#39;Return contract&#39; in ad.prompt)</span>
 <span class="sd">    (&#39;ux&#39;, [&#39;ux&#39;], True)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">plan_completion</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span><span class="o">.</span><span class="n">agent</span></div>
+    <span class="k">return</span> <span class="n">plan_completion</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">,</span> <span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">)</span><span class="o">.</span><span class="n">agent</span></div>
 
 
 
