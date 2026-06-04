@@ -178,42 +178,53 @@ def _as_source_list(skills_source: Path | str | list | None) -> list[Path]:
     return [Path(skills_source)]
 
 
+def _find_skill_source(name: str, sources) -> Optional[Path]:
+    """Find a skill's source dir: each ``sources`` dir first, then store/project."""
+    for src_dir in sources:
+        candidate = Path(src_dir) / name
+        if (candidate / "SKILL.md").exists():
+            return candidate
+    try:
+        return _resolve_skill(name).source_path
+    except FileNotFoundError:
+        return None
+
+
 def _link_skill(
     name: str,
     skills_target: Path,
     *,
-    sources: list[Path] = (),
+    sources=(),
     force: bool = False,
 ) -> Optional[Path]:
     """Symlink one referenced skill into ``skills_target``; None if unresolved.
 
     Resolution order: each ``sources`` dir (``<source>/<name>/SKILL.md``), then
-    by name via the local store / project (``_resolve_skill``). Point-don't-copy:
-    symlink, never copy the skill body. If already present it is left as-is.
+    by name via the local store / project. Point-don't-copy: symlink, never copy.
+    Safety invariants: a **real** (non-symlink) entry already in place is the
+    user's and is never touched; a working coact symlink is kept unless ``force``;
+    the source is resolved **before** any existing link is removed, so a failed
+    re-link can never destroy a previously working one; a dangling symlink is
+    re-linked rather than reported as discoverable.
     """
     dest = skills_target / name
-    if dest.exists() or dest.is_symlink():
-        if not force:
-            return dest  # already discoverable
-        if dest.is_symlink() or dest.is_file():
-            dest.unlink()
-        else:
-            shutil.rmtree(dest)
 
-    source: Optional[Path] = None
-    for src_dir in sources:
-        candidate = Path(src_dir) / name
-        if (candidate / "SKILL.md").exists():
-            source = candidate
-            break
-    if source is None:
-        try:
-            source = _resolve_skill(name).source_path
-        except FileNotFoundError:
-            source = None
-    if source is None:
-        return None
+    # A real directory/file already in place belongs to the user — leave it.
+    if dest.exists() and not dest.is_symlink():
+        return dest
+    # A working symlink we needn't replace.
+    if dest.is_symlink() and dest.exists() and not force:
+        return dest
 
+    source = _find_skill_source(name, sources)
+    if source is None:
+        # Can't resolve a replacement: never delete; report only if it resolves.
+        return dest if dest.exists() else None
+
+    # Safe to (re)create the link now that we have a valid source. At this point
+    # any existing dest is a symlink (good/broken) — real entries returned above.
+    if dest.is_symlink():
+        dest.unlink()
     dest.parent.mkdir(parents=True, exist_ok=True)
     os.symlink(Path(source).resolve(), dest)
     return dest
@@ -271,8 +282,12 @@ class RunnableAgent:
         if self.agent_def.permission_mode:
             kwargs["permission_mode"] = self.agent_def.permission_mode
         # wire the return contract to the SDK's structured-output option (D6).
-        if self.agent_def.returns.json_schema:
-            kwargs["output_format"] = self.agent_def.returns.json_schema
+        # The SDK only honors output_format when it is {"type": "json_schema",
+        # "schema": <schema>}; a bare schema is silently ignored. `.schema()`
+        # also resolves a schema_ref into a canonical JSON Schema.
+        schema = self.agent_def.returns.schema()
+        if schema:
+            kwargs["output_format"] = {"type": "json_schema", "schema": schema}
         return ClaudeAgentOptions(**_filter_kwargs(ClaudeAgentOptions, kwargs))
 
     def execute(

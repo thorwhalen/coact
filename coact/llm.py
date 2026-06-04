@@ -103,17 +103,52 @@ def structured(
 
 
 def _extract_json(text: str) -> Any:
-    """Pull a JSON object out of an LLM reply (tolerating code fences/prose)."""
+    """Pull a JSON object out of an LLM reply (tolerating code fences/trailing prose)."""
     text = text.strip()
     fence = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
     candidate = fence.group(1) if fence else text
     try:
         return json.loads(candidate)
     except (ValueError, TypeError):
-        brace = re.search(r"\{.*\}", candidate, re.DOTALL)
-        if brace:
+        obj = _first_balanced_object(candidate)
+        if obj is not None:
             try:
-                return json.loads(brace.group(0))
+                return json.loads(obj)
             except (ValueError, TypeError):
                 return None
+    return None
+
+
+def _first_balanced_object(s: str) -> Optional[str]:
+    """Return the first brace-balanced ``{...}`` substring (ignoring braces in strings).
+
+    Robust to a valid object followed by prose that itself contains braces — a
+    single greedy ``\\{.*\\}`` would over-capture to the last ``}`` and fail.
+
+    >>> _first_balanced_object('Result: {"a": 1}. Note: use {braces}.')
+    '{"a": 1}'
+    """
+    start = s.find("{")
+    if start < 0:
+        return None
+    depth = 0
+    in_str = False
+    escaped = False
+    for i in range(start, len(s)):
+        ch = s[i]
+        if in_str:
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == '"':
+                in_str = False
+        elif ch == '"':
+            in_str = True
+        elif ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return s[start : i + 1]
     return None

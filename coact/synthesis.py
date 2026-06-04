@@ -116,7 +116,6 @@ def synthesize_persona(
     >>> 'ux-analyst' in persona and 'Return contract' in persona and src == 'synthesized-template'
     True
     """
-    name = skill.meta.name
     tool_note = (
         f"Stay within your tool allowlist: {', '.join(tools)}."
         if tools

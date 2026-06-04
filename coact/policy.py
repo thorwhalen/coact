@@ -15,7 +15,8 @@ code (open-closed).
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, replace
+import re
+from dataclasses import dataclass, replace
 from typing import Optional
 
 from skill.base import Skill
@@ -46,13 +47,16 @@ class CompletionPolicy:
     default_memory: Optional[MemoryScope] = None  # opt-in; None = no memory
     default_tools: tuple[str, ...] = ("Read", "Grep", "Glob")
     read_only_tools: frozenset[str] = _READ_ONLY_TOOLS
+    #: Regex patterns (matched case-insensitively against the description) that
+    #: route to opus. Word-bounded so 'plan.' matches but 'designer'/'designate'
+    #: don't. Data, not code — extend or replace per policy.
     opus_keywords: tuple[str, ...] = (
-        "orchestrat",
-        "architect",
-        "coordinat",
-        "plan ",
-        "design",
-        "review",
+        r"orchestrat\w*",
+        r"architect\w*",
+        r"coordinat\w*",
+        r"\bplan(?:ning|s|ned)?\b",
+        r"\bdesign(?:s|ing|ed)?\b",
+        r"review\w*",
     )
     opus_skill_threshold: int = 3
     #: body substrings that imply the agent writes/edits files.
@@ -83,7 +87,7 @@ class CompletionPolicy:
         """Route to a model from the effective tools / description / skill count."""
         desc = (description or "").lower()
         # opus: orchestration/architecture, or many skills.
-        if any(k in desc for k in self.opus_keywords):
+        if any(re.search(pattern, desc) for pattern in self.opus_keywords):
             return "opus", "orchestration/architecture keyword in description"
         if n_skills >= self.opus_skill_threshold:
             return "opus", f"references ≥{self.opus_skill_threshold} skills"

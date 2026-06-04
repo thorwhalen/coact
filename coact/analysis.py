@@ -225,6 +225,8 @@ def inventory(project: Path | str | None = None) -> Inventory:
                 continue
             for entry in meta.mcp:
                 module = entry.get("module")
+                if not module:
+                    continue
                 for fn in entry.get("functions") or []:
                     mcp_tools.append(f"{child.name}: {module}:{fn}")
 
