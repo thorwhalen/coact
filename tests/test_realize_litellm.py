@@ -176,3 +176,144 @@ def test_litellm_installed_matches_extra():
     # documents that the backend's real path needs the optional extra
     has = importlib.util.find_spec("litellm") is not None
     assert isinstance(has, bool)
+
+
+# --- review fixes -----------------------------------------------------------
+
+
+def test_response_format_falls_back_to_prompt_on_provider_error():
+    # a provider that rejects json_schema response_format -> retry once without it
+    schema = {"type": "object", "properties": {"a": {"type": "string"}}}
+    seen = []
+
+    def flaky(**kwargs):
+        seen.append("response_format" in kwargs)
+        if "response_format" in kwargs:
+            raise RuntimeError("this model does not support response_format")
+        return _resp('{"a": "ok"}')
+
+    r = realize(_agent(schema=schema), backend="litellm", completion=flaky)
+    artifact, info = r.execute("task")
+    assert artifact == {"a": "ok"}
+    assert seen == [True, False]  # tried with response_format, then without
+    assert info["response_format_used"] is False
+
+
+def test_response_format_used_flag_true_on_success():
+    schema = {"type": "object", "properties": {"a": {"type": "string"}}}
+    r = realize(_agent(schema=schema), backend="litellm", completion=lambda **k: _resp('{"a":"x"}'))
+    _, info = r.execute("task")
+    assert info["response_format_used"] is True
+
+
+def test_runnable_llm_agent_copies_model_map_on_construction():
+    external = {"sonnet": "openai/gpt-4o"}
+    r = RunnableLLMAgent(_agent(model="sonnet"), model_map=external)
+    external["sonnet"] = "mutated-externally"  # must NOT affect the agent
+    assert r.resolve_model() == "openai/gpt-4o"
+    r.model_map["sonnet"] = "internal"  # must NOT leak back to the caller's dict
+    assert external["sonnet"] == "mutated-externally"
+
+
+def test_resolve_model_honors_none_key_in_map_else_default():
+    assert RunnableLLMAgent(_agent(model=None)).resolve_model() == DEFAULT_MODEL
+    mapped = RunnableLLMAgent(_agent(model=None), model_map={None: "ollama/llama3"})
+    assert mapped.resolve_model() == "ollama/llama3"
+
+
+def test_non_string_input_rendered_as_json_not_repr():
+    msgs = RunnableLLMAgent(_agent()).build_messages({"task": "go", "n": 1})
+    assert msgs[-1]["content"] == '{"task": "go", "n": 1}'
+
+
+def test_try_json_robust_variants():
+    from coact.realize_litellm import _try_json
+
+    assert _try_json('```json\n{"a": 1}\n```') == {"a": 1}
+    assert _try_json('```json{"a": 1}```') == {"a": 1}  # no newline after lang tag
+    assert _try_json('here is the result: {"a": 1} done') == {"a": 1}  # span extraction
+    assert _try_json(None) is None
+    assert _try_json(123) is None
+
+
+def test_execute_uses_default_completion_and_checks_requirements(monkeypatch):
+    import importlib
+
+    # NB: `coact.realize_litellm` the attribute is the *function* (re-exported in
+    # coact/__init__), so import the module explicitly to patch its globals.
+    m = importlib.import_module("coact.realize_litellm")
+
+    calls = {}
+
+    def fake_check(modules, *, feature):
+        calls["modules"] = modules
+        calls["feature"] = feature
+
+    def fake_default(**kwargs):
+        calls["completion"] = True
+        return _resp("ok")
+
+    monkeypatch.setattr(m, "check_requirements", fake_check)
+    monkeypatch.setattr(m, "_default_litellm_completion", fake_default)
+    r = realize(_agent(), backend="litellm")  # completion=None -> default path
+    artifact, _ = r.execute("x")
+    assert artifact == "ok"
+    assert calls["modules"] == {"litellm": "litellm"}
+    assert "litellm" in calls["feature"]
+    assert calls["completion"] is True
+
+
+def test_schema_ref_resolves_into_messages():
+    ad = AgentDefinition(
+        name="x", description="d", prompt="P",
+        returns=ReturnContract(ref="coact.base:ReturnContract"),
+    )
+    msgs = RunnableLLMAgent(ad).build_messages("t")
+    assert "Return contract" in msgs[0]["content"]
+
+
+def test_unresolvable_schema_ref_omits_instruction():
+    ad = AgentDefinition(
+        name="x", description="d", prompt="P",
+        returns=ReturnContract(ref="nope.not:Real"),
+    )
+    msgs = RunnableLLMAgent(ad).build_messages("t")
+    assert "Return contract" not in msgs[0]["content"]
+
+
+def test_no_instruction_when_no_return_contract():
+    msgs = RunnableLLMAgent(_agent()).build_messages("t")
+    assert all("Return contract" not in m["content"] for m in msgs)
+
+
+def test_realize_litellm_passes_through_agent_definition():
+    ad = _agent()
+    r = realize(ad, backend="litellm", completion=lambda **k: _resp("x"))
+    assert r.agent_def is ad
+
+
+def test_litellm_content_malformed_returns_none():
+    from types import SimpleNamespace
+
+    assert _litellm_content(SimpleNamespace(choices=[])) is None
+    assert _litellm_content(SimpleNamespace(choices=[SimpleNamespace(message=None)])) is None
+    assert _litellm_content({"choices": [{}]}) is None
+
+
+def test_extract_returns_already_parsed_structured_content():
+    from types import SimpleNamespace
+
+    raw = SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content={"a": 1}))])
+    assert _extract_litellm_artifact(raw, has_schema=True) == {"a": 1}
+
+
+def test_execute_accepts_and_ignores_context():
+    captured = {}
+
+    def comp(**kwargs):
+        captured.update(kwargs)
+        return _resp("ok")
+
+    r = realize(_agent(), backend="litellm", completion=comp)
+    artifact, _ = r.execute("t", context={"k": "v"})
+    assert artifact == "ok" and "context" not in captured

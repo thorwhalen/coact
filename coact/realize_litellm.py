@@ -75,10 +75,20 @@ class RunnableLLMAgent:
     #: Also pass the schema as LiteLLM ``response_format`` (in addition to the prompt).
     use_response_format: bool = True
 
+    def __post_init__(self) -> None:
+        # Defensive copy: a caller's dict (passed directly, bypassing realize_litellm)
+        # must not be aliased into the agent — nor mutated by it.
+        self.model_map = dict(self.model_map)
+
     def resolve_model(self) -> str:
-        """Map the definition's model selector to a LiteLLM model string."""
+        """Map the definition's model selector to a LiteLLM model string.
+
+        A mapped selector wins; an explicit LiteLLM string in ``model`` is used
+        verbatim; otherwise ``default_model``. The lookup covers any hashable
+        selector (so a ``model_map`` entry always applies if present).
+        """
         model = self.agent_def.model
-        if model and model in self.model_map:
+        if model in self.model_map:
             return self.model_map[model]
         return model or self.default_model
 
@@ -88,7 +98,7 @@ class RunnableLLMAgent:
         schema = self.agent_def.returns.schema()
         if schema:
             system = (system + "\n\n" + _json_return_instruction(schema)).strip()
-        user = input_data if isinstance(input_data, str) else repr(input_data)
+        user = input_data if isinstance(input_data, str) else _to_user_text(input_data)
         messages: list[dict] = []
         if system:
             messages.append({"role": "system", "content": system})
@@ -110,14 +120,20 @@ class RunnableLLMAgent:
         return kwargs
 
     def execute(self, input_data: Any, context: Any = None) -> tuple[Any, dict[str, Any]]:
-        """Run the agent over ``input_data``; return ``(artifact, info)`` (aw protocol)."""
+        """Run the agent over ``input_data``; return ``(artifact, info)`` (aw protocol).
+
+        ``context`` is accepted for ``aw.AgenticStep`` compatibility and ignored by
+        this backend. If a provider rejects the structured ``response_format``, the
+        call is retried once **without** it — the schema is still requested via the
+        system-prompt instruction (the belt-and-suspenders fallback made functional).
+        """
         completion = self.completion
         if completion is None:
             # Only the real path needs litellm; an injected completion does not.
             check_requirements({"litellm": "litellm"}, feature="realize(backend='litellm')")
             completion = _default_litellm_completion
         kwargs = self.build_kwargs(input_data)
-        raw = completion(**kwargs)
+        raw, response_format_used = _complete_with_fallback(completion, kwargs)
         has_schema = bool(self.agent_def.returns.schema())
         artifact = _extract_litellm_artifact(raw, has_schema=has_schema)
         info = {
@@ -125,9 +141,38 @@ class RunnableLLMAgent:
             "model": kwargs["model"],
             "backend": "litellm",
             "structured": has_schema,
+            "response_format_used": response_format_used,
             "raw": raw,
         }
         return artifact, info
+
+
+def _to_user_text(value: Any) -> str:
+    """Render a non-string ``input_data`` as the user message — JSON when possible.
+
+    JSON beats ``repr`` for a schema-aware model (``{"k": "v"}`` not ``{'k': 'v'}``);
+    falls back to ``repr`` for anything not JSON-serializable.
+    """
+    try:
+        return json.dumps(value)
+    except (TypeError, ValueError):
+        return repr(value)
+
+
+def _complete_with_fallback(completion: Callable[..., Any], kwargs: dict) -> tuple[Any, bool]:
+    """Call ``completion``; if ``response_format`` is rejected, retry once without it.
+
+    Returns ``(response, response_format_used)``. The structured schema is still
+    requested via the system-prompt instruction, so dropping ``response_format`` on a
+    provider that doesn't support it degrades gracefully instead of hard-failing.
+    """
+    if "response_format" not in kwargs:
+        return completion(**kwargs), False
+    try:
+        return completion(**kwargs), True
+    except Exception:
+        retry = {k: v for k, v in kwargs.items() if k != "response_format"}
+        return completion(**retry), False
 
 
 def _default_litellm_completion(**kwargs: Any) -> Any:
@@ -168,22 +213,40 @@ def _litellm_content(raw: Any) -> Optional[str]:
     return content
 
 
-def _try_json(content: str) -> Any:
-    """Best-effort parse of JSON content, tolerating a ```json fenced block."""
+def _try_json(content: Any) -> Any:
+    """Best-effort parse of JSON content, tolerating a ```` ```json ```` fenced block.
+
+    Tries, in order: the raw string; the fenced block's body (handling both a
+    newline after the language tag and the malformed no-newline form); and finally
+    the first ``{...}`` / ``[...]`` span found. Returns ``None`` on non-strings or
+    when nothing parses.
+    """
     if not isinstance(content, str):
         return None
-    try:
-        return json.loads(content)
-    except (ValueError, TypeError):
-        pass
     stripped = content.strip()
+
+    candidates: list[str] = [stripped]
     if stripped.startswith("```"):
-        inner = stripped.strip("`")
-        inner = inner[inner.find("\n") + 1 :] if "\n" in inner else inner
+        body = stripped[3:]
+        body = body.rsplit("```", 1)[0]  # drop the closing fence
+        if "\n" in body:
+            # the first line is the (optional) language tag; the rest is the payload
+            candidates.append(body.split("\n", 1)[1])
+        candidates.append(body)  # no-newline form, e.g. ```json{...}
+
+    for candidate in candidates:
         try:
-            return json.loads(inner)
+            return json.loads(candidate)
         except (ValueError, TypeError):
-            return None
+            continue
+    # last resort: the first balanced-looking {...} or [...] span
+    for opener, closer in (("{", "}"), ("[", "]")):
+        start, end = stripped.find(opener), stripped.rfind(closer)
+        if 0 <= start < end:
+            try:
+                return json.loads(stripped[start : end + 1])
+            except (ValueError, TypeError):
+                continue
     return None
 
 
