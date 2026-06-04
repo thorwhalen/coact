@@ -58,5 +58,8 @@ def test_store_delitem_missing_raises_keyerror(tmp_path):
 
 
 def test_store_repr(tmp_path):
-    r = repr(AgentStore(root=tmp_path))
-    assert "AgentStore" in r and str(tmp_path) in r
+    # Use repr(root) for the path so the assertion is separator-independent:
+    # on Windows repr(WindowsPath) renders with forward slashes, unlike str(path).
+    store = AgentStore(root=tmp_path)
+    r = repr(store)
+    assert "AgentStore" in r and "root=" in r and repr(store.root) in r
