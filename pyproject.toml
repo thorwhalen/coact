@@ -14,7 +14,10 @@ keywords = []
 authors = [
     { name = "Thor Whalen" },
 ]
-dependencies = []
+dependencies = [
+    "skill",
+    "argh",
+]
 
 [project.license]
 text = "mit"
@@ -24,7 +27,18 @@ Homepage = "https://github.com/thorwhalen/coact"
 Repository = "https://github.com/thorwhalen/coact"
 Documentation = "https://thorwhalen.github.io/coact"
 
+[project.entry-points."skill.validators"]
+coact_frontmatter = "coact.frontmatter:_coact_validator"
+
 [project.optional-dependencies]
+sdk = [
+    "claude-agent-sdk",
+    "aw",
+]
+mcp = [
+    "py2mcp",
+    "fastmcp",
+]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
