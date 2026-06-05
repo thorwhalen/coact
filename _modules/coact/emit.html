@@ -121,7 +121,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">skill.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span><span class="p">,</span> <span class="n">ReturnContract</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">coact.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_requirements</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">agent_filename</span><span class="p">,</span> <span class="n">check_requirements</span>
 
 <span class="c1">#: Registry of emit targets: ``AgentDefinition -&gt; serialized form`` (str or dict).</span>
 <span class="n">emitters</span><span class="p">:</span> <span class="n">Registry</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">AgentDefinition</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;emitters&quot;</span><span class="p">)</span>
@@ -134,7 +134,6 @@
     <span class="s2">&quot;mcp_servers&quot;</span><span class="p">:</span> <span class="s2">&quot;mcpServers&quot;</span><span class="p">,</span>
     <span class="s2">&quot;permission_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;permissionMode&quot;</span><span class="p">,</span>
 <span class="p">}</span>
-<span class="n">_HOST_TO_SNAKE</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">_SNAKE_TO_HOST</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
 
 <span class="c1"># ---------------------------------------------------------------------------</span>
@@ -383,7 +382,7 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown emit target: </span><span class="si">{</span><span class="n">target</span><span class="si">!r}</span><span class="s2">. Available: </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">emitter</span><span class="p">(</span><span class="n">ad</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">dest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.md&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span> <span class="o">/</span> <span class="n">agent_filename</span><span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># rejects path-traversal names</span>
         <span class="n">out</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">out</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span>

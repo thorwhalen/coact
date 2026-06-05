@@ -138,7 +138,7 @@
     <span class="n">render_tool_return_instruction</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.stores</span><span class="w"> </span><span class="kn">import</span> <span class="n">agents_dir</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">coact.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_requirements</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">agent_filename</span><span class="p">,</span> <span class="n">check_requirements</span>
 
 <span class="n">RealizeTarget</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">AgentDefinition</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Skill</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span>
 
@@ -265,14 +265,22 @@
     <span class="n">result</span> <span class="o">=</span> <span class="n">RealizedHost</span><span class="p">(</span>
         <span class="n">agents_dir</span><span class="o">=</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">skills_dir</span><span class="o">=</span><span class="n">skills_target</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span>
     <span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ad</span> <span class="ow">in</span> <span class="n">agents</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">agents</span><span class="p">[</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">agent_filename</span><span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
         <span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">ad</span> <span class="ow">in</span> <span class="n">agents</span><span class="p">:</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">agents</span><span class="p">[</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">out_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.md&quot;</span>
-            <span class="k">if</span> <span class="n">dry_run</span>
-            <span class="k">else</span> <span class="n">emit_agent</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="s2">&quot;claude-agents-md&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">out_dir</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="c1"># Render every agent up-front (pure, and validates each name) so a</span>
+        <span class="c1"># predictable failure — an unsafe name, an emit error — aborts before any</span>
+        <span class="c1"># file is written, rather than leaving a half-written agents/ dir. D5</span>
+        <span class="c1"># promises no transactional rollback, but partial output is avoidable.</span>
+        <span class="n">rendered</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">agent_filename</span><span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">emit_agent</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="s2">&quot;claude-agents-md&quot;</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">ad</span> <span class="ow">in</span> <span class="n">agents</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">rendered</span><span class="p">:</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">agents</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
 
     <span class="k">if</span> <span class="n">link</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>

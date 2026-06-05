@@ -322,6 +322,16 @@
                     <span class="k">continue</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;module&quot;</span><span class="p">):</span>
                     <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;coact.mcp[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: missing required &#39;module&#39;&quot;</span><span class="p">)</span>
+                <span class="n">functions</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;functions&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">functions</span><span class="p">:</span>
+                    <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;coact.mcp[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: missing required &#39;functions&#39; &quot;</span>
+                        <span class="s2">&quot;(a non-empty list of function names)&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="n">_is_list_of_str</span><span class="p">(</span><span class="n">functions</span><span class="p">):</span>
+                    <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;coact.mcp[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: &#39;functions&#39; must be a list of strings&quot;</span>
+                    <span class="p">)</span>
 
     <span class="n">returns</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;returns&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">returns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

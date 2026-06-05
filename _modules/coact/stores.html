@@ -109,6 +109,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.emit</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_claude_agent_md</span><span class="p">,</span> <span class="n">to_claude_agent_md</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">agent_filename</span>
 
 
 <div class="viewcode-block" id="agents_dir">
@@ -168,7 +169,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.md&quot;</span>
+        <span class="c1"># agent_filename rejects path-traversal keys (``../x``) so a crafted name</span>
+        <span class="c1"># cannot read or write outside ``self.root`` (CWE-22).</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="n">agent_filename</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AgentDefinition</span><span class="p">:</span>
         <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -195,7 +198,12 @@
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>  <span class="c1"># an unsafe key is simply not a member</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(root=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="si">!r}</span><span class="s2">)&quot;</span></div>

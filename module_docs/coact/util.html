@@ -65,7 +65,9 @@
 <li class="toctree-l1"><a class="reference internal" href="stores.html">coact.stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="synthesis.html">coact.synthesis</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">coact.util</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#coact.util.agent_filename"><code class="docutils literal notranslate"><span class="pre">agent_filename()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.util.check_requirements"><code class="docutils literal notranslate"><span class="pre">check_requirements()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.util.first_balanced_span"><code class="docutils literal notranslate"><span class="pre">first_balanced_span()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.util.import_object"><code class="docutils literal notranslate"><span class="pre">import_object()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.util.to_kebab_case"><code class="docutils literal notranslate"><span class="pre">to_kebab_case()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.util.to_snake_case"><code class="docutils literal notranslate"><span class="pre">to_snake_case()</span></code></a></li>
@@ -104,6 +106,26 @@
 for the optional-dependency backends (Agent SDK, py2mcp/FastMCP, an LLM
 provider). Kept dependency-free so every other coact module can import it.</p>
 <dl class="py function">
+<dt class="sig sig-object py" id="coact.util.agent_filename">
+<span class="sig-prename descclassname"><span class="pre">coact.util.</span></span><span class="sig-name descname"><span class="pre">agent_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/coact/util.html#agent_filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.util.agent_filename" title="Link to this definition"></a></dt>
+<dd><p>Return the safe <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;.md</span></code> filename for an agent, rejecting unsafe names.</p>
+<p>Agent names become files under <code class="docutils literal notranslate"><span class="pre">.claude/agents/</span></code>; a name carrying a path
+separator or <code class="docutils literal notranslate"><span class="pre">..</span></code> could escape that directory (CWE-22 path traversal) on
+write <em>or</em> read. Names must be a bare filename stem. Raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> on
+an empty, non-string, or path-bearing name — the check lives at the
+filesystem boundary so in-memory <a class="reference internal" href="base.html#coact.base.AgentDefinition" title="coact.base.AgentDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">AgentDefinition</span></code></a>s stay
+unconstrained.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">agent_filename</span><span class="p">(</span><span class="s1">&#39;ux-analyst&#39;</span><span class="p">)</span>
+<span class="go">&#39;ux-analyst.md&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">agent_filename</span><span class="p">(</span><span class="s1">&#39;../escape&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">unsafe agent name &#39;../escape&#39;: ...</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="coact.util.check_requirements">
 <span class="sig-prename descclassname"><span class="pre">coact.util.</span></span><span class="sig-name descname"><span class="pre">check_requirements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/coact/util.html#check_requirements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.util.check_requirements" title="Link to this definition"></a></dt>
 <dd><p>Verify optional dependencies are importable, else raise an actionable error.</p>
@@ -113,6 +135,25 @@ it (e.g. <code class="docutils literal notranslate"><span class="pre">{'claude_a
 missing — and, when some requirements <em>are</em> present, which ones — the
 package-UX convention for optional backends (informative, actionable errors).</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">check_requirements</span><span class="p">({</span><span class="s1">&#39;json&#39;</span><span class="p">:</span> <span class="s1">&#39;json&#39;</span><span class="p">},</span> <span class="n">feature</span><span class="o">=</span><span class="s1">&#39;noop&#39;</span><span class="p">)</span>  <span class="c1"># importable -&gt; no raise</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.util.first_balanced_span">
+<span class="sig-prename descclassname"><span class="pre">coact.util.</span></span><span class="sig-name descname"><span class="pre">first_balanced_span</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opener</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'{'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">closer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'}'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/coact/util.html#first_balanced_span"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.util.first_balanced_span" title="Link to this definition"></a></dt>
+<dd><p>Return the first depth-balanced <code class="docutils literal notranslate"><span class="pre">opener…closer</span></code> substring of <code class="docutils literal notranslate"><span class="pre">s</span></code>.</p>
+<p>Brackets inside double-quoted JSON strings are ignored, so a valid value
+followed by prose that itself contains brackets is not over-captured (a
+greedy <code class="docutils literal notranslate"><span class="pre">opener.*closer</span></code> would run to the <em>last</em> <code class="docutils literal notranslate"><span class="pre">closer</span></code> and fail to
+parse). Returns <code class="docutils literal notranslate"><span class="pre">None</span></code> when no balanced span starts in <code class="docutils literal notranslate"><span class="pre">s</span></code>. Shared by the
+LLM-reply JSON extractors (<a class="reference internal" href="llm.html#module-coact.llm" title="coact.llm"><code class="xref py py-mod docutils literal notranslate"><span class="pre">coact.llm</span></code></a>, <a class="reference internal" href="realize_litellm.html#module-coact.realize_litellm" title="coact.realize_litellm"><code class="xref py py-mod docutils literal notranslate"><span class="pre">coact.realize_litellm</span></code></a>).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">first_balanced_span</span><span class="p">(</span><span class="s1">&#39;Result: {&quot;a&quot;: 1}. Note: </span><span class="si">{braces}</span><span class="s1">.&#39;</span><span class="p">)</span>
+<span class="go">&#39;{&quot;a&quot;: 1}&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">first_balanced_span</span><span class="p">(</span><span class="s1">&#39;see [1, [2, 3]] end&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+<span class="go">&#39;[1, [2, 3]]&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">first_balanced_span</span><span class="p">(</span><span class="s1">&#39;no brackets here&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="go">True</span>
 </pre></div>
 </div>
 </dd></dl>
