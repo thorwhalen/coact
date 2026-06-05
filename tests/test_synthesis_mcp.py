@@ -134,5 +134,8 @@ body
 @pytest.mark.skipif(not _HAS_PY2MCP, reason="py2mcp not installed")
 def test_mcp_backend_errors_without_declared_tools():
     s = _skill()  # in-memory skill, no coact: mcp block
-    with pytest.raises(ValueError, match="No Python tools to expose"):
+    with pytest.raises(ValueError) as exc:
         realize(s, backend="mcp")
+    msg = str(exc.value)
+    # pin both the headline AND the actionable guidance pointing at the block
+    assert "No Python tools to expose" in msg and "coact: mcp:" in msg

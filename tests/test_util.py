@@ -9,7 +9,9 @@ from __future__ import annotations
 import pytest
 
 from coact.util import (
+    agent_filename,
     check_requirements,
+    first_balanced_span,
     import_object,
     to_kebab_case,
     to_snake_case,
@@ -79,3 +81,49 @@ def test_check_requirements_reports_present_vs_missing():
         )
     msg = str(exc.value)
     assert "already present: json" in msg and "not-real-pkg" in msg
+
+
+def test_agent_filename_safe_names():
+    assert agent_filename("ux-analyst") == "ux-analyst.md"
+    assert agent_filename("a.b") == "a.b.md"  # an interior dot is a fine stem
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "../escape",
+        "../../etc/passwd",
+        "sub/dir",
+        "a\\b",  # backslash separator (caught even on POSIX)
+        "/abs",
+        ".",
+        "..",
+        "",
+        "   ",
+        "with\x00null",
+    ],
+)
+def test_agent_filename_rejects_unsafe_names(name):
+    with pytest.raises(ValueError):
+        agent_filename(name)
+
+
+def test_agent_filename_rejects_non_string():
+    with pytest.raises(ValueError):
+        agent_filename(None)  # type: ignore[arg-type]
+
+
+def test_first_balanced_span_object_ignores_trailing_braces():
+    # The matcher stops at the first depth-0 close, not the last brace in prose.
+    assert first_balanced_span('prefix {"a": 1} } } suffix') == '{"a": 1}'
+    assert first_balanced_span('Result: {"a": {"b": 1}} trailing {x}') == '{"a": {"b": 1}}'
+
+
+def test_first_balanced_span_ignores_brackets_in_strings():
+    assert first_balanced_span('{"a": "}"}') == '{"a": "}"}'
+    assert first_balanced_span('see [1, [2, 3]] end', "[", "]") == "[1, [2, 3]]"
+
+
+def test_first_balanced_span_none_when_absent_or_unbalanced():
+    assert first_balanced_span("no braces here") is None
+    assert first_balanced_span('{"a": 1') is None  # never closes

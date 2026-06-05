@@ -70,6 +70,37 @@ def test_host_writes_agent_files(tmp_path):
     assert res.warnings == []
 
 
+def test_emit_agent_rejects_path_traversal_name(tmp_path):
+    from coact import emit_agent
+
+    dest = tmp_path / "agents"
+    with pytest.raises(ValueError, match="unsafe agent name"):
+        emit_agent(_agent("../escape", skills=()), "claude-agents-md", dest=dest)
+    assert not (tmp_path / "escape.md").exists()
+
+
+def test_host_aborts_before_writing_on_unsafe_name(tmp_path):
+    # Render-all-then-write: a bad name in the set must abort before ANY file is
+    # written — no half-written agents/ dir (issue #29).
+    dest = tmp_path / "agents"
+    agents = [_agent("good", skills=()), _agent("../evil", skills=())]
+    with pytest.raises(ValueError, match="unsafe agent name"):
+        realize_host(agents, dest=dest, link=False)
+    assert not (dest / "good.md").exists()
+    assert not (tmp_path / "evil.md").exists()
+
+
+def test_extract_artifact_falls_back_to_result_attribute():
+    # When no structured output and no text blocks remain, the final text rides on
+    # ResultMessage.result (issue #29 coverage gap).
+    from types import SimpleNamespace
+
+    from coact.realize import _extract_artifact
+
+    result_msg = SimpleNamespace(structured_output=None, content=None, result="final")
+    assert _extract_artifact([result_msg]) == "final"
+
+
 def test_host_links_referenced_skill(tmp_path):
     # a real skill on disk that the agent references
     skills_src = tmp_path / "src_skills" / "ux"
@@ -466,9 +497,11 @@ def test_sdk_execute_reports_return_mode_none_and_output_format():
     ad = _agent(
         returns=ReturnContract(json_schema={"type": "object", "properties": {}})
     )
-    _, info2 = realize(
+    artifact2, info2 = realize(
         ad, backend="sdk", return_mode="output_format", runner=lambda p, o: {"a": 1}
     ).execute("t", {})
+    # the raw-dict fallthrough returns the structured value as-is
+    assert artifact2 == {"a": 1}
     assert info2["return_mode"] == "output_format"
 
 

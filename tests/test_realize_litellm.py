@@ -236,6 +236,21 @@ def test_try_json_robust_variants():
     assert _try_json(123) is None
 
 
+def test_try_json_balanced_span_regressions():
+    # Regression: naive find/rfind mismatched openers/closers (issue #29).
+    from coact.realize_litellm import _try_json
+
+    # A valid object followed by stray closing braces in prose: the balanced
+    # matcher stops at the first depth-0 '}', so the object still parses (the old
+    # rfind('}') over-captured and returned None).
+    assert _try_json('result: {"a": 1} } } extra') == {"a": 1}
+    # An *invalid* object that merely contains a valid nested array must NOT yield
+    # the nested array (the old code returned [1, 2, 3], violating the contract).
+    assert _try_json("The result is {found: [1,2,3]}") is None
+    # A genuine top-level array still extracts.
+    assert _try_json("prose [1, 2, 3] tail") == [1, 2, 3]
+
+
 def test_execute_uses_default_completion_and_checks_requirements(monkeypatch):
     import importlib
 

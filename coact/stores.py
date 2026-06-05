@@ -17,6 +17,7 @@ from skill.util import find_project_root
 
 from coact.base import AgentDefinition
 from coact.emit import from_claude_agent_md, to_claude_agent_md
+from coact.util import agent_filename
 
 
 def agents_dir(
@@ -71,7 +72,9 @@ class AgentStore(MutableMapping[str, AgentDefinition]):
         self.root.mkdir(parents=True, exist_ok=True)
 
     def _path(self, name: str) -> Path:
-        return self.root / f"{name}.md"
+        # agent_filename rejects path-traversal keys (``../x``) so a crafted name
+        # cannot read or write outside ``self.root`` (CWE-22).
+        return self.root / agent_filename(name)
 
     def __getitem__(self, name: str) -> AgentDefinition:
         path = self._path(name)
@@ -98,7 +101,12 @@ class AgentStore(MutableMapping[str, AgentDefinition]):
         return sum(1 for _ in self)
 
     def __contains__(self, name: object) -> bool:
-        return isinstance(name, str) and self._path(name).exists()
+        if not isinstance(name, str):
+            return False
+        try:
+            return self._path(name).exists()
+        except ValueError:  # an unsafe key is simply not a member
+            return False
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}(root={self.root!r})"
