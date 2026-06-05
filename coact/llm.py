@@ -21,6 +21,8 @@ import json
 import re
 from typing import Any, Callable, Optional
 
+from coact.util import first_balanced_span
+
 LLMCallable = Callable[[str], str]
 
 
@@ -132,33 +134,11 @@ def _extract_json(text: Any) -> Any:
 def _first_balanced_object(s: str) -> Optional[str]:
     """Return the first brace-balanced ``{...}`` substring (ignoring braces in strings).
 
-    Robust to a valid object followed by prose that itself contains braces — a
-    single greedy ``\\{.*\\}`` would over-capture to the last ``}`` and fail.
+    Thin object-only wrapper over :func:`coact.util.first_balanced_span` (the
+    ``structured()`` facade insists on a JSON *object*); the shared primitive
+    keeps this depth-balanced matching in one place.
 
     >>> _first_balanced_object('Result: {"a": 1}. Note: use {braces}.')
     '{"a": 1}'
     """
-    start = s.find("{")
-    if start < 0:
-        return None
-    depth = 0
-    in_str = False
-    escaped = False
-    for i in range(start, len(s)):
-        ch = s[i]
-        if in_str:
-            if escaped:
-                escaped = False
-            elif ch == "\\":
-                escaped = True
-            elif ch == '"':
-                in_str = False
-        elif ch == '"':
-            in_str = True
-        elif ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                return s[start : i + 1]
-    return None
+    return first_balanced_span(s, "{", "}")

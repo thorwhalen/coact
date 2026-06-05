@@ -108,6 +108,20 @@ def test_validate_mcp_missing_module():
     assert issues == ["coact.mcp[0]: missing required 'module'"]
 
 
+def test_validate_mcp_missing_functions():
+    # D1/SPEC §4 pair module+functions; a module with no functions exposes nothing
+    # and must be flagged rather than silently yielding "0 tools" (issue #29).
+    for entry in ({"module": "m"}, {"module": "m", "functions": []}):
+        issues = validate_coact_block({"coact": {"mcp": [entry]}})
+        assert issues == ["coact.mcp[0]: missing required 'functions' "
+                          "(a non-empty list of function names)"]
+
+
+def test_validate_mcp_functions_must_be_list_of_str():
+    issues = validate_coact_block({"coact": {"mcp": [{"module": "m", "functions": "f"}]}})
+    assert issues == ["coact.mcp[0]: 'functions' must be a list of strings"]
+
+
 def test_validate_returns_not_a_mapping():
     issues = validate_coact_block({"coact": {"returns": "schema"}})
     assert any("coact.returns: must be a mapping" in i for i in issues)

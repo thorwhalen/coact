@@ -29,7 +29,7 @@ from skill.base import parse_frontmatter, render_frontmatter
 from skill.registry import Registry
 
 from coact.base import AgentDefinition, ReturnContract
-from coact.util import check_requirements
+from coact.util import agent_filename, check_requirements
 
 #: Registry of emit targets: ``AgentDefinition -> serialized form`` (str or dict).
 emitters: Registry[Callable[[AgentDefinition], Any]] = Registry("emitters")
@@ -42,7 +42,6 @@ _SNAKE_TO_HOST = {
     "mcp_servers": "mcpServers",
     "permission_mode": "permissionMode",
 }
-_HOST_TO_SNAKE = {v: k for k, v in _SNAKE_TO_HOST.items()}
 
 
 # ---------------------------------------------------------------------------
@@ -274,7 +273,7 @@ def emit_agent(
         raise ValueError(f"Unknown emit target: {target!r}. Available: {available}")
     result = emitter(ad)
     if dest is not None and isinstance(result, str):
-        out = Path(dest) / f"{ad.name}.md"
+        out = Path(dest) / agent_filename(ad.name)  # rejects path-traversal names
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(result)
         return out

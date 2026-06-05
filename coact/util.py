@@ -9,7 +9,8 @@ from __future__ import annotations
 
 import re
 from importlib import import_module
-from typing import Any
+from pathlib import Path
+from typing import Any, Optional
 
 
 def to_kebab_case(name: str) -> str:
@@ -38,6 +39,81 @@ def to_snake_case(name: str) -> str:
     s = re.sub(r"(?<=[a-z0-9])([A-Z])", r"_\1", name)
     s = re.sub(r"[\s-]+", "_", s)
     return s.lower().strip("_")
+
+
+def agent_filename(name: str) -> str:
+    """Return the safe ``<name>.md`` filename for an agent, rejecting unsafe names.
+
+    Agent names become files under ``.claude/agents/``; a name carrying a path
+    separator or ``..`` could escape that directory (CWE-22 path traversal) on
+    write *or* read. Names must be a bare filename stem. Raises ``ValueError`` on
+    an empty, non-string, or path-bearing name — the check lives at the
+    filesystem boundary so in-memory :class:`~coact.base.AgentDefinition`\\ s stay
+    unconstrained.
+
+    >>> agent_filename('ux-analyst')
+    'ux-analyst.md'
+    >>> agent_filename('../escape')  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+        ...
+    ValueError: unsafe agent name '../escape': ...
+    """
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError(f"agent name must be a non-empty string, got {name!r}")
+    unsafe = (
+        name in (".", "..")
+        or name != Path(name).name
+        or any(sep in name for sep in ("/", "\\"))
+        or "\x00" in name
+    )
+    if unsafe:
+        raise ValueError(
+            f"unsafe agent name {name!r}: must be a bare filename stem "
+            "(no '/', '\\', '..', or path separators)"
+        )
+    return f"{name}.md"
+
+
+def first_balanced_span(s: str, opener: str = "{", closer: str = "}") -> Optional[str]:
+    """Return the first depth-balanced ``opener…closer`` substring of ``s``.
+
+    Brackets inside double-quoted JSON strings are ignored, so a valid value
+    followed by prose that itself contains brackets is not over-captured (a
+    greedy ``opener.*closer`` would run to the *last* ``closer`` and fail to
+    parse). Returns ``None`` when no balanced span starts in ``s``. Shared by the
+    LLM-reply JSON extractors (:mod:`coact.llm`, :mod:`coact.realize_litellm`).
+
+    >>> first_balanced_span('Result: {"a": 1}. Note: {braces}.')
+    '{"a": 1}'
+    >>> first_balanced_span('see [1, [2, 3]] end', '[', ']')
+    '[1, [2, 3]]'
+    >>> first_balanced_span('no brackets here') is None
+    True
+    """
+    start = s.find(opener)
+    if start < 0:
+        return None
+    depth = 0
+    in_str = False
+    escaped = False
+    for i in range(start, len(s)):
+        ch = s[i]
+        if in_str:
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == '"':
+                in_str = False
+        elif ch == '"':
+            in_str = True
+        elif ch == opener:
+            depth += 1
+        elif ch == closer:
+            depth -= 1
+            if depth == 0:
+                return s[start : i + 1]
+    return None
 
 
 def import_object(ref: str) -> Any:

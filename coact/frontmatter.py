@@ -213,6 +213,16 @@ def validate_coact_block(skill_or_meta: Skill | dict) -> list[str]:
                     continue
                 if not entry.get("module"):
                     issues.append(f"coact.mcp[{i}]: missing required 'module'")
+                functions = entry.get("functions")
+                if not functions:
+                    issues.append(
+                        f"coact.mcp[{i}]: missing required 'functions' "
+                        "(a non-empty list of function names)"
+                    )
+                elif not _is_list_of_str(functions):
+                    issues.append(
+                        f"coact.mcp[{i}]: 'functions' must be a list of strings"
+                    )
 
     returns = block.get("returns")
     if returns is not None:

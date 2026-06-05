@@ -27,7 +27,7 @@ from coact.base import AgentDefinition
 from coact.policy import CompletionPolicy
 from coact.realize import RealizeTarget, coerce_agents, backends
 from coact.return_contract import render_json_return_instruction
-from coact.util import check_requirements
+from coact.util import check_requirements, first_balanced_span
 
 #: Map coact's model *selectors* to LiteLLM model strings. Data, not code — pass a
 #: ``model_map=`` to ``realize(..., backend='litellm')`` to target any provider.
@@ -223,8 +223,13 @@ def _try_json(content: Any) -> Any:
 
     Tries, in order: the raw string; the fenced block's body (handling both a
     newline after the language tag and the malformed no-newline form); and finally
-    the first ``{...}`` / ``[...]`` span found. Returns ``None`` on non-strings or
-    when nothing parses.
+    the *first top-level* depth-balanced ``{...}`` / ``[...]`` span embedded in
+    prose. Returns ``None`` on non-strings or when nothing parses.
+
+    The span step uses :func:`coact.util.first_balanced_span`, not a naive
+    ``find``/``rfind`` pair: the latter mismatched openers/closers, so
+    ``'{found: [1,2,3]}'`` (an invalid object) wrongly yielded the nested
+    ``[1,2,3]``, and a trailing stray ``}`` made a valid object unparseable.
     """
     if not isinstance(content, str):
         return None
@@ -244,14 +249,23 @@ def _try_json(content: Any) -> Any:
             return json.loads(candidate)
         except (ValueError, TypeError):
             continue
-    # last resort: the first balanced-looking {...} or [...] span
+    # last resort: the earliest-starting top-level balanced span (object or
+    # array), parsed as-is. Only that one value is tried — extracting a nested
+    # fragment from an unparseable span would violate the return contract.
+    best_start: Optional[int] = None
+    best_span: Optional[str] = None
     for opener, closer in (("{", "}"), ("[", "]")):
-        start, end = stripped.find(opener), stripped.rfind(closer)
-        if 0 <= start < end:
-            try:
-                return json.loads(stripped[start : end + 1])
-            except (ValueError, TypeError):
-                continue
+        span = first_balanced_span(stripped, opener, closer)
+        if span is None:
+            continue
+        start = stripped.find(opener)
+        if best_start is None or start < best_start:
+            best_start, best_span = start, span
+    if best_span is not None:
+        try:
+            return json.loads(best_span)
+        except (ValueError, TypeError):
+            return None
     return None
 
 

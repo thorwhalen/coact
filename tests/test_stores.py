@@ -57,6 +57,29 @@ def test_store_delitem_missing_raises_keyerror(tmp_path):
         del AgentStore(root=tmp_path)["nope"]
 
 
+def test_store_rejects_path_traversal_on_write(tmp_path):
+    # A crafted key must not escape the store root (CWE-22). The write raises and
+    # no file lands outside root.
+    store = AgentStore(root=tmp_path / "agents")
+    with pytest.raises(ValueError, match="unsafe agent name"):
+        store["../escape"] = _agent("escape")
+    assert not (tmp_path / "escape.md").exists()
+
+
+def test_store_rejects_path_traversal_on_read_and_delete(tmp_path):
+    store = AgentStore(root=tmp_path / "agents")
+    with pytest.raises(ValueError, match="unsafe agent name"):
+        _ = store["../../secret"]
+    with pytest.raises(ValueError, match="unsafe agent name"):
+        del store["../../secret"]
+
+
+def test_store_contains_is_total_for_unsafe_keys(tmp_path):
+    # ``in`` must stay total — an unsafe key is simply not a member, not a raise.
+    store = AgentStore(root=tmp_path / "agents")
+    assert "../escape" not in store
+
+
 def test_store_repr(tmp_path):
     # Use repr(root) for the path so the assertion is separator-independent:
     # on Windows repr(WindowsPath) renders with forward slashes, unlike str(path).

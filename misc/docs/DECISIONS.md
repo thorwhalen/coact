@@ -269,3 +269,51 @@ frontmatter validator, `util`, `stores`, `policy`, and the two new modules
 (`schema`, `return_contract`, `scaffold`) — ~120 new tests, coverage 88% → 95%
 (the residual is the live Agent-SDK runner, exercised only by the opt-in `real_llm`
 tests).
+
+## D15 — Second review pass: filesystem boundary is now traversal-safe, JSON extraction is balanced
+
+A second deep-review pass (7 read-only finder dimensions → per-finding adversarial
+verification; 11 confirmed, 9 refuted). The refuted set was correctly intended-by-
+design and **not** actioned: the `__all__`/D14 re-export trio (the D14 re-exports are
+*module-level* old-import-path shims and `resolve_skill`/`coerce_agents` are
+submodule-public cross-module helpers — neither was ever promised in
+`coact.__init__.__all__`), and the `schema_ref` "arbitrary code execution" pair
+(`schema_ref` is **author-pinned, trusted** input per D6, guarded by
+`isinstance(obj, type)` and yielding `None` on anything unrecognized — a supply-chain
+threat model, not a coact defect). The confirmed defects, all fixed with no public-
+contract or prior-decision change:
+
+- **Path traversal at the filesystem boundary (CWE-22).** An agent `name` becomes a
+  `<name>.md` file; a crafted name (`../../x`) escaped `.claude/agents/` on **write
+  *and* read** at two sites (`emit.emit_agent`, `stores.AgentStore._path`). Fix: one
+  `util.agent_filename(name)` validator (rejects path separators / `..` / empty /
+  null), applied at every write boundary (`emit_agent`, `AgentStore._path`,
+  `realize_host`). **Validation lives at the boundary, not on `AgentDefinition`** — an
+  in-memory definition with any name is legal; only *materializing* it to disk is
+  constrained. `AgentStore.__contains__` swallows the `ValueError` to stay a total
+  membership test (an unsafe key is simply not a member).
+
+- **`_try_json` extraction was unbalanced.** The litellm last-resort used independent
+  `find('{')`/`rfind('}')` (and a separate `[`/`]` pass), which mismatched
+  openers/closers: `{found: [1,2,3]}` (an invalid object) wrongly returned the nested
+  `[1,2,3]`, and a trailing stray `}` made a valid object unparseable. Fix: a shared
+  `util.first_balanced_span(s, opener, closer)` (depth-tracking, string-aware) now
+  backs **both** JSON extractors; `_try_json` takes the *earliest top-level* balanced
+  span and parses only that (a nested fragment from an unparseable span would violate
+  the return contract). `llm._first_balanced_object` became a thin object-only wrapper
+  over the shared primitive — the two extractors keep their distinct contracts
+  (dict-only vs. any) but share the one matcher (so a blind "merge them" was rejected).
+
+- **mcp validator** now requires a non-empty `functions` list per entry (D1/§4 pair
+  `module`+`functions`); a lone `module` previously passed validation then silently
+  exposed zero tools.
+
+- **`realize_host` no longer leaves partial output.** It renders every agent up-front
+  (pure, validating each name) and writes only after all render, so a predictable
+  failure aborts before any file lands. Not full dir-rename atomicity (D5 promises no
+  rollback), but the realistic partial-write is gone.
+
+- **Housekeeping:** removed dead `emit._HOST_TO_SNAKE`; closed three test gaps (the SDK
+  `.result` extraction fallback, the `output_format` raw-dict artifact value, and the
+  mcp-no-tools error message's `coact: mcp:` guidance) plus regression tests for every
+  fix above. `+24` tests / `+2` doctests; suite stays green, ruff `D100`+`F` clean.

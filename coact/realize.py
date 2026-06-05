@@ -46,7 +46,7 @@ from coact.return_contract import (
     render_tool_return_instruction,
 )
 from coact.stores import agents_dir
-from coact.util import check_requirements
+from coact.util import agent_filename, check_requirements
 
 RealizeTarget = Union[AgentDefinition, str, Path, Skill, list]
 
@@ -162,14 +162,22 @@ def realize_host(
     result = RealizedHost(
         agents_dir=out_dir, skills_dir=skills_target, dry_run=dry_run
     )
-    if not dry_run:
+    if dry_run:
+        for ad in agents:
+            result.agents[ad.name] = out_dir / agent_filename(ad.name)
+    else:
         out_dir.mkdir(parents=True, exist_ok=True)
-    for ad in agents:
-        result.agents[ad.name] = (
-            out_dir / f"{ad.name}.md"
-            if dry_run
-            else emit_agent(ad, "claude-agents-md", dest=out_dir)
-        )
+        # Render every agent up-front (pure, and validates each name) so a
+        # predictable failure — an unsafe name, an emit error — aborts before any
+        # file is written, rather than leaving a half-written agents/ dir. D5
+        # promises no transactional rollback, but partial output is avoidable.
+        rendered = [
+            (ad.name, out_dir / agent_filename(ad.name), emit_agent(ad, "claude-agents-md"))
+            for ad in agents
+        ]
+        for name, path, content in rendered:
+            path.write_text(content)
+            result.agents[name] = path
 
     if link:
         if not dry_run:
