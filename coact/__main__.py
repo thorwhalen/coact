@@ -3,14 +3,19 @@
 
 Mirrors ``skill``'s dispatch-to-interface pattern (CLI wrappers call the same
 core functions and format for the terminal), so the two packages feel like one
-toolkit. Usage::
+toolkit. The verbs are ``plan``, ``complete``, ``emit``, ``realize``, ``diff``,
+``estimate``, ``inventory``, ``back``, and ``scaffold``. Usage::
 
     python -m coact plan .claude/skills/ux-analyst
     python -m coact complete .claude/skills/ux-analyst --dest .claude/agents
-    python -m coact realize .claude/skills/ux-analyst --backend host
+    python -m coact emit .claude/skills/ux-analyst --target sdk-agent-dict
+    python -m coact realize .claude/skills/ux-analyst --backend host --dry-run
+    python -m coact realize .claude/skills/ux-analyst --backend litellm
     python -m coact diff .claude/skills/ux-analyst .claude/agents/ux-analyst.md
     python -m coact estimate .claude/agents/a.md .claude/agents/b.md
     python -m coact inventory .
+    python -m coact back .claude/agents/ux-analyst.md
+    python -m coact scaffold .claude/agents/a.md .claude/agents/b.md
 """
 
 from __future__ import annotations
