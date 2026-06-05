@@ -87,7 +87,7 @@ or the Claude Agent SDK directly. coact will not regenerate or overwrite your ed
 
 Cost gate (DECISIONS D9): a running fleet costs ~an order of magnitude more tokens
 than a single host agent, and the premium is worst on *interdependent* tasks. Run
-``coact estimate {' '.join(agents_dir + '/' + n + '.md' for n in names)}`` first;
+``coact estimate {" ".join(agents_dir + "/" + n + ".md" for n in names)}`` first;
 prefer ``backend='host'`` unless you have a real throughput/isolation need.
 """
 

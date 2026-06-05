@@ -167,9 +167,7 @@ def check_requirements(
         except ImportError:
             missing.append(pip_target)
     if missing:
-        already = (
-            f" (already present: {', '.join(sorted(present))})" if present else ""
-        )
+        already = f" (already present: {', '.join(sorted(present))})" if present else ""
         raise ImportError(
             f"The {feature!r} feature needs optional dependencies that are not "
             f"installed{already}. Install them with:\n\n    "

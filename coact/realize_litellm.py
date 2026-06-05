@@ -110,7 +110,9 @@ class RunnableLLMAgent:
             }
         return kwargs
 
-    def execute(self, input_data: Any, context: Any = None) -> tuple[Any, dict[str, Any]]:
+    def execute(
+        self, input_data: Any, context: Any = None
+    ) -> tuple[Any, dict[str, Any]]:
         """Run the agent over ``input_data``; return ``(artifact, info)`` (aw protocol).
 
         ``context`` is accepted for ``aw.AgenticStep`` compatibility and ignored by
@@ -121,7 +123,9 @@ class RunnableLLMAgent:
         completion = self.completion
         if completion is None:
             # Only the real path needs litellm; an injected completion does not.
-            check_requirements({"litellm": "litellm"}, feature="realize(backend='litellm')")
+            check_requirements(
+                {"litellm": "litellm"}, feature="realize(backend='litellm')"
+            )
             completion = _default_litellm_completion
         kwargs = self.build_kwargs(input_data)
         raw, response_format_used, fallback_error = _complete_with_fallback(

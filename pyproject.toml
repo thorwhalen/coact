@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "coact"
-version = "0.0.3"
+version = "0.0.4"
 description = "Reuse your AI stuff across the agent stack: COMPLETE skills into agent definitions and REALIZE them into running agents (glue over skill, aw, py2mcp)."
 readme = "README.md"
 requires-python = ">=3.10"

@@ -159,9 +159,7 @@ def realize_host(
     skills_target = out_dir.parent / "skills"
     sources = _as_source_list(skills_source)
 
-    result = RealizedHost(
-        agents_dir=out_dir, skills_dir=skills_target, dry_run=dry_run
-    )
+    result = RealizedHost(agents_dir=out_dir, skills_dir=skills_target, dry_run=dry_run)
     if dry_run:
         for ad in agents:
             result.agents[ad.name] = out_dir / agent_filename(ad.name)
@@ -172,7 +170,11 @@ def realize_host(
         # file is written, rather than leaving a half-written agents/ dir. D5
         # promises no transactional rollback, but partial output is avoidable.
         rendered = [
-            (ad.name, out_dir / agent_filename(ad.name), emit_agent(ad, "claude-agents-md"))
+            (
+                ad.name,
+                out_dir / agent_filename(ad.name),
+                emit_agent(ad, "claude-agents-md"),
+            )
             for ad in agents
         ]
         for name, path, content in rendered:
