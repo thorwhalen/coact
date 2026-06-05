@@ -74,11 +74,13 @@ python examples/walkthrough.py
 ```bash
 coact plan      .claude/skills/ux-analyst                 # dry-run with provenance
 coact complete  .claude/skills/ux-analyst --dest .claude/agents
+coact emit      .claude/skills/ux-analyst --target sdk-agent-dict   # a non-default emit target
 coact realize   .claude/skills/ux-analyst --backend host
 coact realize   .claude/skills/ux-analyst --backend host --dry-run   # preview; writes nothing
 coact diff      .claude/skills/ux-analyst .claude/agents/ux-analyst.md
 coact estimate  .claude/agents/a.md .claude/agents/b.md   # the cost gate
 coact inventory .                                         # skills + agents + MCP tools
+coact back      .claude/agents/ux-analyst.md              # lossy agent → skill stub
 coact scaffold  .claude/agents/a.md .claude/agents/b.md   # a starter fleet shim (you own it)
 ```
 
