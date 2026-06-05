@@ -95,14 +95,19 @@
 
 <span class="sd">Mirrors ``skill``&#39;s dispatch-to-interface pattern (CLI wrappers call the same</span>
 <span class="sd">core functions and format for the terminal), so the two packages feel like one</span>
-<span class="sd">toolkit. Usage::</span>
+<span class="sd">toolkit. The verbs are ``plan``, ``complete``, ``emit``, ``realize``, ``diff``,</span>
+<span class="sd">``estimate``, ``inventory``, ``back``, and ``scaffold``. Usage::</span>
 
 <span class="sd">    python -m coact plan .claude/skills/ux-analyst</span>
 <span class="sd">    python -m coact complete .claude/skills/ux-analyst --dest .claude/agents</span>
-<span class="sd">    python -m coact realize .claude/skills/ux-analyst --backend host</span>
+<span class="sd">    python -m coact emit .claude/skills/ux-analyst --target sdk-agent-dict</span>
+<span class="sd">    python -m coact realize .claude/skills/ux-analyst --backend host --dry-run</span>
+<span class="sd">    python -m coact realize .claude/skills/ux-analyst --backend litellm</span>
 <span class="sd">    python -m coact diff .claude/skills/ux-analyst .claude/agents/ux-analyst.md</span>
 <span class="sd">    python -m coact estimate .claude/agents/a.md .claude/agents/b.md</span>
 <span class="sd">    python -m coact inventory .</span>
+<span class="sd">    python -m coact back .claude/agents/ux-analyst.md</span>
+<span class="sd">    python -m coact scaffold .claude/agents/a.md .claude/agents/b.md</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
