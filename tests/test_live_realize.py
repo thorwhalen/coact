@@ -56,6 +56,71 @@ def test_litellm_backend_live_structured_output():
 
 
 @pytest.mark.real_llm
+def test_langgraph_backend_live_structured_output():
+    """langgraph backend returns the structured result for a trivial task.
+
+    Needs ``langchain``/``langgraph`` plus the chosen provider's integration; an
+    ``anthropic:`` model needs ``langchain-anthropic`` (set ``COACT_LIVE_MODEL_LG``
+    to an ``openai:`` model if only ``langchain-openai`` is installed). Skips rather
+    than fails if the runtime/provider package is unavailable.
+    """
+    pytest.importorskip("langchain")
+    pytest.importorskip("langgraph")
+    _need_anthropic_key()
+
+    agent = AgentDefinition(
+        name="adder",
+        description="Adds two integers.",
+        prompt="You add integers. Use the return contract; do not explain.",
+        model="haiku",
+        returns=_SUM_CONTRACT,
+    )
+    runnable = realize(
+        agent,
+        backend="langgraph",
+        model_map={
+            "haiku": os.environ.get("COACT_LIVE_MODEL_LG", "anthropic:claude-haiku-4-5")
+        },
+    )
+    try:
+        artifact, info = runnable.execute("Compute 2 + 3 and put it in 'sum'.")
+    except Exception as exc:  # provider package / runtime unavailable -> skip
+        pytest.skip(f"langgraph runtime unavailable: {type(exc).__name__}: {exc}")
+
+    assert info["backend"] == "langgraph"
+    assert isinstance(artifact, dict), f"expected a structured dict, got {artifact!r}"
+    assert int(artifact["sum"]) == 5
+
+
+@pytest.mark.real_llm
+def test_crewai_backend_live_structured_output():
+    """crewai backend returns the structured result for a trivial task (skips if absent)."""
+    pytest.importorskip("crewai")
+    _need_anthropic_key()
+
+    agent = AgentDefinition(
+        name="adder",
+        description="Adds two integers.",
+        prompt="You add integers. Use the return contract; do not explain.",
+        model="haiku",
+        returns=_SUM_CONTRACT,
+    )
+    runnable = realize(
+        agent,
+        backend="crewai",
+        model_map={"haiku": os.environ.get("COACT_LIVE_MODEL", "anthropic/claude-haiku-4-5")},
+    )
+    try:
+        artifact, info = runnable.execute("Compute 2 + 3 and put it in 'sum'.")
+    except Exception as exc:  # crewai/runtime unavailable -> skip
+        pytest.skip(f"crewai runtime unavailable: {type(exc).__name__}: {exc}")
+
+    assert info["backend"] == "crewai"
+    assert isinstance(artifact, dict), f"expected a structured dict, got {artifact!r}"
+    assert int(artifact["sum"]) == 5
+
+
+@pytest.mark.real_llm
 def test_sdk_backend_live_runs():
     """sdk backend executes end-to-end and returns a non-empty artifact.
 

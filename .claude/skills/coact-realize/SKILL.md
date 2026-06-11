@@ -1,6 +1,6 @@
 ---
 name: coact-realize
-description: Use when turning a coact agent definition (or a skill) into something that actually runs — i.e. REALIZE. Triggers on "realize this agent", "run a coact agent", "materialize an agent for Claude Code", "make an aw/Agent-SDK runnable from a skill", "expose a skill's tools as an MCP server", or choosing between the host/sdk/mcp backends and their cost. Covers realize(), the three backends, install extras, and the fan-out cost gate.
+description: Use when turning a coact agent definition (or a skill) into something that actually runs — i.e. REALIZE. Triggers on "realize this agent", "run a coact agent", "materialize an agent for Claude Code", "make an aw/Agent-SDK runnable from a skill", "run a definition through LiteLLM/LangGraph/CrewAI", "expose a skill's tools as an MCP server", or choosing between the host/sdk/litellm/langgraph/crewai/mcp backends and their cost. Covers realize(), the backends, install extras, and the fan-out cost gate.
 ---
 
 # REALIZE a definition into a running agent
@@ -18,6 +18,9 @@ realize(target, backend="host")     # target: AgentDefinition | skill source | a
 |---|---|---|---|
 | `host` (default) | materialize `.claude/agents/*.md` + link referenced skills; the **host agent** (Claude Code) executes | cheapest — no fan-out | `pip install coact` |
 | `sdk` | a `RunnableAgent` backed by the Claude Agent SDK that **satisfies `aw.AgenticStep`** (`execute(input, context) -> (artifact, info)`) — drops into `aw` workflows | in-process | `pip install coact[sdk]` |
+| `litellm` | a `RunnableLLMAgent` (also `aw.AgenticStep`) running the **same** definition against any LiteLLM provider (OpenAI, Anthropic, Gemini, Ollama, …) | in-process | `pip install coact[litellm]` |
+| `langgraph` | a `RunnableLLMGraphAgent` (also `aw.AgenticStep`) backed by a LangGraph `CompiledStateGraph`; the graph is **exposed** (`.agent`) to compose into *your own* `StateGraph` | in-process | `pip install coact[langgraph]` |
+| `crewai` | a `RunnableCrewAIAgent` (also `aw.AgenticStep`) backed by a single `crewai.Agent` (`Agent.kickoff`); the `Agent` is **exposed** (`.agent`) for *your own* `Crew` | in-process | `pip install coact[crewai]` |
 | `mcp` | expose a skill's declared Python tools as a FastMCP server (via `py2mcp`) for any MCP client | tool server | `pip install coact[mcp]` |
 
 ## host (the default, cheapest)
@@ -69,6 +72,34 @@ recovers the result from the tool call. Control it with
 almost always). `info` carries warnings (e.g. an mcp server declared as a bare
 name the sdk backend can't resolve — use `host` for those).
 
+## litellm / langgraph / crewai (one definition, three more runtimes)
+
+The same `AgentDefinition` realizes against three more in-process runtimes, each an
+`aw.AgenticStep` runnable (`execute(input, context) -> (artifact, info)`):
+
+```python
+step = realize(agent, backend="litellm", model_map={"sonnet": "openai/gpt-4o"})
+artifact, info = step.execute(task)                 # any LiteLLM provider
+
+graph_step = realize(agent, backend="langgraph")    # graph_step.agent: a CompiledStateGraph
+crew_step  = realize(agent, backend="crewai")       # crew_step.agent: a crewai.Agent
+```
+
+`langgraph` and `crewai` realize **one** definition into a framework-native object and
+**expose** it (`.agent`) so you compose it into *your own* `StateGraph` / `Crew` — coact
+builds no graph or crew of its own (DECISIONS D8/D16). They differ from `litellm` in two
+ways worth knowing:
+
+- **Tools are opt-in.** coact tools are host-resolved *names*; these frameworks want Python
+  callables, so pass `tools_map={name: callable}` to bind them for a real tool-use loop.
+  Unbound names surface in `info["unbound_tools"]` (langgraph) / `info["warnings"]` (crewai).
+- **Model-string form differs:** `langgraph` uses langchain **colon** form
+  (`"anthropic:claude-sonnet-4-5"`) and needs the provider's `langchain-<provider>` package;
+  `litellm`/`crewai` use **slash** form (`"anthropic/claude-..."`). Override via `model_map=`.
+
+The return contract (D6) is honored natively where each framework allows and always via the
+in-prompt instruction as a fallback — so structured output degrades gracefully.
+
 ## mcp (a tool server)
 
 ```python
@@ -117,7 +148,8 @@ coact scaffold .claude/agents/a.md .claude/agents/b.md   # prints the shim
 This is the **one** topology-adjacent thing coact emits (DECISIONS D8): it renders
 source and stops — no LLM, no runtime, no graph. coact writes the starter once and
 never runs it; the topology (branches, fan-out, retries) is yours to own, against
-`aw.orchestration` or the Agent SDK. coact is not LangGraph.
+`aw.orchestration` or the Agent SDK. coact is not LangGraph — though the `langgraph`
+backend *can* realize a single definition into a node you wire into your own graph.
 
 ## Boundaries
 
@@ -125,7 +157,8 @@ never runs it; the topology (branches, fan-out, retries) is yours to own, agains
   conditional edges, or cycles, and subagents can't spawn subagents. coact emits
   *definitions + tool/MCP wiring* and stops — orchestration is the host manager's
   job (or a thin shim you own against `aw` / the Agent SDK). coact is not
-  LangGraph.
+  LangGraph. The `langgraph`/`crewai` backends realize a *single* definition into a
+  composable node/Agent; they still build no graph or crew of their own (D8/D16).
 
 ## Related
 

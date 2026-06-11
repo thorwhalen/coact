@@ -60,6 +60,14 @@ from coact.realize_litellm import (
     RunnableLLMAgent,
     realize_litellm,
 )  # registers 'litellm'
+from coact.realize_langgraph import (
+    RunnableLLMGraphAgent,
+    realize_langgraph,
+)  # registers 'langgraph'
+from coact.realize_crewai import (
+    RunnableCrewAIAgent,
+    realize_crewai,
+)  # registers 'crewai'
 from coact.scaffold import scaffold_fleet
 from coact.stores import AgentStore, agents_dir
 from coact.synthesis import synthesize_persona, synthesize_return_contract
@@ -104,9 +112,13 @@ __all__ = [
     "realize_sdk",
     "realize_mcp",
     "realize_litellm",
+    "realize_langgraph",
+    "realize_crewai",
     "RealizedHost",
     "RunnableAgent",
     "RunnableLLMAgent",
+    "RunnableLLMGraphAgent",
+    "RunnableCrewAIAgent",
     "realization_backends",
     # Scaffold (the one topology-adjacent emitter — a starter you own; D8)
     "scaffold_fleet",
