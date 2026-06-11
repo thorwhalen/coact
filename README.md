@@ -31,7 +31,7 @@ pip install coact            # core: COMPLETE + host realize + analysis (no LLM 
 pip install coact[sdk]       # + the Claude Agent SDK realize backend (and aw)
 pip install coact[mcp]       # + the py2mcp/FastMCP realize backend
 pip install coact[litellm]   # + the provider-agnostic LiteLLM realize backend
-pip install coact[langgraph] # + the LangGraph realize backend (langchain >= 1.0)
+pip install coact[langgraph] # + the LangGraph realize backend (langchain+langgraph >= 1.0; bundles langchain-openai)
 pip install coact[crewai]    # + the CrewAI realize backend
 ```
 

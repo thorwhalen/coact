@@ -246,20 +246,27 @@ def _default_crewai_runner(
 
 
 def _as_crewai_tool(value: Any) -> Any:
-    """Best-effort wrap a bare callable as a crewai tool; pass tool-like values through.
+    """Wrap a bare callable as a crewai tool; pass tool-like values through unchanged.
 
     Runs only on the real (crewai-installed) path. A value that already looks like a
-    tool (has ``run``/``_run``) is returned unchanged; a plain callable is wrapped via
-    ``crewai.tools.tool``. On any failure the value is returned as-is — tools are an
-    advanced opt-in, and passing a crewai ``BaseTool`` directly is the reliable route.
+    tool (has ``run``/``_run``) is returned as-is; a plain callable is wrapped via
+    ``crewai.tools.tool``. If wrapping fails (crewai's ``tool`` decorator rejects a
+    function lacking a docstring or type annotations), an actionable ``ValueError`` is
+    raised here rather than letting a confusing pydantic validation error surface later
+    from ``Agent(tools=...)`` — tools are an advanced opt-in, and passing a crewai
+    ``BaseTool`` instance directly is the reliable route.
     """
     if callable(value) and not hasattr(value, "run") and not hasattr(value, "_run"):
         try:
             from crewai.tools import tool as _tool
 
             return _tool(getattr(value, "__name__", "tool"))(value)
-        except Exception:
-            return value
+        except Exception as error:
+            raise ValueError(
+                f"tools_map callable {getattr(value, '__name__', value)!r} could not be "
+                f"wrapped as a crewai tool ({error}). Pass a crewai BaseTool instance in "
+                "tools_map, or give the function a docstring and type annotations."
+            ) from error
     return value
 
 

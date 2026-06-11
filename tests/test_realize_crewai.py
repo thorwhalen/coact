@@ -262,6 +262,19 @@ def test_injected_runner_receives_agent_none():
     assert rec["agent"] is None
 
 
+def test_injected_runner_with_schema_still_skips_crewai():
+    # With a schema, execute() calls build_response_model() (which lazily imports
+    # pydantic) — but the injected runner still means crewai is never imported.
+    r = realize(
+        _agent(schema=_SCHEMA),
+        backend="crewai",
+        runner=_runner_returning(_out(raw='{"a": "x"}')),
+    )
+    artifact, _ = r.execute("x")
+    assert artifact == {"a": "x"}
+    assert "crewai" not in sys.modules
+
+
 # --- default path gates on requirements -------------------------------------
 
 
