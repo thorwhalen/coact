@@ -215,7 +215,8 @@ open-closed extension point working as designed.
 Python callables, but a coact definition carries tool *names* (host-resolved), which
 don't map cleanly; LiteLLM's chat-completion-with-structured-output maps exactly onto
 what a definition actually carries (persona + return contract). Topology stays out
-(D8): one definition → one runnable. LangGraph/CrewAI *realizers* remain deferred.
+(D8): one definition → one runnable. (The LangGraph/CrewAI *realizers*, deferred here,
+followed in **D16** — still single-agent, topology still out.)
 
 ## D13 — The §6.4 fleet-scaffold shim is implemented (the one topology-adjacent emit)
 
@@ -317,3 +318,52 @@ contract or prior-decision change:
   `.result` extraction fallback, the `output_format` raw-dict artifact value, and the
   mcp-no-tools error message's `coact: mcp:` guidance) plus regression tests for every
   fix above. `+24` tests / `+2` doctests; suite stays green, ruff `D100`+`F` clean.
+
+## D16 — LangGraph & CrewAI single-agent realizers (D8 upheld)
+
+Two new realization backends, `langgraph` and `crewai`, realize the **same**
+canonical `AgentDefinition` against two more runtimes — extending the portability
+thesis (D12) past LiteLLM. Each realizes **exactly one** definition into one runnable
+and **raises** on more than one ("topology is out of scope — DECISIONS D8"), exactly
+like `sdk`/`litellm`. This **supersedes only the "LangGraph/CrewAI realizers remain
+deferred" clause of D12**; it does **not** soften D8:
+
+- **Single agent, not a graph.** The frameworks are used as *execution engines for one
+  agent*. coact serializes no nodes/edges/tasks/process. A multi-agent run still uses
+  `scaffold_fleet` (D13).
+- **The framework-native object is exposed, not owned.** `langgraph` returns a
+  `CompiledStateGraph` (built via `langchain.agents.create_agent`, its `name` = the
+  agent's name); `crewai` returns a `crewai.Agent` (run via the lightweight
+  `Agent.kickoff`, **not** `Crew`/`Task`, which would invent topology). Both are reachable
+  via `build_agent()` / the `.agent` property precisely so the *user* composes them into
+  *their own* `StateGraph` / `Crew`. coact realizes the agent; the user owns the topology
+  it joins. This is the §3.4 "leave room for a future LangGraph node … without … topology"
+  seam, finally filled.
+- **Same shape as litellm (open-closed, DI, lazy).** Both are `aw.AgenticStep` runnables
+  (`execute -> (artifact, info)`), self-register into `realize.backends` on import, take a
+  data-driven defensively-copied `model_map` (langchain **colon**-form `provider:model`
+  for langgraph; LiteLLM **slash**-form for crewai), import their framework **lazily**
+  behind `check_requirements`, and are unit-testable with an injected `factory`/`runner`
+  (no API key, no install — `import coact` pulls in none of langchain/langgraph/crewai).
+- **Return contract (D6), belt-and-suspenders.** langgraph passes the canonical JSON
+  Schema dict to `ToolStrategy`/`ProviderStrategy` (both accept a raw dict — **no pydantic
+  synthesis**) *and* embeds the in-prompt instruction, JSON-parsing the final message text
+  when the native `structured_response` is absent (langchain can omit it without error).
+  crewai's `kickoff(response_format=)` is class-only, so a *flat* schema is synthesized to
+  a pydantic model (`coact._pydantic_schema.json_schema_to_model`, returning `None` →
+  prompt-only for non-flat schemas) — the one langgraph-vs-crewai asymmetry (langgraph
+  enforces deep schemas natively; crewai falls back to the prompt).
+- **Tools are opt-in (D12).** coact tools are host-resolved *name strings* and both
+  frameworks want Python callables, so bare names are never passed. A `tools_map={name:
+  callable}` binds them for a real tool-use loop; unbound names surface in
+  `info['unbound_tools']` (langgraph) / `info['warnings']` (crewai), never dropped.
+- **Packaging.** In-repo modules (`coact/realize_langgraph.py`, `coact/realize_crewai.py`)
+  + optional extras `coact[langgraph]` / `coact[crewai]`. `[langgraph]` ships
+  `langchain-openai` so the openai-prefixed default model works out of the box; an
+  `anthropic:` model additionally needs `langchain-anthropic`. crewai requires Python
+  `<3.14`; coact does not tighten its own `>=3.10` pin for one optional backend.
+
+Verified against the installed langchain/langgraph 1.0.1 (`create_agent`,
+`ToolStrategy(dict)`, `ProviderStrategy(dict)`); the crewai path is research-verified and
+fully `getattr`-guarded — its unit suite is injected-runner-only (asserts crewai never
+enters `sys.modules`) and its live test is opt-in (`real_llm`) and `importorskip`-ped.

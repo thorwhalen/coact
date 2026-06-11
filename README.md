@@ -31,6 +31,8 @@ pip install coact            # core: COMPLETE + host realize + analysis (no LLM 
 pip install coact[sdk]       # + the Claude Agent SDK realize backend (and aw)
 pip install coact[mcp]       # + the py2mcp/FastMCP realize backend
 pip install coact[litellm]   # + the provider-agnostic LiteLLM realize backend
+pip install coact[langgraph] # + the LangGraph realize backend (langchain+langgraph >= 1.0; bundles langchain-openai)
+pip install coact[crewai]    # + the CrewAI realize backend
 ```
 
 ## Quick start
@@ -130,6 +132,8 @@ coact:
 | `sdk` | a `RunnableAgent` backed by the Claude Agent SDK that **satisfies `aw.AgenticStep`** (`execute(input, context) -> (artifact, info)`), so it drops into `aw` workflows | in-process |
 | `mcp` | expose a skill's declared Python tools as a FastMCP server (via `py2mcp`) for any MCP client | tool server |
 | `litellm` | a `RunnableLLMAgent` (also `aw.AgenticStep`) backed by **LiteLLM** — realize the *same* definition against any provider (OpenAI, Gemini, Mistral, Ollama, …); proof the definition isn't Anthropic-specific | in-process |
+| `langgraph` | a `RunnableLLMGraphAgent` (also `aw.AgenticStep`) backed by a LangGraph `CompiledStateGraph` (`langchain.agents.create_agent`); the graph is **exposed** (`.agent`) to drop as a node into *your own* `StateGraph` | in-process |
+| `crewai` | a `RunnableCrewAIAgent` (also `aw.AgenticStep`) backed by a single `crewai.Agent` (`Agent.kickoff`); the `Agent` is **exposed** (`.agent`) for *your own* `Crew` | in-process |
 
 ```python
 agent_step = realize(agent, backend="sdk")          # aw-compatible runnable
@@ -140,6 +144,10 @@ server = realize(".claude/skills/ux-analyst", backend="mcp")   # FastMCP handle
 # same definition, a different provider — map model selectors however you like
 llm_step = realize(agent, backend="litellm", model_map={"sonnet": "openai/gpt-4o"})
 artifact, info = llm_step.execute(task)             # info["backend"] == "litellm"
+
+# one definition → a LangGraph node / CrewAI Agent you compose into your own topology
+graph_step = realize(agent, backend="langgraph")    # graph_step.agent is a CompiledStateGraph
+crew_step  = realize(agent, backend="crewai")       # crew_step.agent is a crewai.Agent
 ```
 
 ## Two boundaries to know
@@ -148,7 +156,10 @@ artifact, info = llm_step.execute(task)             # info["backend"] == "litell
   conditional edges, or cycles, and subagents can't spawn subagents. `coact`
   emits *definitions + tool/MCP wiring* and stops. Multi-agent orchestration is
   left to the host's manager or a thin shim you own (against the Agent SDK or
-  `aw`'s workflow chaining) — `coact` is not LangGraph.
+  `aw`'s workflow chaining) — `coact` is not LangGraph. It *can* realize a single
+  definition **into** a LangGraph node or a CrewAI `Agent` (the `langgraph`/`crewai`
+  backends above), but it builds no graph or crew of its own — you compose the
+  exposed `.agent` into *your* topology.
 - **A running fleet is an optimization, not a default.** Multi-agent fan-out
   costs roughly an order of magnitude more tokens, and the premium is worst on
   *interdependent* tasks. So `backend="host"` (one agent runs the skills) is the

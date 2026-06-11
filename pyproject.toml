@@ -45,6 +45,18 @@ mcp = [
 litellm = [
     "litellm>=1.0",
 ]
+langgraph = [
+    "langchain>=1.0",
+    "langgraph>=1.0",
+    # The chosen provider's integration is also needed on the real path; the default
+    # model is openai-prefixed, so langchain-openai ships here. An `anthropic:` model
+    # additionally needs `langchain-anthropic` (install it alongside).
+    "langchain-openai>=1.0",
+]
+crewai = [
+    # crewai requires Python >=3.10,<3.14; tool helpers live in `crewai[tools]`.
+    "crewai>=1.0",
+]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
