@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>coact.realize &mdash; coact 0.0.3 documentation</title>
+  <title>coact.realize &mdash; coact 0.0.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=47de8214"></script>
+      <script src="../../_static/documentation_options.js?v=8c5712d9"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -48,6 +48,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact.html">coact</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/_pydantic_schema.html">coact._pydantic_schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/analysis.html">coact.analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/base.html">coact.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/complete.html">coact.complete</a></li>
@@ -56,6 +57,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/llm.html">coact.llm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize.html">coact.realize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_crewai.html">coact.realize_crewai</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_langgraph.html">coact.realize_langgraph</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_litellm.html">coact.realize_litellm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/return_contract.html">coact.return_contract</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/scaffold.html">coact.scaffold</a></li>
@@ -262,9 +265,7 @@
     <span class="n">skills_target</span> <span class="o">=</span> <span class="n">out_dir</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;skills&quot;</span>
     <span class="n">sources</span> <span class="o">=</span> <span class="n">_as_source_list</span><span class="p">(</span><span class="n">skills_source</span><span class="p">)</span>
 
-    <span class="n">result</span> <span class="o">=</span> <span class="n">RealizedHost</span><span class="p">(</span>
-        <span class="n">agents_dir</span><span class="o">=</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">skills_dir</span><span class="o">=</span><span class="n">skills_target</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span>
-    <span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">RealizedHost</span><span class="p">(</span><span class="n">agents_dir</span><span class="o">=</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">skills_dir</span><span class="o">=</span><span class="n">skills_target</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">ad</span> <span class="ow">in</span> <span class="n">agents</span><span class="p">:</span>
             <span class="n">result</span><span class="o">.</span><span class="n">agents</span><span class="p">[</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">agent_filename</span><span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -275,7 +276,11 @@
         <span class="c1"># file is written, rather than leaving a half-written agents/ dir. D5</span>
         <span class="c1"># promises no transactional rollback, but partial output is avoidable.</span>
         <span class="n">rendered</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">agent_filename</span><span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">emit_agent</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="s2">&quot;claude-agents-md&quot;</span><span class="p">))</span>
+            <span class="p">(</span>
+                <span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">out_dir</span> <span class="o">/</span> <span class="n">agent_filename</span><span class="p">(</span><span class="n">ad</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+                <span class="n">emit_agent</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="s2">&quot;claude-agents-md&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
             <span class="k">for</span> <span class="n">ad</span> <span class="ow">in</span> <span class="n">agents</span>
         <span class="p">]</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">rendered</span><span class="p">:</span>

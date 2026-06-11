@@ -4,6 +4,7 @@
 
    module_docs/coact
    module_docs/coact/__main__
+   module_docs/coact/_pydantic_schema
    module_docs/coact/analysis
    module_docs/coact/base
    module_docs/coact/complete
@@ -12,6 +13,8 @@
    module_docs/coact/llm
    module_docs/coact/policy
    module_docs/coact/realize
+   module_docs/coact/realize_crewai
+   module_docs/coact/realize_langgraph
    module_docs/coact/realize_litellm
    module_docs/coact/return_contract
    module_docs/coact/scaffold

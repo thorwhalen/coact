@@ -1,0 +1,499 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coact.realize_langgraph &mdash; coact 0.0.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8c5712d9"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            coact
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/_pydantic_schema.html">coact._pydantic_schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/analysis.html">coact.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/base.html">coact.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/complete.html">coact.complete</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/emit.html">coact.emit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/llm.html">coact.llm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize.html">coact.realize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_crewai.html">coact.realize_crewai</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_langgraph.html">coact.realize_langgraph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/schema.html">coact.schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/stores.html">coact.stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/synthesis.html">coact.synthesis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/util.html">coact.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">coact</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">coact.realize_langgraph</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for coact.realize_langgraph</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;LangGraph realization backend — one definition → one composable graph node.</span>
+
+<span class="sd">Realizes a **single** :class:`~coact.base.AgentDefinition` (DECISIONS D8) into a</span>
+<span class="sd">LangGraph ``CompiledStateGraph`` built by the modern ``langchain.agents.create_agent``</span>
+<span class="sd">(langchain &gt;= 1.0), falling back to ``langgraph.prebuilt.create_react_agent`` on</span>
+<span class="sd">older installs. Both are reached through an **injectable** ``factory`` so this</span>
+<span class="sd">backend is unit-testable with no API key and no ``langchain``/``langgraph``</span>
+<span class="sd">installed (dependency injection, mirroring :mod:`coact.realize_litellm`).</span>
+
+<span class="sd">Like the ``sdk``/``litellm`` backends it produces an ``aw.AgenticStep``-compatible</span>
+<span class="sd">runnable (``execute(input_data, context) -&gt; (artifact, info)``) and **self-registers**</span>
+<span class="sd">into :data:`coact.realize.backends` on import — no core change (open-closed).</span>
+
+<span class="sd">**Topology stays out (D8).** This realizes *one* agent; it never wires a graph of</span>
+<span class="sd">many. The compiled graph IS the framework-native object and is **exposed** (via</span>
+<span class="sd">:meth:`RunnableLLMGraphAgent.build_agent` / the ``.agent`` property) precisely so</span>
+<span class="sd">*you* can drop it as a node into *your own* ``StateGraph``</span>
+<span class="sd">(``g.add_node(agent.name, runnable.agent)``). coact serializes no nodes, edges, or</span>
+<span class="sd">cycles — that orchestration is yours to own.</span>
+
+<span class="sd">Notable specifics:</span>
+
+<span class="sd">- **Model strings are colon-form** ``&quot;provider:model&quot;`` (e.g. ``&quot;anthropic:claude-sonnet-4-5&quot;``),</span>
+<span class="sd">  what ``langchain``&#39;s ``init_chat_model`` expects — distinct from the slash-form</span>
+<span class="sd">  LiteLLM strings the ``litellm``/``crewai`` backends use. The map is open-closed</span>
+<span class="sd">  data (``model_map=``); an explicit provider string in ``model`` is used verbatim.</span>
+<span class="sd">  The chosen provider&#39;s ``langchain-&lt;provider&gt;`` integration must also be installed</span>
+<span class="sd">  on the real path (the default model is ``openai``-prefixed → ``langchain-openai``).</span>
+<span class="sd">- **Return contract (D6) is belt-and-suspenders:** the canonical JSON-Schema dict is</span>
+<span class="sd">  passed to ``create_agent(response_format=ToolStrategy(schema))`` (both</span>
+<span class="sd">  ``ToolStrategy`` and ``ProviderStrategy`` accept the raw dict) **and** embedded as a</span>
+<span class="sd">  system-prompt instruction; ``execute`` reads the native ``structured_response`` when</span>
+<span class="sd">  present and otherwise JSON-parses the final message text (langchain can omit</span>
+<span class="sd">  ``structured_response`` without error), so structured output degrades gracefully.</span>
+<span class="sd">- **Tools are opt-in** via ``tools_map={name: callable}``: coact tools are</span>
+<span class="sd">  host-resolved *name strings* (D12), and LangGraph wants Python callables, so bare</span>
+<span class="sd">  names are **never** passed to the framework (``tools=[]`` when no ``tools_map`` —</span>
+<span class="sd">  the common path then matches ``litellm``). Unbound names are surfaced in</span>
+<span class="sd">  ``info[&#39;unbound_tools&#39;]``, never silently dropped.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompletionPolicy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.realize</span><span class="w"> </span><span class="kn">import</span> <span class="n">RealizeTarget</span><span class="p">,</span> <span class="n">backends</span><span class="p">,</span> <span class="n">coerce_agents</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.realize_litellm</span><span class="w"> </span><span class="kn">import</span> <span class="n">_to_user_text</span><span class="p">,</span> <span class="n">_try_json</span>  <span class="c1"># DRY: reuse, never edit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.return_contract</span><span class="w"> </span><span class="kn">import</span> <span class="n">render_json_return_instruction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_requirements</span>
+
+<span class="c1">#: Map coact&#39;s model *selectors* to langchain colon-form ``&quot;provider:model&quot;`` strings.</span>
+<span class="c1">#: Data, not code — pass ``model_map=`` to ``realize(..., backend=&#39;langgraph&#39;)`` to</span>
+<span class="c1">#: target any provider. An explicit provider string in ``model`` is used verbatim.</span>
+<span class="n">DEFAULT_MODEL_MAP</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;haiku&quot;</span><span class="p">:</span> <span class="s2">&quot;anthropic:claude-3-5-haiku-latest&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sonnet&quot;</span><span class="p">:</span> <span class="s2">&quot;anthropic:claude-sonnet-4-5&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;opus&quot;</span><span class="p">:</span> <span class="s2">&quot;anthropic:claude-opus-4-1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;inherit&quot;</span><span class="p">:</span> <span class="s2">&quot;openai:gpt-4o-mini&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="c1">#: Used when the definition pins no model and none maps.</span>
+<span class="n">DEFAULT_MODEL</span> <span class="o">=</span> <span class="s2">&quot;openai:gpt-4o-mini&quot;</span>
+
+
+<div class="viewcode-block" id="RunnableLLMGraphAgent">
+<a class="viewcode-back" href="../../module_docs/coact/realize_langgraph.html#coact.RunnableLLMGraphAgent">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RunnableLLMGraphAgent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An ``aw.AgenticStep``-compatible runnable backed by a LangGraph graph.</span>
+
+<span class="sd">    The compiled graph is built lazily and cached; ``factory`` is injectable so the</span>
+<span class="sd">    agent can be constructed and unit-tested without a live API call or a</span>
+<span class="sd">    ``langchain``/``langgraph`` install (dependency injection). The graph itself is</span>
+<span class="sd">    exposed via :meth:`build_agent` / the :attr:`agent` property for composition.</span>
+
+<span class="sd">    &gt;&gt;&gt; from coact import AgentDefinition</span>
+<span class="sd">    &gt;&gt;&gt; ad = AgentDefinition(name=&#39;x&#39;, description=&#39;d&#39;, prompt=&#39;You are X.&#39;, model=&#39;sonnet&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; RunnableLLMGraphAgent(ad).resolve_model()</span>
+<span class="sd">    &#39;anthropic:claude-sonnet-4-5&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">agent_def</span><span class="p">:</span> <span class="n">AgentDefinition</span>
+    <span class="n">model_map</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">DEFAULT_MODEL_MAP</span><span class="p">))</span>
+    <span class="n">default_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_MODEL</span>
+    <span class="c1">#: ``factory(*, model, tools, system_prompt, response_format, name) -&gt; graph``;</span>
+    <span class="c1">#: defaults to :func:`_default_langgraph_factory`. The primary DI seam.</span>
+    <span class="n">factory</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: Optional test-only bypass of ``graph.invoke``: ``runner(graph, state) -&gt; result``.</span>
+    <span class="n">runner</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: ``{tool_name: callable | BaseTool}`` — opt-in tool binding (D12); names with</span>
+    <span class="c1">#: no entry here are reported in ``info[&#39;unbound_tools&#39;]`` and never passed on.</span>
+    <span class="n">tools_map</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: Also request native structured output (in addition to the prompt instruction).</span>
+    <span class="n">use_response_format</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1">#: ``&#39;auto&#39;`` / ``&#39;tool&#39;`` -&gt; ``ToolStrategy`` (safest cross-provider); ``&#39;provider&#39;``</span>
+    <span class="c1">#: -&gt; ``ProviderStrategy`` (native provider structured output).</span>
+    <span class="n">structured_strategy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span>
+    <span class="n">_agent_cache</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Defensive copy: a caller&#39;s dict must not be aliased into — nor mutated by —</span>
+        <span class="c1"># the agent (mirrors RunnableLLMAgent).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_map</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">structured_strategy</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;tool&quot;</span><span class="p">,</span> <span class="s2">&quot;provider&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown structured_strategy </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">structured_strategy</span><span class="si">!r}</span><span class="s2">; &quot;</span>
+                <span class="s2">&quot;expected &#39;auto&#39;, &#39;tool&#39;, or &#39;provider&#39;.&quot;</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="RunnableLLMGraphAgent.resolve_model">
+<a class="viewcode-back" href="../../module_docs/coact/realize_langgraph.html#coact.RunnableLLMGraphAgent.resolve_model">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resolve_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Map the definition&#39;s model selector to a langchain ``provider:model`` string.</span>
+
+<span class="sd">        A mapped selector wins; an explicit provider string in ``model`` is used</span>
+<span class="sd">        verbatim; otherwise ``default_model``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">model</span>
+        <span class="k">if</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span><span class="p">[</span><span class="n">model</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">model</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_model</span></div>
+
+
+<div class="viewcode-block" id="RunnableLLMGraphAgent.build_system_prompt">
+<a class="viewcode-back" href="../../module_docs/coact/realize_langgraph.html#coact.RunnableLLMGraphAgent.build_system_prompt">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_system_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Persona (+ the D6 return-contract instruction when a schema is declared).&quot;&quot;&quot;</span>
+        <span class="n">system</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">prompt</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="p">:</span>
+            <span class="n">system</span> <span class="o">=</span> <span class="p">(</span><span class="n">system</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">render_json_return_instruction</span><span class="p">(</span><span class="n">schema</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">system</span></div>
+
+
+<div class="viewcode-block" id="RunnableLLMGraphAgent.build_response_format">
+<a class="viewcode-back" href="../../module_docs/coact/realize_langgraph.html#coact.RunnableLLMGraphAgent.build_response_format">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_response_format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build the ``create_agent`` ``response_format`` for the return contract, or None.</span>
+
+<span class="sd">        Wraps the canonical JSON-Schema dict in ``ToolStrategy`` (default) or</span>
+<span class="sd">        ``ProviderStrategy`` — both accept the raw dict. When ``langchain`` is not</span>
+<span class="sd">        importable (an injected factory in tests, or the ``create_react_agent``</span>
+<span class="sd">        fallback, which accepts a bare dict), the raw schema dict is returned so the</span>
+<span class="sd">        offline path needs no framework.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">schema</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_response_format</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">langchain.agents.structured_output</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+                <span class="n">ProviderStrategy</span><span class="p">,</span>
+                <span class="n">ToolStrategy</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">schema</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">structured_strategy</span> <span class="o">==</span> <span class="s2">&quot;provider&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ProviderStrategy</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ToolStrategy</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_tools</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Split declared tool names into (bound callables, unbound names) via tools_map.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools_map</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">bound</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">unbound</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">tools</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools_map</span><span class="p">:</span>
+                <span class="n">bound</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tools_map</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">unbound</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bound</span><span class="p">,</span> <span class="n">unbound</span>
+
+<div class="viewcode-block" id="RunnableLLMGraphAgent.build_agent">
+<a class="viewcode-back" href="../../module_docs/coact/realize_langgraph.html#coact.RunnableLLMGraphAgent.build_agent">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build (once) and return the framework-native ``CompiledStateGraph``.</span>
+
+<span class="sd">        Pure with respect to API calls — constructing the graph does not invoke a</span>
+<span class="sd">        model. The default path imports ``langchain``/``langgraph`` lazily and</span>
+<span class="sd">        checks they are installed; an injected ``factory`` bypasses both.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agent_cache</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">factory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span>
+            <span class="k">if</span> <span class="n">factory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">check_requirements</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;langchain&quot;</span><span class="p">:</span> <span class="s2">&quot;langchain&quot;</span><span class="p">,</span> <span class="s2">&quot;langgraph&quot;</span><span class="p">:</span> <span class="s2">&quot;langgraph&quot;</span><span class="p">},</span>
+                    <span class="n">feature</span><span class="o">=</span><span class="s2">&quot;realize(backend=&#39;langgraph&#39;)&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">factory</span> <span class="o">=</span> <span class="n">_default_langgraph_factory</span>
+            <span class="n">bound</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_tools</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_agent_cache</span> <span class="o">=</span> <span class="n">factory</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolve_model</span><span class="p">(),</span>
+                <span class="n">tools</span><span class="o">=</span><span class="n">bound</span><span class="p">,</span>
+                <span class="n">system_prompt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">build_system_prompt</span><span class="p">(),</span>
+                <span class="n">response_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">build_response_format</span><span class="p">(),</span>
+                <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agent_cache</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">agent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The native ``CompiledStateGraph`` — add it as a node to your own ``StateGraph``.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_agent</span><span class="p">()</span>
+
+<div class="viewcode-block" id="RunnableLLMGraphAgent.build_state">
+<a class="viewcode-back" href="../../module_docs/coact/realize_langgraph.html#coact.RunnableLLMGraphAgent.build_state">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build the LangGraph input state (a single user message).&quot;&quot;&quot;</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">input_data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">_to_user_text</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">content</span><span class="p">}]}</span></div>
+
+
+<div class="viewcode-block" id="RunnableLLMGraphAgent.execute">
+<a class="viewcode-back" href="../../module_docs/coact/realize_langgraph.html#coact.RunnableLLMGraphAgent.execute">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the agent over ``input_data``; return ``(artifact, info)`` (aw protocol).</span>
+
+<span class="sd">        ``context`` is accepted for ``aw.AgenticStep`` compatibility and ignored.</span>
+<span class="sd">        Uses the native ``structured_response`` when the graph returns one; otherwise</span>
+<span class="sd">        falls back to JSON-parsing the final message text (graceful, like litellm) —</span>
+<span class="sd">        langchain may omit ``structured_response`` even when a schema was requested.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_agent</span><span class="p">()</span>
+        <span class="n">runner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="ow">or</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">g</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">runner</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_state</span><span class="p">(</span><span class="n">input_data</span><span class="p">))</span>
+        <span class="n">has_schema</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">schema</span><span class="p">())</span>
+        <span class="n">structured_used</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">structured</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;structured_response&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">has_schema</span> <span class="ow">and</span> <span class="n">structured</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">artifact</span> <span class="o">=</span> <span class="n">_structured_to_dict</span><span class="p">(</span><span class="n">structured</span><span class="p">)</span>
+            <span class="n">structured_used</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">_final_text</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">artifact</span> <span class="o">=</span> <span class="n">result</span>  <span class="c1"># unexpected shape: surface raw (mirrors litellm)</span>
+            <span class="k">elif</span> <span class="n">has_schema</span><span class="p">:</span>
+                <span class="n">parsed</span> <span class="o">=</span> <span class="n">_try_json</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+                <span class="n">artifact</span> <span class="o">=</span> <span class="n">parsed</span> <span class="k">if</span> <span class="n">parsed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">text</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">artifact</span> <span class="o">=</span> <span class="n">text</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">unbound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_tools</span><span class="p">()</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;agent&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve_model</span><span class="p">(),</span>
+            <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="s2">&quot;langgraph&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;structured&quot;</span><span class="p">:</span> <span class="n">has_schema</span><span class="p">,</span>
+            <span class="s2">&quot;structured_response_used&quot;</span><span class="p">:</span> <span class="n">structured_used</span><span class="p">,</span>
+            <span class="s2">&quot;unbound_tools&quot;</span><span class="p">:</span> <span class="n">unbound</span><span class="p">,</span>
+            <span class="s2">&quot;raw&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">artifact</span><span class="p">,</span> <span class="n">info</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_default_langgraph_factory</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">tools</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">system_prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">response_format</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a ``CompiledStateGraph`` via ``create_agent`` (or ``create_react_agent``).</span>
+
+<span class="sd">    Prefers the modern ``langchain.agents.create_agent`` (``system_prompt=``); on an</span>
+<span class="sd">    older install without it, falls back to ``langgraph.prebuilt.create_react_agent``</span>
+<span class="sd">    (``prompt=`` and positional ``tools``), normalizing both behind one kwarg set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">langchain.agents</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_agent</span>
+
+        <span class="k">return</span> <span class="n">create_agent</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span>
+            <span class="n">tools</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">system_prompt</span><span class="o">=</span><span class="n">system_prompt</span><span class="p">,</span>
+            <span class="n">response_format</span><span class="o">=</span><span class="n">response_format</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">langgraph.prebuilt</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_react_agent</span>
+
+        <span class="k">return</span> <span class="n">create_react_agent</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span>
+            <span class="n">tools</span> <span class="ow">or</span> <span class="p">[],</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="n">system_prompt</span><span class="p">,</span>
+            <span class="n">response_format</span><span class="o">=</span><span class="n">response_format</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_final_text</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract the final assistant text from a LangGraph result dict, else ``None``.</span>
+
+<span class="sd">    Reads ``result[&#39;messages&#39;][-1].content`` (getattr/dict-guarded), joining a</span>
+<span class="sd">    multi-part content list into one string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;messages&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">messages</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">last</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">last</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">last</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">content</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">parts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">),</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="k">if</span> <span class="n">parts</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_structured_to_dict</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A pydantic ``BaseModel`` -&gt; ``dict`` via ``model_dump()``; anything else as-is.&quot;&quot;&quot;</span>
+    <span class="n">dump</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;model_dump&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">dump</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">dump</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<div class="viewcode-block" id="realize_langgraph">
+<a class="viewcode-back" href="../../module_docs/coact/realize_langgraph.html#coact.realize_langgraph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">realize_langgraph</span><span class="p">(</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">RealizeTarget</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">model_map</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_MODEL</span><span class="p">,</span>
+    <span class="n">factory</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">runner</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tools_map</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">structured_strategy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">use_response_format</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">policy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletionPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RunnableLLMGraphAgent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Realize one agent as a LangGraph-backed :class:`RunnableLLMGraphAgent` (aw-compatible).</span>
+
+<span class="sd">    ``model_map`` overrides how coact selectors (``sonnet``/``opus``/``haiku``) map to</span>
+<span class="sd">    langchain ``provider:model`` strings. ``tools_map`` opt-in binds host-resolved tool</span>
+<span class="sd">    *names* to Python callables (D12). ``factory`` injects the graph builder for</span>
+<span class="sd">    testing. Raises if asked to realize more than one agent (topology is out — D8).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">agents</span> <span class="o">=</span> <span class="n">coerce_agents</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;backend=&#39;langgraph&#39; realizes exactly one agent; got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+            <span class="s2">&quot;Realize each separately (topology is out of scope — DECISIONS D8).&quot;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">RunnableLLMGraphAgent</span><span class="p">(</span>
+        <span class="n">agent_def</span><span class="o">=</span><span class="n">agents</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">model_map</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">model_map</span><span class="p">)</span> <span class="k">if</span> <span class="n">model_map</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">DEFAULT_MODEL_MAP</span><span class="p">),</span>
+        <span class="n">default_model</span><span class="o">=</span><span class="n">default_model</span><span class="p">,</span>
+        <span class="n">factory</span><span class="o">=</span><span class="n">factory</span><span class="p">,</span>
+        <span class="n">runner</span><span class="o">=</span><span class="n">runner</span><span class="p">,</span>
+        <span class="n">tools_map</span><span class="o">=</span><span class="n">tools_map</span><span class="p">,</span>
+        <span class="n">structured_strategy</span><span class="o">=</span><span class="n">structured_strategy</span><span class="p">,</span>
+        <span class="n">use_response_format</span><span class="o">=</span><span class="n">use_response_format</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="n">backends</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;langgraph&quot;</span><span class="p">,</span> <span class="n">realize_langgraph</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

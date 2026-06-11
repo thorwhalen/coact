@@ -1,0 +1,458 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coact.realize_crewai &mdash; coact 0.0.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8c5712d9"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            coact
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/_pydantic_schema.html">coact._pydantic_schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/analysis.html">coact.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/base.html">coact.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/complete.html">coact.complete</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/emit.html">coact.emit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/llm.html">coact.llm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize.html">coact.realize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_crewai.html">coact.realize_crewai</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_langgraph.html">coact.realize_langgraph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/schema.html">coact.schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/stores.html">coact.stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/synthesis.html">coact.synthesis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/util.html">coact.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">coact</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">coact.realize_crewai</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for coact.realize_crewai</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;CrewAI realization backend — one definition → one composable ``crewai.Agent``.</span>
+
+<span class="sd">Realizes a **single** :class:`~coact.base.AgentDefinition` (DECISIONS D8) into a</span>
+<span class="sd">``crewai.Agent`` run via the lightweight ``Agent.kickoff()`` path — deliberately</span>
+<span class="sd">**not** ``Crew``/``Task``: a Crew would force inventing a Task and serialize a</span>
+<span class="sd">degenerate one-agent crew, i.e. topology. The ``Agent`` instance IS the</span>
+<span class="sd">framework-native object and is **exposed** (via :meth:`RunnableCrewAIAgent.build_agent`</span>
+<span class="sd">/ the ``.agent`` property) so *you* drop it into *your own*</span>
+<span class="sd">``Crew(agents=[runnable.agent, ...], tasks=[...], process=...)``. coact builds no</span>
+<span class="sd">Crew, Task, or Process — that orchestration is yours to own.</span>
+
+<span class="sd">Like the ``sdk``/``litellm`` backends it produces an ``aw.AgenticStep``-compatible</span>
+<span class="sd">runnable (``execute(input_data, context) -&gt; (artifact, info)``); the run call is</span>
+<span class="sd">**injectable** so it is unit-testable with no API key and no ``crewai`` install, and</span>
+<span class="sd">it **self-registers** into :data:`coact.realize.backends` on import (open-closed).</span>
+
+<span class="sd">Notable specifics:</span>
+
+<span class="sd">- **Model strings are slash-form** LiteLLM strings (``&quot;anthropic/claude-sonnet-4-5&quot;``) —</span>
+<span class="sd">  CrewAI consumes LiteLLM model strings, so the default map matches</span>
+<span class="sd">  :mod:`coact.realize_litellm` verbatim. Open-closed via ``model_map=``.</span>
+<span class="sd">- **Return contract (D6) is belt-and-suspenders.** CrewAI&#39;s ``kickoff(response_format=)``</span>
+<span class="sd">  wants a pydantic **class**, not a JSON-Schema dict — synthesized at run time from the</span>
+<span class="sd">  canonical schema by :func:`coact._pydantic_schema.json_schema_to_model`, which returns</span>
+<span class="sd">  ``None`` for non-flat schemas (then coact relies on the prompt-only instruction always</span>
+<span class="sd">  embedded in the agent&#39;s backstory and JSON-parses the text result). This is the one</span>
+<span class="sd">  asymmetry with ``langgraph``, which enforces deep schemas natively via ``ToolStrategy``.</span>
+<span class="sd">- **Tools are opt-in** via ``tools_map={name: callable | BaseTool}``: coact tools are</span>
+<span class="sd">  host-resolved *name strings* (D12), so bare names are never passed; unbound names are</span>
+<span class="sd">  reported in ``info[&#39;warnings&#39;]``.</span>
+<span class="sd">- CrewAI requires Python ``&gt;=3.10,&lt;3.14``; coact pins only ``&gt;=3.10`` (compatible) and</span>
+<span class="sd">  does **not** tighten its own ``requires-python`` for one optional backend.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact._pydantic_schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">json_schema_to_model</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompletionPolicy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.realize</span><span class="w"> </span><span class="kn">import</span> <span class="n">RealizeTarget</span><span class="p">,</span> <span class="n">backends</span><span class="p">,</span> <span class="n">coerce_agents</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.realize_litellm</span><span class="w"> </span><span class="kn">import</span> <span class="n">_to_user_text</span><span class="p">,</span> <span class="n">_try_json</span>  <span class="c1"># DRY: reuse, never edit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.return_contract</span><span class="w"> </span><span class="kn">import</span> <span class="n">render_json_return_instruction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_requirements</span>
+
+<span class="c1">#: Map coact&#39;s model *selectors* to LiteLLM slash-form strings (CrewAI speaks LiteLLM).</span>
+<span class="c1">#: Mirrors :data:`coact.realize_litellm.DEFAULT_MODEL_MAP`; override via ``model_map=``.</span>
+<span class="n">DEFAULT_MODEL_MAP</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;haiku&quot;</span><span class="p">:</span> <span class="s2">&quot;anthropic/claude-3-5-haiku-latest&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sonnet&quot;</span><span class="p">:</span> <span class="s2">&quot;anthropic/claude-sonnet-4-5&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;opus&quot;</span><span class="p">:</span> <span class="s2">&quot;anthropic/claude-opus-4-1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;inherit&quot;</span><span class="p">:</span> <span class="s2">&quot;openai/gpt-4o-mini&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="c1">#: Used when the definition pins no model and none maps.</span>
+<span class="n">DEFAULT_MODEL</span> <span class="o">=</span> <span class="s2">&quot;openai/gpt-4o-mini&quot;</span>
+
+
+<div class="viewcode-block" id="RunnableCrewAIAgent">
+<a class="viewcode-back" href="../../module_docs/coact/realize_crewai.html#coact.RunnableCrewAIAgent">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RunnableCrewAIAgent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An ``aw.AgenticStep``-compatible runnable backed by a single ``crewai.Agent``.</span>
+
+<span class="sd">    The ``Agent`` is built lazily and cached; ``runner`` is injectable so the agent</span>
+<span class="sd">    runs in tests with no API key and no ``crewai`` install (dependency injection).</span>
+<span class="sd">    The ``Agent`` is exposed via :meth:`build_agent` / the :attr:`agent` property.</span>
+
+<span class="sd">    &gt;&gt;&gt; from coact import AgentDefinition</span>
+<span class="sd">    &gt;&gt;&gt; ad = AgentDefinition(name=&#39;x&#39;, description=&#39;d&#39;, prompt=&#39;You are X.&#39;, model=&#39;sonnet&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; RunnableCrewAIAgent(ad).resolve_model()</span>
+<span class="sd">    &#39;anthropic/claude-sonnet-4-5&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">agent_def</span><span class="p">:</span> <span class="n">AgentDefinition</span>
+    <span class="n">model_map</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">DEFAULT_MODEL_MAP</span><span class="p">))</span>
+    <span class="n">default_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_MODEL</span>
+    <span class="c1">#: ``runner(*, agent, input_text, response_format) -&gt; output`` (``.raw`` / ``.pydantic``);</span>
+    <span class="c1">#: defaults to :func:`_default_crewai_runner`. The DI seam (mirrors litellm ``completion=``).</span>
+    <span class="n">runner</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: ``{tool_name: callable | crewai BaseTool}`` — opt-in tool binding (D12); names with</span>
+    <span class="c1">#: no entry are reported in ``info[&#39;warnings&#39;]`` and never passed on.</span>
+    <span class="n">tools_map</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: Also request native structured output (synthesized pydantic class) when possible.</span>
+    <span class="n">use_response_format</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">_agent_cache</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Defensive copy (mirrors RunnableLLMAgent): never alias/mutate the caller&#39;s dict.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_map</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RunnableCrewAIAgent.resolve_model">
+<a class="viewcode-back" href="../../module_docs/coact/realize_crewai.html#coact.RunnableCrewAIAgent.resolve_model">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resolve_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Map the definition&#39;s model selector to a LiteLLM model string (slash form).&quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">model</span>
+        <span class="k">if</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span><span class="p">[</span><span class="n">model</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">model</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_model</span></div>
+
+
+<div class="viewcode-block" id="RunnableCrewAIAgent.build_role">
+<a class="viewcode-back" href="../../module_docs/coact/realize_crewai.html#coact.RunnableCrewAIAgent.build_role">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_role</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The CrewAI ``role`` (required, non-empty) — the agent&#39;s name.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">name</span></div>
+
+
+<div class="viewcode-block" id="RunnableCrewAIAgent.build_goal">
+<a class="viewcode-back" href="../../module_docs/coact/realize_crewai.html#coact.RunnableCrewAIAgent.build_goal">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The CrewAI ``goal`` (required, non-empty).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">description</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">prompt</span>
+            <span class="ow">or</span> <span class="s2">&quot;(no goal specified)&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RunnableCrewAIAgent.build_backstory">
+<a class="viewcode-back" href="../../module_docs/coact/realize_crewai.html#coact.RunnableCrewAIAgent.build_backstory">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_backstory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The CrewAI ``backstory`` (persona + the D6 return-contract instruction).&quot;&quot;&quot;</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">prompt</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">name</span>
+        <span class="p">)</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">body</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">render_json_return_instruction</span><span class="p">(</span><span class="n">schema</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">body</span></div>
+
+
+<div class="viewcode-block" id="RunnableCrewAIAgent.build_response_model">
+<a class="viewcode-back" href="../../module_docs/coact/realize_crewai.html#coact.RunnableCrewAIAgent.build_response_model">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_response_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">type</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Synthesize the pydantic class for ``kickoff(response_format=)``, or ``None``.</span>
+
+<span class="sd">        ``None`` when there is no schema, ``use_response_format`` is off, or the schema</span>
+<span class="sd">        is not flat enough to represent (then coact relies on the prompt instruction).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">schema</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_response_format</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">json_schema_to_model</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_tools</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Split declared tool names into (bound values, unbound names) via tools_map.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools_map</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">bound</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">unbound</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">tools</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools_map</span><span class="p">:</span>
+                <span class="n">bound</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tools_map</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">unbound</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bound</span><span class="p">,</span> <span class="n">unbound</span>
+
+<div class="viewcode-block" id="RunnableCrewAIAgent.build_agent">
+<a class="viewcode-back" href="../../module_docs/coact/realize_crewai.html#coact.RunnableCrewAIAgent.build_agent">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build (once) and return the framework-native ``crewai.Agent``.</span>
+
+<span class="sd">        Pure with respect to API calls — constructing the ``Agent`` does not invoke a</span>
+<span class="sd">        model. Imports ``crewai`` lazily (checked first); only ever called on the</span>
+<span class="sd">        default (non-injected) run path.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agent_cache</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">check_requirements</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">&quot;crewai&quot;</span><span class="p">:</span> <span class="s2">&quot;crewai&quot;</span><span class="p">},</span> <span class="n">feature</span><span class="o">=</span><span class="s2">&quot;realize(backend=&#39;crewai&#39;)&quot;</span>
+            <span class="p">)</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">crewai</span><span class="w"> </span><span class="kn">import</span> <span class="n">Agent</span>
+
+            <span class="n">bound</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_tools</span><span class="p">()</span>
+            <span class="n">tools</span> <span class="o">=</span> <span class="p">[</span><span class="n">_as_crewai_tool</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">bound</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_agent_cache</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span>
+                <span class="n">role</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">build_role</span><span class="p">(),</span>
+                <span class="n">goal</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">build_goal</span><span class="p">(),</span>
+                <span class="n">backstory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">build_backstory</span><span class="p">(),</span>
+                <span class="n">llm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolve_model</span><span class="p">(),</span>
+                <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
+                <span class="n">allow_delegation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agent_cache</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">agent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The native ``crewai.Agent`` — add it to your own ``Crew(agents=[...])``.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_agent</span><span class="p">()</span>
+
+<div class="viewcode-block" id="RunnableCrewAIAgent.execute">
+<a class="viewcode-back" href="../../module_docs/coact/realize_crewai.html#coact.RunnableCrewAIAgent.execute">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the agent over ``input_data``; return ``(artifact, info)`` (aw protocol).</span>
+
+<span class="sd">        ``context`` is accepted for ``aw.AgenticStep`` compatibility and ignored. Uses</span>
+<span class="sd">        the native ``.pydantic`` result when present; otherwise JSON-parses ``.raw``</span>
+<span class="sd">        (graceful, like litellm). An injected ``runner`` keeps ``crewai`` unimported.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">input_text</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">input_data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">_to_user_text</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">response_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_response_model</span><span class="p">()</span>
+        <span class="n">has_schema</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">schema</span><span class="p">())</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">check_requirements</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">&quot;crewai&quot;</span><span class="p">:</span> <span class="s2">&quot;crewai&quot;</span><span class="p">},</span> <span class="n">feature</span><span class="o">=</span><span class="s2">&quot;realize(backend=&#39;crewai&#39;)&quot;</span>
+            <span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">_default_crewai_runner</span><span class="p">(</span>
+                <span class="n">agent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">build_agent</span><span class="p">(),</span>
+                <span class="n">input_text</span><span class="o">=</span><span class="n">input_text</span><span class="p">,</span>
+                <span class="n">response_format</span><span class="o">=</span><span class="n">response_format</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="p">(</span>
+                <span class="n">agent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_text</span><span class="o">=</span><span class="n">input_text</span><span class="p">,</span> <span class="n">response_format</span><span class="o">=</span><span class="n">response_format</span>
+            <span class="p">)</span>
+
+        <span class="n">structured_used</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">pyd</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s2">&quot;pydantic&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">has_schema</span> <span class="ow">and</span> <span class="n">pyd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">artifact</span> <span class="o">=</span> <span class="n">pyd</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">pyd</span><span class="p">,</span> <span class="s2">&quot;model_dump&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">pyd</span>
+            <span class="n">structured_used</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">raw_text</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s2">&quot;raw&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw_text</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">raw_text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">has_schema</span><span class="p">:</span>
+                <span class="n">parsed</span> <span class="o">=</span> <span class="n">_try_json</span><span class="p">(</span><span class="n">raw_text</span><span class="p">)</span>
+                <span class="n">artifact</span> <span class="o">=</span> <span class="n">parsed</span> <span class="k">if</span> <span class="n">parsed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">raw_text</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">artifact</span> <span class="o">=</span> <span class="n">raw_text</span>
+
+        <span class="n">warnings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">unbound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_tools</span><span class="p">()</span>
+        <span class="n">warnings</span> <span class="o">+=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot;tool </span><span class="si">{</span><span class="n">n</span><span class="si">!r}</span><span class="s2"> has no callable in tools_map; not bound&quot;</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">unbound</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">has_schema</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_response_format</span> <span class="ow">and</span> <span class="n">response_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">&quot;return schema not synthesizable to a pydantic class (non-flat schema &quot;</span>
+                <span class="s2">&quot;or pydantic missing); using the prompt-only return-contract fallback&quot;</span>
+            <span class="p">)</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;agent&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve_model</span><span class="p">(),</span>
+            <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="s2">&quot;crewai&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;structured&quot;</span><span class="p">:</span> <span class="n">has_schema</span><span class="p">,</span>
+            <span class="s2">&quot;structured_response_used&quot;</span><span class="p">:</span> <span class="n">structured_used</span><span class="p">,</span>
+            <span class="s2">&quot;warnings&quot;</span><span class="p">:</span> <span class="n">warnings</span><span class="p">,</span>
+            <span class="s2">&quot;raw&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">artifact</span><span class="p">,</span> <span class="n">info</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_default_crewai_runner</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">agent</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">input_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">response_format</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run a real ``crewai.Agent`` to completion via ``Agent.kickoff`` (lazy path).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">agent</span><span class="o">.</span><span class="n">kickoff</span><span class="p">(</span><span class="n">input_text</span><span class="p">,</span> <span class="n">response_format</span><span class="o">=</span><span class="n">response_format</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_as_crewai_tool</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrap a bare callable as a crewai tool; pass tool-like values through unchanged.</span>
+
+<span class="sd">    Runs only on the real (crewai-installed) path. A value that already looks like a</span>
+<span class="sd">    tool (has ``run``/``_run``) is returned as-is; a plain callable is wrapped via</span>
+<span class="sd">    ``crewai.tools.tool``. If wrapping fails (crewai&#39;s ``tool`` decorator rejects a</span>
+<span class="sd">    function lacking a docstring or type annotations), an actionable ``ValueError`` is</span>
+<span class="sd">    raised here rather than letting a confusing pydantic validation error surface later</span>
+<span class="sd">    from ``Agent(tools=...)`` — tools are an advanced opt-in, and passing a crewai</span>
+<span class="sd">    ``BaseTool`` instance directly is the reliable route.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;run&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;_run&quot;</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">crewai.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">tool</span> <span class="k">as</span> <span class="n">_tool</span>
+
+            <span class="k">return</span> <span class="n">_tool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="s2">&quot;tool&quot;</span><span class="p">))(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;tools_map callable </span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;__name__&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="si">!r}</span><span class="s2"> could not be &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;wrapped as a crewai tool (</span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">). Pass a crewai BaseTool instance in &quot;</span>
+                <span class="s2">&quot;tools_map, or give the function a docstring and type annotations.&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<div class="viewcode-block" id="realize_crewai">
+<a class="viewcode-back" href="../../module_docs/coact/realize_crewai.html#coact.realize_crewai">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">realize_crewai</span><span class="p">(</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">RealizeTarget</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">model_map</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_MODEL</span><span class="p">,</span>
+    <span class="n">runner</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tools_map</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_response_format</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">policy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletionPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RunnableCrewAIAgent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Realize one agent as a CrewAI-backed :class:`RunnableCrewAIAgent` (aw-compatible).</span>
+
+<span class="sd">    ``model_map`` overrides how coact selectors map to LiteLLM model strings;</span>
+<span class="sd">    ``tools_map`` opt-in binds host-resolved tool *names* to callables/tools (D12);</span>
+<span class="sd">    ``runner`` injects the run call for testing. Raises if asked to realize more than</span>
+<span class="sd">    one agent (topology is out of scope — D8).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">agents</span> <span class="o">=</span> <span class="n">coerce_agents</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;backend=&#39;crewai&#39; realizes exactly one agent; got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+            <span class="s2">&quot;Realize each separately (topology is out of scope — DECISIONS D8).&quot;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">RunnableCrewAIAgent</span><span class="p">(</span>
+        <span class="n">agent_def</span><span class="o">=</span><span class="n">agents</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">model_map</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">model_map</span><span class="p">)</span> <span class="k">if</span> <span class="n">model_map</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">DEFAULT_MODEL_MAP</span><span class="p">),</span>
+        <span class="n">default_model</span><span class="o">=</span><span class="n">default_model</span><span class="p">,</span>
+        <span class="n">runner</span><span class="o">=</span><span class="n">runner</span><span class="p">,</span>
+        <span class="n">tools_map</span><span class="o">=</span><span class="n">tools_map</span><span class="p">,</span>
+        <span class="n">use_response_format</span><span class="o">=</span><span class="n">use_response_format</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="n">backends</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;crewai&quot;</span><span class="p">,</span> <span class="n">realize_crewai</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

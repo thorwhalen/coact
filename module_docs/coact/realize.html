@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>coact.realize &mdash; coact 0.0.3 documentation</title>
+  <title>coact.realize &mdash; coact 0.0.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=47de8214"></script>
+      <script src="../../_static/documentation_options.js?v=8c5712d9"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -24,7 +24,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="coact.realize_litellm" href="realize_litellm.html" />
+    <link rel="next" title="coact.realize_crewai" href="realize_crewai.html" />
     <link rel="prev" title="coact.policy" href="policy.html" /> 
 </head>
 
@@ -51,6 +51,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../coact.html">coact</a></li>
 <li class="toctree-l1"><a class="reference internal" href="__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_pydantic_schema.html">coact._pydantic_schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analysis.html">coact.analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="base.html">coact.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="complete.html">coact.complete</a></li>
@@ -74,6 +75,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#coact.realize.realize_sdk"><code class="docutils literal notranslate"><span class="pre">realize_sdk()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="realize_crewai.html">coact.realize_crewai</a></li>
+<li class="toctree-l1"><a class="reference internal" href="realize_langgraph.html">coact.realize_langgraph</a></li>
 <li class="toctree-l1"><a class="reference internal" href="realize_litellm.html">coact.realize_litellm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="return_contract.html">coact.return_contract</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scaffold.html">coact.scaffold</a></li>
@@ -173,7 +176,7 @@ thinking that cannot honor output_format). See DECISIONS D6.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="coact.realize.backends">
-<span class="sig-prename descclassname"><span class="pre">coact.realize.</span></span><span class="sig-name descname"><span class="pre">backends</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Registry</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Registry('realization_backends',</span> <span class="pre">keys=['host',</span> <span class="pre">'sdk',</span> <span class="pre">'mcp',</span> <span class="pre">'litellm'])</span></span><a class="headerlink" href="#coact.realize.backends" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">coact.realize.</span></span><span class="sig-name descname"><span class="pre">backends</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Registry</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Registry('realization_backends',</span> <span class="pre">keys=['host',</span> <span class="pre">'sdk',</span> <span class="pre">'mcp',</span> <span class="pre">'litellm',</span> <span class="pre">'langgraph',</span> <span class="pre">'crewai'])</span></span><a class="headerlink" href="#coact.realize.backends" title="Link to this definition"></a></dt>
 <dd><p>Registry of realization backends (<code class="docutils literal notranslate"><span class="pre">realize(target,</span> <span class="pre">backend=&lt;name&gt;)</span></code>).</p>
 </dd></dl>
 
@@ -248,7 +251,7 @@ that cannot honor <code class="docutils literal notranslate"><span class="pre">o
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="policy.html" class="btn btn-neutral float-left" title="coact.policy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="realize_litellm.html" class="btn btn-neutral float-right" title="coact.realize_litellm" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="realize_crewai.html" class="btn btn-neutral float-right" title="coact.realize_crewai" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

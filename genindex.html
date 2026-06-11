@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; coact 0.0.3 documentation</title>
+  <title>Index &mdash; coact 0.0.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=47de8214"></script>
+      <script src="_static/documentation_options.js?v=8c5712d9"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -48,6 +48,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact.html">coact</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_docs/coact/_pydantic_schema.html">coact._pydantic_schema</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/analysis.html">coact.analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/base.html">coact.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/complete.html">coact.complete</a></li>
@@ -56,6 +57,8 @@
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/llm.html">coact.llm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/policy.html">coact.policy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/realize.html">coact.realize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_docs/coact/realize_crewai.html">coact.realize_crewai</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_docs/coact/realize_langgraph.html">coact.realize_langgraph</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/realize_litellm.html">coact.realize_litellm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/return_contract.html">coact.return_contract</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/scaffold.html">coact.scaffold</a></li>
@@ -99,6 +102,7 @@
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#J"><strong>J</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
@@ -113,6 +117,16 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.RunnableCrewAIAgent.agent">agent (coact.realize_crewai.RunnableCrewAIAgent property)</a>
+
+      <ul>
+        <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.RunnableLLMGraphAgent.agent">(coact.realize_langgraph.RunnableLLMGraphAgent property)</a>
+</li>
+        <li><a href="module_docs/coact.html#coact.RunnableCrewAIAgent.agent">(coact.RunnableCrewAIAgent property)</a>
+</li>
+        <li><a href="module_docs/coact.html#coact.RunnableLLMGraphAgent.agent">(coact.RunnableLLMGraphAgent property)</a>
+</li>
+      </ul></li>
       <li><a href="module_docs/coact/util.html#coact.util.agent_filename">agent_filename() (in module coact.util)</a>
 </li>
       <li><a href="module_docs/coact/emit.html#coact.emit.agent_to_frontmatter">agent_to_frontmatter() (in module coact.emit)</a>
@@ -123,6 +137,8 @@
         <li><a href="module_docs/coact/base.html#coact.base.AgentDefinition">(class in coact.base)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/coact/analysis.html#coact.analysis.AgentDiff">AgentDiff (class in coact.analysis)</a>
 </li>
       <li><a href="module_docs/coact.html#coact.AgentPlan">AgentPlan (class in coact)</a>
@@ -131,8 +147,6 @@
         <li><a href="module_docs/coact/base.html#coact.base.AgentPlan">(class in coact.base)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/coact.html#coact.agents_dir">agents_dir() (in module coact)</a>
 
       <ul>
@@ -165,6 +179,28 @@
       </ul></li>
       <li><a href="module_docs/coact/realize.html#coact.realize.backends">backends (in module coact.realize)</a>
 </li>
+      <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.RunnableCrewAIAgent.build_agent">build_agent() (coact.realize_crewai.RunnableCrewAIAgent method)</a>
+
+      <ul>
+        <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.RunnableLLMGraphAgent.build_agent">(coact.realize_langgraph.RunnableLLMGraphAgent method)</a>
+</li>
+        <li><a href="module_docs/coact.html#coact.RunnableCrewAIAgent.build_agent">(coact.RunnableCrewAIAgent method)</a>
+</li>
+        <li><a href="module_docs/coact.html#coact.RunnableLLMGraphAgent.build_agent">(coact.RunnableLLMGraphAgent method)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.RunnableCrewAIAgent.build_backstory">build_backstory() (coact.realize_crewai.RunnableCrewAIAgent method)</a>
+
+      <ul>
+        <li><a href="module_docs/coact.html#coact.RunnableCrewAIAgent.build_backstory">(coact.RunnableCrewAIAgent method)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.RunnableCrewAIAgent.build_goal">build_goal() (coact.realize_crewai.RunnableCrewAIAgent method)</a>
+
+      <ul>
+        <li><a href="module_docs/coact.html#coact.RunnableCrewAIAgent.build_goal">(coact.RunnableCrewAIAgent method)</a>
+</li>
+      </ul></li>
       <li><a href="module_docs/coact/realize_litellm.html#coact.realize_litellm.RunnableLLMAgent.build_kwargs">build_kwargs() (coact.realize_litellm.RunnableLLMAgent method)</a>
 
       <ul>
@@ -183,6 +219,36 @@
 
       <ul>
         <li><a href="module_docs/coact.html#coact.RunnableAgent.build_options">(coact.RunnableAgent method)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.RunnableLLMGraphAgent.build_response_format">build_response_format() (coact.realize_langgraph.RunnableLLMGraphAgent method)</a>
+
+      <ul>
+        <li><a href="module_docs/coact.html#coact.RunnableLLMGraphAgent.build_response_format">(coact.RunnableLLMGraphAgent method)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.RunnableCrewAIAgent.build_response_model">build_response_model() (coact.realize_crewai.RunnableCrewAIAgent method)</a>
+
+      <ul>
+        <li><a href="module_docs/coact.html#coact.RunnableCrewAIAgent.build_response_model">(coact.RunnableCrewAIAgent method)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.RunnableCrewAIAgent.build_role">build_role() (coact.realize_crewai.RunnableCrewAIAgent method)</a>
+
+      <ul>
+        <li><a href="module_docs/coact.html#coact.RunnableCrewAIAgent.build_role">(coact.RunnableCrewAIAgent method)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.RunnableLLMGraphAgent.build_state">build_state() (coact.realize_langgraph.RunnableLLMGraphAgent method)</a>
+
+      <ul>
+        <li><a href="module_docs/coact.html#coact.RunnableLLMGraphAgent.build_state">(coact.RunnableLLMGraphAgent method)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.RunnableLLMGraphAgent.build_system_prompt">build_system_prompt() (coact.realize_langgraph.RunnableLLMGraphAgent method)</a>
+
+      <ul>
+        <li><a href="module_docs/coact.html#coact.RunnableLLMGraphAgent.build_system_prompt">(coact.RunnableLLMGraphAgent method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -217,6 +283,13 @@
 
       <ul>
         <li><a href="module_docs/coact/__main__.html#module-coact.__main__">module</a>
+</li>
+      </ul></li>
+      <li>
+    coact._pydantic_schema
+
+      <ul>
+        <li><a href="module_docs/coact/_pydantic_schema.html#module-coact._pydantic_schema">module</a>
 </li>
       </ul></li>
       <li>
@@ -275,8 +348,22 @@
         <li><a href="module_docs/coact/realize.html#module-coact.realize">module</a>
 </li>
       </ul></li>
+      <li>
+    coact.realize_crewai
+
+      <ul>
+        <li><a href="module_docs/coact/realize_crewai.html#module-coact.realize_crewai">module</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    coact.realize_langgraph
+
+      <ul>
+        <li><a href="module_docs/coact/realize_langgraph.html#module-coact.realize_langgraph">module</a>
+</li>
+      </ul></li>
       <li>
     coact.realize_litellm
 
@@ -362,16 +449,28 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="module_docs/coact/realize_litellm.html#coact.realize_litellm.DEFAULT_MODEL">DEFAULT_MODEL (in module coact.realize_litellm)</a>
+      <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.DEFAULT_MODEL">DEFAULT_MODEL (in module coact.realize_crewai)</a>
+
+      <ul>
+        <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.DEFAULT_MODEL">(in module coact.realize_langgraph)</a>
 </li>
-      <li><a href="module_docs/coact/realize_litellm.html#coact.realize_litellm.DEFAULT_MODEL_MAP">DEFAULT_MODEL_MAP (in module coact.realize_litellm)</a>
+        <li><a href="module_docs/coact/realize_litellm.html#coact.realize_litellm.DEFAULT_MODEL">(in module coact.realize_litellm)</a>
 </li>
+      </ul></li>
+      <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.DEFAULT_MODEL_MAP">DEFAULT_MODEL_MAP (in module coact.realize_crewai)</a>
+
+      <ul>
+        <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.DEFAULT_MODEL_MAP">(in module coact.realize_langgraph)</a>
+</li>
+        <li><a href="module_docs/coact/realize_litellm.html#coact.realize_litellm.DEFAULT_MODEL_MAP">(in module coact.realize_litellm)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/coact/policy.html#coact.policy.default_policy">default_policy (in module coact.policy)</a>
 </li>
       <li><a href="module_docs/coact/synthesis.html#coact.synthesis.DEFAULT_RETURN_SCHEMA">DEFAULT_RETURN_SCHEMA (in module coact.synthesis)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/coact/scaffold.html#coact.scaffold.DEFAULT_SHIM_NAME">DEFAULT_SHIM_NAME (in module coact.scaffold)</a>
 </li>
       <li><a href="module_docs/coact.html#coact.diff">diff() (in module coact)</a>
@@ -413,11 +512,19 @@
       <li><a href="module_docs/coact/realize.html#coact.realize.RunnableAgent.execute">execute() (coact.realize.RunnableAgent method)</a>
 
       <ul>
+        <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.RunnableCrewAIAgent.execute">(coact.realize_crewai.RunnableCrewAIAgent method)</a>
+</li>
+        <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.RunnableLLMGraphAgent.execute">(coact.realize_langgraph.RunnableLLMGraphAgent method)</a>
+</li>
         <li><a href="module_docs/coact/realize_litellm.html#coact.realize_litellm.RunnableLLMAgent.execute">(coact.realize_litellm.RunnableLLMAgent method)</a>
 </li>
         <li><a href="module_docs/coact.html#coact.RunnableAgent.execute">(coact.RunnableAgent method)</a>
 </li>
+        <li><a href="module_docs/coact.html#coact.RunnableCrewAIAgent.execute">(coact.RunnableCrewAIAgent method)</a>
+</li>
         <li><a href="module_docs/coact.html#coact.RunnableLLMAgent.execute">(coact.RunnableLLMAgent method)</a>
+</li>
+        <li><a href="module_docs/coact.html#coact.RunnableLLMGraphAgent.execute">(coact.RunnableLLMGraphAgent method)</a>
 </li>
       </ul></li>
       <li><a href="module_docs/coact/return_contract.html#coact.return_contract.extract_return_tool_input">extract_return_tool_input() (in module coact.return_contract)</a>
@@ -428,6 +535,12 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.RunnableLLMGraphAgent.factory">factory (coact.realize_langgraph.RunnableLLMGraphAgent attribute)</a>
+
+      <ul>
+        <li><a href="module_docs/coact.html#coact.RunnableLLMGraphAgent.factory">(coact.RunnableLLMGraphAgent attribute)</a>
+</li>
+      </ul></li>
       <li><a href="module_docs/coact.html#coact.FieldProvenance">FieldProvenance (class in coact)</a>
 
       <ul>
@@ -436,14 +549,14 @@
       </ul></li>
       <li><a href="module_docs/coact/util.html#coact.util.first_balanced_span">first_balanced_span() (in module coact.util)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/coact.html#coact.from_claude_agent_md">from_claude_agent_md() (in module coact)</a>
 
       <ul>
         <li><a href="module_docs/coact/emit.html#coact.emit.from_claude_agent_md">(in module coact.emit)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/coact/base.html#coact.base.ReturnContract.from_dict">from_dict() (coact.base.ReturnContract class method)</a>
 
       <ul>
@@ -497,6 +610,14 @@
   </ul></td>
 </tr></table>
 
+<h2 id="J">J</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_docs/coact/_pydantic_schema.html#coact._pydantic_schema.json_schema_to_model">json_schema_to_model() (in module coact._pydantic_schema)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -514,6 +635,8 @@
 </li>
         <li><a href="module_docs/coact/__main__.html#module-coact.__main__">coact.__main__</a>
 </li>
+        <li><a href="module_docs/coact/_pydantic_schema.html#module-coact._pydantic_schema">coact._pydantic_schema</a>
+</li>
         <li><a href="module_docs/coact/analysis.html#module-coact.analysis">coact.analysis</a>
 </li>
         <li><a href="module_docs/coact/base.html#module-coact.base">coact.base</a>
@@ -529,6 +652,10 @@
         <li><a href="module_docs/coact/policy.html#module-coact.policy">coact.policy</a>
 </li>
         <li><a href="module_docs/coact/realize.html#module-coact.realize">coact.realize</a>
+</li>
+        <li><a href="module_docs/coact/realize_crewai.html#module-coact.realize_crewai">coact.realize_crewai</a>
+</li>
+        <li><a href="module_docs/coact/realize_langgraph.html#module-coact.realize_langgraph">coact.realize_langgraph</a>
 </li>
         <li><a href="module_docs/coact/realize_litellm.html#module-coact.realize_litellm">coact.realize_litellm</a>
 </li>
@@ -603,10 +730,22 @@
         <li><a href="module_docs/coact/realize.html#coact.realize.realize">(in module coact.realize)</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/coact.html#coact.realize_crewai">realize_crewai() (in module coact)</a>
+
+      <ul>
+        <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.realize_crewai">(in module coact.realize_crewai)</a>
+</li>
+      </ul></li>
       <li><a href="module_docs/coact.html#coact.realize_host">realize_host() (in module coact)</a>
 
       <ul>
         <li><a href="module_docs/coact/realize.html#coact.realize.realize_host">(in module coact.realize)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/coact.html#coact.realize_langgraph">realize_langgraph() (in module coact)</a>
+
+      <ul>
+        <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.realize_langgraph">(in module coact.realize_langgraph)</a>
 </li>
       </ul></li>
       <li><a href="module_docs/coact.html#coact.realize_litellm">realize_litellm() (in module coact)</a>
@@ -653,8 +792,6 @@
       </ul></li>
       <li><a href="module_docs/coact/return_contract.html#coact.return_contract.render_json_return_instruction">render_json_return_instruction() (in module coact.return_contract)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/coact/synthesis.html#coact.synthesis.render_return_contract_section">render_return_contract_section() (in module coact.synthesis)</a>
 </li>
       <li><a href="module_docs/coact/return_contract.html#coact.return_contract.render_tool_return_instruction">render_tool_return_instruction() (in module coact.return_contract)</a>
@@ -665,10 +802,20 @@
         <li><a href="module_docs/coact/llm.html#coact.llm.resolve_llm">(in module coact.llm)</a>
 </li>
       </ul></li>
-      <li><a href="module_docs/coact/realize_litellm.html#coact.realize_litellm.RunnableLLMAgent.resolve_model">resolve_model() (coact.realize_litellm.RunnableLLMAgent method)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.RunnableCrewAIAgent.resolve_model">resolve_model() (coact.realize_crewai.RunnableCrewAIAgent method)</a>
 
       <ul>
+        <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.RunnableLLMGraphAgent.resolve_model">(coact.realize_langgraph.RunnableLLMGraphAgent method)</a>
+</li>
+        <li><a href="module_docs/coact/realize_litellm.html#coact.realize_litellm.RunnableLLMAgent.resolve_model">(coact.realize_litellm.RunnableLLMAgent method)</a>
+</li>
+        <li><a href="module_docs/coact.html#coact.RunnableCrewAIAgent.resolve_model">(coact.RunnableCrewAIAgent method)</a>
+</li>
         <li><a href="module_docs/coact.html#coact.RunnableLLMAgent.resolve_model">(coact.RunnableLLMAgent method)</a>
+</li>
+        <li><a href="module_docs/coact.html#coact.RunnableLLMGraphAgent.resolve_model">(coact.RunnableLLMGraphAgent method)</a>
 </li>
       </ul></li>
       <li><a href="module_docs/coact/schema.html#coact.schema.resolve_schema_ref">resolve_schema_ref() (in module coact.schema)</a>
@@ -705,10 +852,32 @@
         <li><a href="module_docs/coact/realize.html#coact.realize.RunnableAgent">(class in coact.realize)</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/coact.html#coact.RunnableCrewAIAgent">RunnableCrewAIAgent (class in coact)</a>
+
+      <ul>
+        <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.RunnableCrewAIAgent">(class in coact.realize_crewai)</a>
+</li>
+      </ul></li>
       <li><a href="module_docs/coact.html#coact.RunnableLLMAgent">RunnableLLMAgent (class in coact)</a>
 
       <ul>
         <li><a href="module_docs/coact/realize_litellm.html#coact.realize_litellm.RunnableLLMAgent">(class in coact.realize_litellm)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/coact.html#coact.RunnableLLMGraphAgent">RunnableLLMGraphAgent (class in coact)</a>
+
+      <ul>
+        <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.RunnableLLMGraphAgent">(class in coact.realize_langgraph)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.RunnableCrewAIAgent.runner">runner (coact.realize_crewai.RunnableCrewAIAgent attribute)</a>
+
+      <ul>
+        <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.RunnableLLMGraphAgent.runner">(coact.realize_langgraph.RunnableLLMGraphAgent attribute)</a>
+</li>
+        <li><a href="module_docs/coact.html#coact.RunnableCrewAIAgent.runner">(coact.RunnableCrewAIAgent attribute)</a>
+</li>
+        <li><a href="module_docs/coact.html#coact.RunnableLLMGraphAgent.runner">(coact.RunnableLLMGraphAgent attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -745,6 +914,12 @@
         <li><a href="module_docs/coact/llm.html#coact.llm.structured">(in module coact.llm)</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.RunnableLLMGraphAgent.structured_strategy">structured_strategy (coact.realize_langgraph.RunnableLLMGraphAgent attribute)</a>
+
+      <ul>
+        <li><a href="module_docs/coact.html#coact.RunnableLLMGraphAgent.structured_strategy">(coact.RunnableLLMGraphAgent attribute)</a>
+</li>
+      </ul></li>
       <li><a href="module_docs/coact.html#coact.synthesize_persona">synthesize_persona() (in module coact)</a>
 
       <ul>
@@ -775,30 +950,48 @@
         <li><a href="module_docs/coact/emit.html#coact.emit.to_claude_agent_md">(in module coact.emit)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/coact/base.html#coact.base.ReturnContract.to_dict">to_dict() (coact.base.ReturnContract method)</a>
 
       <ul>
         <li><a href="module_docs/coact.html#coact.ReturnContract.to_dict">(coact.ReturnContract method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/coact/util.html#coact.util.to_kebab_case">to_kebab_case() (in module coact.util)</a>
 </li>
       <li><a href="module_docs/coact/emit.html#coact.emit.to_sdk_agent_dict">to_sdk_agent_dict() (in module coact.emit)</a>
 </li>
       <li><a href="module_docs/coact/util.html#coact.util.to_snake_case">to_snake_case() (in module coact.util)</a>
 </li>
+      <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.RunnableCrewAIAgent.tools_map">tools_map (coact.realize_crewai.RunnableCrewAIAgent attribute)</a>
+
+      <ul>
+        <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.RunnableLLMGraphAgent.tools_map">(coact.realize_langgraph.RunnableLLMGraphAgent attribute)</a>
+</li>
+        <li><a href="module_docs/coact.html#coact.RunnableCrewAIAgent.tools_map">(coact.RunnableCrewAIAgent attribute)</a>
+</li>
+        <li><a href="module_docs/coact.html#coact.RunnableLLMGraphAgent.tools_map">(coact.RunnableLLMGraphAgent attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="module_docs/coact/realize_litellm.html#coact.realize_litellm.RunnableLLMAgent.use_response_format">use_response_format (coact.realize_litellm.RunnableLLMAgent attribute)</a>
+      <li><a href="module_docs/coact/realize_crewai.html#coact.realize_crewai.RunnableCrewAIAgent.use_response_format">use_response_format (coact.realize_crewai.RunnableCrewAIAgent attribute)</a>
 
       <ul>
+        <li><a href="module_docs/coact/realize_langgraph.html#coact.realize_langgraph.RunnableLLMGraphAgent.use_response_format">(coact.realize_langgraph.RunnableLLMGraphAgent attribute)</a>
+</li>
+        <li><a href="module_docs/coact/realize_litellm.html#coact.realize_litellm.RunnableLLMAgent.use_response_format">(coact.realize_litellm.RunnableLLMAgent attribute)</a>
+</li>
+        <li><a href="module_docs/coact.html#coact.RunnableCrewAIAgent.use_response_format">(coact.RunnableCrewAIAgent attribute)</a>
+</li>
         <li><a href="module_docs/coact.html#coact.RunnableLLMAgent.use_response_format">(coact.RunnableLLMAgent attribute)</a>
+</li>
+        <li><a href="module_docs/coact.html#coact.RunnableLLMGraphAgent.use_response_format">(coact.RunnableLLMGraphAgent attribute)</a>
 </li>
       </ul></li>
   </ul></td>
