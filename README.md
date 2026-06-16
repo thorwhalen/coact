@@ -84,7 +84,30 @@ coact estimate  .claude/agents/a.md .claude/agents/b.md   # the cost gate
 coact inventory .                                         # skills + agents + MCP tools
 coact back      .claude/agents/ux-analyst.md              # lossy agent → skill stub
 coact scaffold  .claude/agents/a.md .claude/agents/b.md   # a starter fleet shim (you own it)
+coact publish   mypkg.tools:summarize --name my-tools --dry-run   # → a Claude .mcpb (preview)
 ```
+
+## Publish — ship a capability to a chatbot host
+
+Beyond COMPLETE/REALIZE, the **PUBLISH** axis packages a capability (Python
+tools) as a deployable chatbot integration. The first target,
+`claude-local-mcpb`, builds a **Claude Desktop `.mcpb` Desktop Extension** — a
+one-click *local* (stdio) MCP server, built by [`py2mcp`](https://github.com/i2mint/py2mcp):
+
+```python
+from coact import publish
+
+publish(["mypkg.tools:summarize", "mypkg.tools:translate"],
+        name="text-tools", dest="dist")          # → dist/text-tools.mcpb
+```
+
+Sources can be `module:function` refs, live callables, or a skill carrying a
+`coact: mcp:` block. `dry_run=True` (or `--dry-run`) previews the bundle without
+writing it. This is the **local** surface (stdio, no OAuth); remote claude.ai
+*connectors* (HTTPS + OAuth), Claude Code plugins, ChatGPT Apps, and Gemini are
+planned targets on the same open-closed registry. Background:
+[`misc/docs/CHATBOT_INTEGRATION_LANDSCAPE.md`](misc/docs/CHATBOT_INTEGRATION_LANDSCAPE.md).
+Install: `pip install coact[mcpb]`.
 
 ## The model in one minute
 

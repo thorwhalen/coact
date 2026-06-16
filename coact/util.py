@@ -41,6 +41,38 @@ def to_snake_case(name: str) -> str:
     return s.lower().strip("_")
 
 
+def safe_filename(name: str, *, suffix: str = "", kind: str = "name") -> str:
+    """Return ``f"{name}{suffix}"`` after rejecting unsafe, path-bearing names.
+
+    Names that become files must be bare filename stems; one carrying a path
+    separator or ``..`` could escape its directory (CWE-22) on write *or* read.
+    Raises ``ValueError`` on an empty, non-string, or path-bearing name. ``kind``
+    customizes the error wording for the caller's domain. Shared by
+    :func:`agent_filename` (``.md`` agents) and the publish axis (``.mcpb`` bundles).
+
+    >>> safe_filename('paths', suffix='.mcpb')
+    'paths.mcpb'
+    >>> safe_filename('../x', suffix='.mcpb')  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+        ...
+    ValueError: unsafe name '../x': ...
+    """
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError(f"{kind} must be a non-empty string, got {name!r}")
+    unsafe = (
+        name in (".", "..")
+        or name != Path(name).name
+        or any(sep in name for sep in ("/", "\\"))
+        or "\x00" in name
+    )
+    if unsafe:
+        raise ValueError(
+            f"unsafe {kind} {name!r}: must be a bare filename stem "
+            "(no '/', '\\', '..', or path separators)"
+        )
+    return f"{name}{suffix}"
+
+
 def agent_filename(name: str) -> str:
     """Return the safe ``<name>.md`` filename for an agent, rejecting unsafe names.
 
@@ -58,20 +90,7 @@ def agent_filename(name: str) -> str:
         ...
     ValueError: unsafe agent name '../escape': ...
     """
-    if not isinstance(name, str) or not name.strip():
-        raise ValueError(f"agent name must be a non-empty string, got {name!r}")
-    unsafe = (
-        name in (".", "..")
-        or name != Path(name).name
-        or any(sep in name for sep in ("/", "\\"))
-        or "\x00" in name
-    )
-    if unsafe:
-        raise ValueError(
-            f"unsafe agent name {name!r}: must be a bare filename stem "
-            "(no '/', '\\', '..', or path separators)"
-        )
-    return f"{name}.md"
+    return safe_filename(name, suffix=".md", kind="agent name")
 
 
 def first_balanced_span(s: str, opener: str = "{", closer: str = "}") -> Optional[str]:

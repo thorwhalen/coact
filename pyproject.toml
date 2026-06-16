@@ -42,6 +42,13 @@ mcp = [
     "py2mcp",
     "fastmcp",
 ]
+# The `claude-local-mcpb` publish target builds bundles with the stdlib alone;
+# py2mcp + fastmcp are needed in the Python that RUNS the installed .mcpb (and
+# locally to introspect tool docstrings), so they ship as this extra.
+mcpb = [
+    "py2mcp",
+    "fastmcp",
+]
 litellm = [
     "litellm>=1.0",
 ]
