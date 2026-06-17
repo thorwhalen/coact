@@ -1,0 +1,184 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coact.publish_remote &mdash; coact 0.0.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8c5712d9"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="coact.realize" href="realize.html" />
+    <link rel="prev" title="coact.publish_mcpb" href="publish_mcpb.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            coact
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_pydantic_schema.html">coact._pydantic_schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">coact.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">coact.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complete.html">coact.complete</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emit.html">coact.emit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integration.html">coact.integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="llm.html">coact.llm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nl_ingress.html">coact.nl_ingress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="policy.html">coact.policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publish.html">coact.publish</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publish_mcpb.html">coact.publish_mcpb</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">coact.publish_remote</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#coact.publish_remote.SERVER_CONFIG_NAME"><code class="docutils literal notranslate"><span class="pre">SERVER_CONFIG_NAME</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.publish_remote.publish_remote"><code class="docutils literal notranslate"><span class="pre">publish_remote()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="realize.html">coact.realize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="realize_crewai.html">coact.realize_crewai</a></li>
+<li class="toctree-l1"><a class="reference internal" href="realize_langgraph.html">coact.realize_langgraph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema.html">coact.schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stores.html">coact.stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="synthesis.html">coact.synthesis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">coact.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">coact</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">coact.publish_remote</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/coact/publish_remote.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-coact.publish_remote">
+<span id="coact-publish-remote"></span><h1>coact.publish_remote<a class="headerlink" href="#module-coact.publish_remote" title="Link to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">claude-remote-connector</span></code> publish target — scaffold a deployable <strong>remote</strong>
+Claude connector (a public Streamable-HTTP MCP server with OAuth 2.1).</p>
+<p>A claude.ai <strong>custom connector</strong> is a <em>remote</em> MCP server reached from Anthropic’s
+cloud over public HTTPS — even on Desktop — so it needs a publicly-reachable
+endpoint and <strong>OAuth 2.1</strong>. That is a different surface from the local
+<code class="docutils literal notranslate"><span class="pre">.mcpb</span></code>/stdio target (<a class="reference internal" href="publish_mcpb.html#module-coact.publish_mcpb" title="coact.publish_mcpb"><code class="xref py py-mod docutils literal notranslate"><span class="pre">coact.publish_mcpb</span></code></a>): different transport, different
+auth, different place it runs. This target produces a <strong>deployment scaffold</strong> (a
+small project you host), not a single file.</p>
+<p>Division of labour (mirrors the <code class="docutils literal notranslate"><span class="pre">.mcpb</span></code> path and DECISIONS D17/D19): coact
+writes only <em>packaging/deploy scaffolding</em>; the MCP server itself — Streamable
+HTTP + the OAuth 2.1 <strong>resource-server</strong> wiring — is built by <code class="docutils literal notranslate"><span class="pre">py2mcp</span></code>’s
+<code class="xref py py-func docutils literal notranslate"><span class="pre">py2mcp.http.mk_http_app()</span></code>. So building the scaffold is <strong>pure stdlib</strong>
+(<code class="docutils literal notranslate"><span class="pre">json</span></code> only); <code class="docutils literal notranslate"><span class="pre">py2mcp</span></code>/<code class="docutils literal notranslate"><span class="pre">fastmcp</span></code>/<code class="docutils literal notranslate"><span class="pre">uvicorn</span></code> are needed only in the Python
+that <em>runs</em> the deployed service, and a missing one is a warning, not a build error.</p>
+<p>Security posture baked into the scaffold (landscape doc §4.4/§8.5): the server is
+an OAuth 2.1 <strong>resource server</strong> that <em>validates</em> a managed IdP’s tokens (never an
+authorization server of its own), tokens are <strong>audience-bound</strong> (RFC 8707) so one
+minted for another service can’t be replayed, and the server <strong>never forwards</strong> an
+inbound token upstream (no confused-deputy). The connector binds locally and must
+sit behind a TLS-terminating reverse proxy.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="coact.publish_remote.SERVER_CONFIG_NAME">
+<span class="sig-prename descclassname"><span class="pre">coact.publish_remote.</span></span><span class="sig-name descname"><span class="pre">SERVER_CONFIG_NAME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'connector_config.json'</span></span><a class="headerlink" href="#coact.publish_remote.SERVER_CONFIG_NAME" title="Link to this definition"></a></dt>
+<dd><p>Name of the bundled connector config, under <code class="docutils literal notranslate"><span class="pre">server/</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.publish_remote.publish_remote">
+<span class="sig-prename descclassname"><span class="pre">coact.publish_remote.</span></span><span class="sig-name descname"><span class="pre">publish_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#coact.integration.IntegrationSpec" title="coact.integration.IntegrationSpec"><span class="pre">IntegrationSpec</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">author</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'0.1.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connector_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idp_issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jwks_uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audience</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required_scopes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transport</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'streamable-http'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_dockerfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="publish.html#coact.publish.PublishResult" title="coact.publish.PublishResult"><span class="pre">PublishResult</span></a></span></span><a class="reference internal" href="../../_modules/coact/publish_remote.html#publish_remote"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.publish_remote.publish_remote" title="Link to this definition"></a></dt>
+<dd><p>Scaffold a remote Claude connector (Streamable-HTTP MCP server + OAuth 2.1).</p>
+<p><code class="docutils literal notranslate"><span class="pre">source</span></code> is anything <a class="reference internal" href="integration.html#coact.integration.integration_spec_from" title="coact.integration.integration_spec_from"><code class="xref py py-func docutils literal notranslate"><span class="pre">coact.integration.integration_spec_from()</span></code></a> accepts.
+The OAuth parameters describe the <strong>managed IdP</strong> that issues tokens and <em>this</em>
+server’s public identity; when omitted, placeholder values + a loud warning are
+emitted so the scaffold is still useful (fill them in before going public).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">publish_remote</span><span class="p">([</span><span class="s1">&#39;os.path:basename&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;paths&#39;</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">dry_run</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">files</span><span class="p">)</span>
+<span class="go">(True, [&#39;DEPLOY.md&#39;, &#39;Dockerfile&#39;, &#39;requirements.txt&#39;, &#39;server/app.py&#39;,</span>
+<span class="go">        &#39;server/connector_config.json&#39;])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="publish_mcpb.html" class="btn btn-neutral float-left" title="coact.publish_mcpb" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="realize.html" class="btn btn-neutral float-right" title="coact.realize" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

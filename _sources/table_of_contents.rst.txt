@@ -16,6 +16,7 @@
    module_docs/coact/policy
    module_docs/coact/publish
    module_docs/coact/publish_mcpb
+   module_docs/coact/publish_remote
    module_docs/coact/realize
    module_docs/coact/realize_crewai
    module_docs/coact/realize_langgraph
