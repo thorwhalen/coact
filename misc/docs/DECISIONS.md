@@ -481,3 +481,18 @@ landscape doc §9.2 — a **natural-language description** → a *draft*
   verb `coact describe "<NL>"` (renders the draft); skill updated. Offline tests
   inject a fake backend (no provider call); the `oa` injection has its own upstream
   test + PR.
+
+- **Review hardening (adversarial multi-agent pass, 9 confirmed findings, all
+  fixed).** The NL output is *untrusted*, so every extracted field is coerced
+  (non-string name/description → `str`; a bare-string `resources`/`prompts` is
+  wrapped, not iterated per-char) and the JSON parse tries the whole reply, a fenced
+  body, then *each* top-level balanced `{…}` span (brace-bearing prose before the
+  JSON no longer defeats it). `integration_spec_from` now carries a spec's
+  `tool_specs`/`resources`/`prompts` through the **list** branch (a draft mixed into
+  a list previously lost its bound handlers silently). `check_requirements` is
+  path-aware (an injected callable needs neither `aix` installed nor a provider
+  call — honoring the "offline when injected" contract). The `.mcpb` draft guard
+  distinguishes a *design draft* (proposed tools) from a *tools-less* spec
+  (resources/prompts only) in its message. The manifest keeps the bound function's
+  own name/docstring (what `py2mcp` actually serves — no manifest↔runtime desync); a
+  curated ToolSpec description only *fills an empty* one.

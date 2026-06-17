@@ -167,6 +167,9 @@ def integration_spec_from(
         return source
 
     refs: list[str] = []
+    spec_tool_specs: list[ToolSpec] = []
+    spec_resources: list[str] = []
+    spec_prompts: list[str] = []
     derived_name: Optional[str] = name
     src_label: Optional[str] = None
     unrecognized: list[str] = []
@@ -174,7 +177,13 @@ def integration_spec_from(
 
     for item in items:
         if isinstance(item, IntegrationSpec):
+            # Carry the spec's richer connectivity, not just its bare refs — else a
+            # draft from `integration_spec_from_description` (whose runnable tools
+            # live in tool_specs[].handler) would silently lose every handler.
             refs.extend(item.tools)
+            spec_tool_specs.extend(item.tool_specs)
+            spec_resources.extend(item.resources)
+            spec_prompts.extend(item.prompts)
             derived_name = derived_name or item.name
         elif _is_skill_obj(item):  # before callable(): a Skill may define __call__
             sk_refs, sk_name = _refs_and_name_from_skill(item)
@@ -200,7 +209,7 @@ def integration_spec_from(
             + ". Expected a 'module:function' ref (note the colon), an existing "
             "skill directory / SKILL.md, or a live callable."
         )
-    if not refs:
+    if not (refs or spec_tool_specs or spec_resources or spec_prompts):
         raise ValueError(
             "No tools found to publish. Provide 'module:function' refs, live "
             "callables, or a skill carrying a `coact: mcp:` block (module + functions)."
@@ -211,6 +220,9 @@ def integration_spec_from(
         description=description,
         version=version,
         tools=refs,
+        resources=spec_resources,
+        prompts=spec_prompts,
+        tool_specs=spec_tool_specs,
         author=author,
         source=src_label,
     )

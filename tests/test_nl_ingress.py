@@ -87,7 +87,7 @@ def test_backend_is_injected_not_openai():
     assert "x" in fake.calls[0][0]
 
 
-def test_model_string_llm_threads_model():
+def test_callable_llm_threads_explicit_model():
     reply = _reply([{"name": "t", "description": "d", "input_schema": {}, "handler": None}])
     captured = {}
 
@@ -95,9 +95,36 @@ def test_model_string_llm_threads_model():
         captured.update(kwargs)
         return reply
 
-    # a str llm is a model name -> threaded as model=... to the backend
     integration_spec_from_description("x", llm=fake, model="claude-sonnet-4")
     assert captured.get("model") == "claude-sonnet-4"
+
+
+def test_str_llm_is_treated_as_model_name(monkeypatch):
+    """A str llm is a model name routed to the default aix.chat backend (D18)."""
+    from coact import nl_ingress
+
+    reply = _reply([{"name": "t", "description": "d", "input_schema": {}, "handler": None}])
+    captured = {}
+
+    def fake_chat(prompt, **kwargs):
+        captured.update(kwargs)
+        return reply
+
+    monkeypatch.setattr(nl_ingress, "_aix_chat", lambda: fake_chat)
+    integration_spec_from_description("x", llm="claude-sonnet-4")
+    assert captured.get("model") == "claude-sonnet-4"
+
+
+def test_explicit_model_overrides_str_llm(monkeypatch):
+    from coact import nl_ingress
+
+    reply = _reply([{"name": "t", "description": "d", "input_schema": {}, "handler": None}])
+    captured = {}
+    monkeypatch.setattr(
+        nl_ingress, "_aix_chat", lambda: (lambda p, **k: captured.update(k) or reply)
+    )
+    integration_spec_from_description("x", llm="model-a", model="model-b")
+    assert captured.get("model") == "model-b"  # explicit model wins over str llm
 
 
 # --- per-tool schema inference fallback --------------------------------------
@@ -194,6 +221,146 @@ def test_empty_description_rejected():
 def test_unparseable_reply_rejected():
     with pytest.raises(ValueError, match="could not parse"):
         integration_spec_from_description("x", llm=_fixed("sorry, I cannot help"))
+
+
+# --- robustness against untrusted LLM output (review hardening) --------------
+
+
+def test_non_string_fields_do_not_crash():
+    """Numbers/objects where strings were asked for are coerced, not crashed on."""
+    reply = json.dumps(
+        {
+            "name": 2025,  # number where a string was expected
+            "description": ["a", "list"],
+            "tools": [
+                {"name": 42, "description": {"k": "v"}, "input_schema": {}, "handler": None}
+            ],
+            "resources": [],
+            "prompts": [],
+        }
+    )
+    spec = integration_spec_from_description("x", llm=_fixed(reply))
+    assert spec.name == "2025"  # coerced + kebabbed, not a crash
+    assert spec.tool_specs[0].name == "42"
+
+
+def test_single_string_resources_not_exploded():
+    """A bare-string resources/prompts is wrapped, not iterated char-by-char."""
+    reply = json.dumps(
+        {
+            "name": "wx",
+            "description": "d",
+            "tools": [{"name": "t", "description": "d", "input_schema": {}, "handler": None}],
+            "resources": "the_only_resource",  # a string, not a list
+            "prompts": "the_only_prompt",
+        }
+    )
+    spec = integration_spec_from_description("x", llm=_fixed(reply))
+    assert spec.resources == ["the_only_resource"]
+    assert spec.prompts == ["the_only_prompt"]
+
+
+def test_parse_recovers_json_after_brace_bearing_prose():
+    """A reply whose JSON is preceded by prose containing braces still parses."""
+    reply = (
+        'For example {x, y} are inputs. Here is the spec: '
+        + _reply([{"name": "t", "description": "d", "input_schema": {}, "handler": None}])
+    )
+    spec = integration_spec_from_description("x", llm=_fixed(reply))
+    assert spec.name == "wx" and spec.tool_specs[0].name == "t"
+
+
+def test_parse_recovers_fenced_json():
+    reply = "```json\n" + _reply(
+        [{"name": "t", "description": "d", "input_schema": {}, "handler": None}]
+    ) + "\n```"
+    spec = integration_spec_from_description("x", llm=_fixed(reply))
+    assert spec.name == "wx"
+
+
+def test_injected_callable_does_not_require_aix(monkeypatch):
+    """With an injected callable backend, aix need not be importable (D18)."""
+    import builtins
+
+    real_import = builtins.__import__
+
+    def no_aix(name, *args, **kwargs):
+        if name == "aix" or name.startswith("aix."):
+            raise ImportError("aix blocked for test")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", no_aix)
+    reply = _reply([{"name": "t", "description": "d", "input_schema": {}, "handler": None}])
+    spec = integration_spec_from_description("x", llm=_fixed(reply))  # must not raise
+    assert spec.name == "wx"
+
+
+# --- integration_spec_from preserves drafts through the list branch (#5) ------
+
+
+def test_spec_in_list_preserves_bound_handlers():
+    from coact import integration_spec_from
+
+    draft = IntegrationSpec(name="wx", tool_specs=[ToolSpec(name="dn", handler="os.path:dirname")])
+    out = integration_spec_from([draft, "os.path:basename"])
+    assert "os.path:dirname" in out.runnable_refs()
+    assert "os.path:basename" in out.runnable_refs()
+
+
+def test_pure_bound_draft_in_list_publishes(tmp_path):
+    from coact import integration_spec_from
+
+    draft = IntegrationSpec(name="wx", tool_specs=[ToolSpec(name="bn", handler="os.path:basename")])
+    out = integration_spec_from([draft])
+    assert out.runnable_refs() == ["os.path:basename"]
+    res = publish(out, dest=str(tmp_path))
+    assert res.artifact is not None and res.artifact.exists()
+
+
+# --- manifest fidelity + clearer guards (#4, #7) -----------------------------
+
+
+def test_bound_toolspec_fills_empty_manifest_description(monkeypatch):
+    """A bound tool whose docstring is empty gets its manifest desc from the ToolSpec."""
+    import importlib
+
+    pm = importlib.import_module("coact.publish_mcpb")
+
+    monkeypatch.setattr(
+        pm, "_introspect_tools", lambda refs: ([{"name": "basename", "description": ""}], [])
+    )
+    spec = IntegrationSpec(
+        name="mix",
+        tool_specs=[ToolSpec(name="x", description="curated", handler="os.path:basename")],
+    )
+    manifest, _ = pm.build_manifest(spec)
+    tool = next(t for t in manifest["tools"] if t["name"] == "basename")
+    assert tool["description"] == "curated"  # empty introspected desc filled in
+
+
+def test_bound_toolspec_does_not_clobber_introspected_description(monkeypatch):
+    """Runtime truth (the function's own docstring) wins — never desync manifest vs server."""
+    import importlib
+
+    pm = importlib.import_module("coact.publish_mcpb")
+
+    monkeypatch.setattr(
+        pm,
+        "_introspect_tools",
+        lambda refs: ([{"name": "basename", "description": "real docstring"}], []),
+    )
+    spec = IntegrationSpec(
+        name="mix",
+        tool_specs=[ToolSpec(name="x", description="curated", handler="os.path:basename")],
+    )
+    manifest, _ = pm.build_manifest(spec)
+    tool = next(t for t in manifest["tools"] if t["name"] == "basename")
+    assert tool["description"] == "real docstring"
+
+
+def test_resources_only_spec_rejected_with_clear_message():
+    with pytest.raises(ValueError, match="resource"):
+        publish_mcpb(IntegrationSpec(name="r", resources=["data1"]))
 
 
 def test_import_coact_is_provider_free():

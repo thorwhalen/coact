@@ -24,6 +24,7 @@ code, mirroring the D8/D13 scaffold philosophy).
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Callable, Optional
 
 from coact.integration import IntegrationSpec, ToolSpec
@@ -124,9 +125,12 @@ def integration_spec_from_description(
     """
     if not isinstance(description, str) or not description.strip():
         raise ValueError("description must be a non-empty string")
-    check_requirements(
-        {"oa": "oa", "aix": "aix"}, feature="nl-ingress (NL -> IntegrationSpec)"
-    )
+    # `oa` is used on every path; `aix` only backs the default (None / model-name)
+    # path — an injected callable needs neither aix installed nor a provider call.
+    reqs = {"oa": "oa"}
+    if not callable(llm):
+        reqs["aix"] = "aix"
+    check_requirements(reqs, feature="nl-ingress (NL -> IntegrationSpec)")
 
     from oa.tools import prompt_function  # lazy: D10 — no LLM dep on import
 
@@ -184,26 +188,32 @@ def _spec_from_extracted(
     model: Optional[str],
     infer_tool_schemas: bool,
 ) -> IntegrationSpec:
-    """Coerce the LLM's extracted dict into a draft :class:`IntegrationSpec`."""
-    spec_name = to_kebab_case(name or data.get("name") or "integration")
-    description = (data.get("description") or "").strip()
+    """Coerce the LLM's (untrusted) extracted dict into a draft :class:`IntegrationSpec`.
+
+    Every field is coerced defensively: the model may return a number/list/object
+    where a string was asked for, so ``.strip()``/``to_kebab_case`` never see a
+    non-string, and a bare-string ``resources``/``prompts`` is wrapped (not
+    iterated character-by-character).
+    """
+    spec_name = to_kebab_case(name or _as_str(data.get("name")) or "integration")
+    description = _as_str(data.get("description")).strip()
 
     tool_specs: list[ToolSpec] = []
     refs: list[str] = []
     for entry in data.get("tools") or []:
         if not isinstance(entry, dict):
             continue
-        tname = (entry.get("name") or "").strip()
+        tname = _as_str(entry.get("name")).strip()
         if not tname:
             continue
-        tdesc = (entry.get("description") or "").strip()
+        tdesc = _as_str(entry.get("description")).strip()
         schema = entry.get("input_schema")
         if not isinstance(schema, dict):
             schema = None
         handler = entry.get("handler")
         handler = handler if _looks_like_ref(handler) else None
         if schema is None and infer_tool_schemas:
-            hint = entry.get("input_description") or tdesc
+            hint = _as_str(entry.get("input_description")) or tdesc
             if hint:
                 schema = _infer_tool_schema(hint, prompt_func=prompt_func, model=model)
         tool_specs.append(
@@ -214,8 +224,8 @@ def _spec_from_extracted(
         if handler:
             refs.append(handler)
 
-    resources = [str(r) for r in (data.get("resources") or []) if r]
-    prompts = [str(p) for p in (data.get("prompts") or []) if p]
+    resources = _as_str_list(data.get("resources"))
+    prompts = _as_str_list(data.get("prompts"))
     return IntegrationSpec(
         name=spec_name,
         description=description,
@@ -264,19 +274,65 @@ def _looks_like_ref(value: Any) -> bool:
     )
 
 
-def _parse_json_object(text: Any) -> Optional[dict]:
-    """Tolerantly pull the first brace-balanced JSON object from an LLM reply.
+def _as_str(value: Any) -> str:
+    """Coerce an LLM-supplied scalar field to a string (untrusted output may not be)."""
+    if isinstance(value, str):
+        return value
+    return "" if value is None else str(value)
 
-    Reuses :func:`coact.util.first_balanced_span` (string-aware, depth-balanced) so
-    a fenced or prose-wrapped reply still parses. Returns ``None`` when no JSON
-    object is recoverable.
+
+def _as_str_list(value: Any) -> list[str]:
+    """Coerce an LLM-supplied field to a list of non-empty strings.
+
+    A bare string is *wrapped* (not iterated character-by-character); a list/tuple
+    is element-coerced and emptied of blanks; anything else degrades sensibly.
+    """
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [value] if value.strip() else []
+    if isinstance(value, (list, tuple)):
+        return [s for s in (_as_str(v).strip() for v in value) if s]
+    coerced = _as_str(value).strip()
+    return [coerced] if coerced else []
+
+
+def _parse_json_object(text: Any) -> Optional[dict]:
+    """Tolerantly pull a JSON object out of an LLM reply.
+
+    Tries, in order, the whole stripped reply, a fenced ```` ```json … ``` ```` body,
+    then each top-level brace-balanced ``{…}`` span (string-aware, via
+    :func:`coact.util.first_balanced_span`) — so a reply whose real JSON is preceded
+    by brace-bearing prose still parses (a single-span parse would wrongly seize the
+    first, invalid, fragment). Returns ``None`` when no JSON *object* is recoverable.
     """
     if not isinstance(text, str):
         return None
-    span = first_balanced_span(text, "{", "}")
-    candidate = span if span is not None else text
-    try:
-        obj = json.loads(candidate)
-    except (ValueError, TypeError):
-        return None
-    return obj if isinstance(obj, dict) else None
+    stripped = text.strip()
+    candidates = [stripped]
+    fence = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", stripped, re.DOTALL)
+    if fence:
+        candidates.append(fence.group(1))
+    candidates.extend(_iter_balanced_objects(stripped))
+    for candidate in candidates:
+        try:
+            obj = json.loads(candidate)
+        except (ValueError, TypeError):
+            continue
+        if isinstance(obj, dict):
+            return obj
+    return None
+
+
+def _iter_balanced_objects(s: str):
+    """Yield each top-level brace-balanced ``{…}`` substring of ``s``, left to right."""
+    i = 0
+    while i < len(s):
+        start = s.find("{", i)
+        if start < 0:
+            return
+        span = first_balanced_span(s[start:], "{", "}")
+        if span is None:
+            return
+        yield span
+        i = start + len(span)

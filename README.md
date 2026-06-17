@@ -119,8 +119,11 @@ input schemas — routing generation through [`aix`](https://github.com/thorwhal
 ```python
 from coact import integration_spec_from_description
 
+# This routes through aix/oa — it makes a real LLM call (needs a configured
+# provider). Inject `llm=<callable>` to run it offline (e.g. in tests).
 spec = integration_spec_from_description("expose os.path.basename as a tool")
-print(spec.render())   # tools the description bound to code become runnable refs
+print(spec.render())   # a DRAFT: a tool becomes a runnable ref only if the model
+                       # binds it to module:function code — else it stays proposed
 ```
 
 The draft is a **design artifact**: tools without a `module:function` handler are

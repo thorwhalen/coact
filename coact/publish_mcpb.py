@@ -79,13 +79,26 @@ def publish_mcpb(
 
     runnable_refs = spec.runnable_refs()
     if not runnable_refs:
-        proposed = ", ".join(ts.name for ts in spec.tool_specs) or "(none)"
+        if spec.tool_specs:  # proposed tools exist, none bound -> a design draft
+            proposed = ", ".join(ts.name for ts in spec.tool_specs)
+            raise ValueError(
+                f"This IntegrationSpec is a design draft: {len(spec.tool_specs)} "
+                f"proposed tool(s) [{proposed}], none bound to an importable "
+                "'module:function' handler. Bind handlers (or pass module:function "
+                "refs) before building a runnable .mcpb — the draft is still usable "
+                "as a design artifact (see `coact describe`)."
+            )
+        declared = []
+        if spec.resources:
+            declared.append(f"{len(spec.resources)} resource(s)")
+        if spec.prompts:
+            declared.append(f"{len(spec.prompts)} prompt(s)")
         raise ValueError(
-            f"This IntegrationSpec is a design draft: {len(spec.tool_specs)} "
-            f"proposed tool(s) [{proposed}], none bound to an importable "
-            "'module:function' handler. Bind handlers (or pass module:function "
-            "refs) before building a runnable .mcpb — the draft is still usable as "
-            "a design artifact (see `coact describe`)."
+            "nothing to publish to a .mcpb: this IntegrationSpec declares "
+            + (", ".join(declared) or "no tools")
+            + " but no tools. The claude-local-mcpb target consumes tools only "
+            "(resources/prompts are reserved for future targets) — add "
+            "'module:function' tool refs (or bound ToolSpecs) to publish."
         )
 
     manifest, warnings = build_manifest(
@@ -139,11 +152,22 @@ def build_manifest(
     ``${__dirname}`` is resolved by Claude Desktop to the extracted bundle dir.
 
     Tool metadata is introspected from every *runnable* ref (``module:function``
-    in ``tools`` plus bound ToolSpec handlers); any *proposed* (unbound) ToolSpec
-    is listed by name/description for design visibility, with a warning that it
-    will not run until bound.
+    in ``tools`` plus bound ToolSpec handlers) — the bound function's own
+    name/docstring are authoritative because they are what ``py2mcp`` actually
+    serves at runtime (so the manifest never advertises a name the server won't
+    expose). A bound ToolSpec's curated description only *fills in* an empty
+    docstring. Any *proposed* (unbound) ToolSpec is listed by name/description for
+    design visibility, with a warning that it will not run until bound.
     """
-    tools, warnings = _introspect_tools(spec.runnable_refs())
+    runnable = spec.runnable_refs()
+    tools, warnings = _introspect_tools(runnable)
+    # Fill an empty introspected description from the bound ToolSpec's curated one
+    # (a fidelity win that can't desync from runtime — names are left untouched).
+    bound_by_ref = {ts.handler: ts for ts in spec.tool_specs if ts.handler}
+    for tool, ref in zip(tools, runnable):
+        ts = bound_by_ref.get(ref)
+        if ts and ts.description and not tool["description"]:
+            tool["description"] = ts.description
     seen = {t["name"] for t in tools}
     unbound: list[str] = []
     for ts in spec.tool_specs:
