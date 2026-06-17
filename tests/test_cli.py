@@ -125,6 +125,7 @@ def test_cli_scaffold_prints_and_writes(tmp_path):
 def test_cli_describe_renders_draft(monkeypatch):
     import json
 
+    pytest.importorskip("oa")  # the describe verb uses oa's prompt machinery
     from coact import nl_ingress
 
     reply = json.dumps(
