@@ -367,3 +367,57 @@ Verified against the installed langchain/langgraph 1.0.1 (`create_agent`,
 `ToolStrategy(dict)`, `ProviderStrategy(dict)`); the crewai path is research-verified and
 fully `getattr`-guarded — its unit suite is injected-runner-only (asserts crewai never
 enters `sys.modules`) and its live test is opt-in (`real_llm`) and `importorskip`-ped.
+
+---
+
+## D17 — PUBLISH: a third axis (ship a capability to a chatbot host)
+
+COMPLETE and REALIZE answer "turn a skill into an agent" and "run that agent". A
+distinct need — *take a capability and ship it to an end-user chatbot* (a Claude
+**connector**/**plugin**/**Desktop Extension**, later ChatGPT/Gemini) — is the
+**PUBLISH** axis (`coact.publish` + `coact.integration` + per-target modules).
+Decision and its rationale (background research:
+`misc/docs/CHATBOT_INTEGRATION_LANDSCAPE.md`):
+
+- **A separate `IntegrationSpec`, not an extended `AgentDefinition`.** An
+  integration is MCP-server-shaped (tools/resources/prompts + auth + deployment),
+  not persona-shaped. Overloading `AgentDefinition` (D2) would muddy the "an agent
+  is a skill + extras" thesis, so PUBLISH gets its own pure-data SSOT. Only
+  `tools` (`'module:function'` refs) is consumed today; `resources`/`prompts` and
+  the `auth`/`deployment` hints are declared now (open-closed) for later targets.
+- **Same registry shape as REALIZE/emit (open-closed, self-registering).**
+  `publish(source, target=...)` dispatches through a `skill.registry.Registry`;
+  targets call `targets.register(...)` at import (like D12/D16 backends). A new
+  host = a new module, **no edit to `publish.py`**. Claude is deliberately *one*
+  target among future ones (target-neutral).
+- **coact writes packaging, not MCP plumbing (mirrors §6.1.3 / the `mcp` backend).**
+  The canonical artifact is an MCP server built by **`py2mcp`**; the
+  `claude-local-mcpb` target only assembles the `.mcpb` bundle (manifest + a
+  `server/` shim that launches `py2mcp.serve` over stdio). Building a bundle is
+  pure stdlib (`json` + `zipfile`); `py2mcp`/`fastmcp` are needed only in the
+  Python that *runs* the installed extension, so a missing runtime dep is a
+  **warning**, not a build error (no hard `check_requirements` gate on the build
+  path — it would wrongly block bundling on a machine that only authors).
+- **Local first; the local/remote split is load-bearing (§9.3).** `claude-local-mcpb`
+  is the LOCAL surface — stdio, no OAuth, runs on the user's machine. It is **not**
+  a claude.ai remote *connector* (a remote MCP server reached from Anthropic's
+  cloud over HTTPS + OAuth); that is a future target with its own deploy/auth
+  story (and will lean on `aw_agents` adapters). The CLI/skill state this so the
+  two surfaces are never conflated.
+- **dry-run, name safety, D8.** `publish(..., dry_run=True)` returns the
+  would-write members without touching disk (mirrors `realize(host, dry_run=True)`);
+  bundle filenames route through `util.safe_filename` (the D15 path-traversal
+  guard, generalized from `agent_filename`). A bundle packages a *capability set*,
+  not a topology — D8 holds.
+- **py2mcp's role (upstream, first customer = coact).** py2mcp already emits a
+  standalone-`fastmcp` server; PUBLISH only needed a thin **stdio runner**
+  (`py2mcp.serve` + `python -m py2mcp` + a `py2mcp` console script) so a bundle can
+  launch it. Built in py2mcp, not inlined here (cross-package policy).
+- **Packaging.** `coact/integration.py` + `coact/publish.py` + per-target
+  `coact/publish_mcpb.py` (self-registers `claude-local-mcpb`); optional extra
+  `coact[mcpb]`; CLI verb `coact publish`; skill `.claude/skills/coact-publish`.
+
+Verified end-to-end: `coact publish os.path:basename --name demo --dest <dir>`
+writes a valid `.mcpb` (ZIP) with a `manifest_version: "0.3"` manifest
+(`server.type: python`, `${__dirname}/server/main.py`), docstring-introspected
+`tools` metadata, and a `py2mcp_config.json` the shim feeds to `py2mcp.serve`.

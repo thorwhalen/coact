@@ -4,7 +4,7 @@
 Mirrors ``skill``'s dispatch-to-interface pattern (CLI wrappers call the same
 core functions and format for the terminal), so the two packages feel like one
 toolkit. The verbs are ``plan``, ``complete``, ``emit``, ``realize``, ``diff``,
-``estimate``, ``inventory``, ``back``, and ``scaffold``. Usage::
+``estimate``, ``inventory``, ``back``, ``scaffold``, and ``publish``. Usage::
 
     python -m coact plan .claude/skills/ux-analyst
     python -m coact complete .claude/skills/ux-analyst --dest .claude/agents
@@ -16,6 +16,7 @@ toolkit. The verbs are ``plan``, ``complete``, ``emit``, ``realize``, ``diff``,
     python -m coact inventory .
     python -m coact back .claude/agents/ux-analyst.md
     python -m coact scaffold .claude/agents/a.md .claude/agents/b.md
+    python -m coact publish my.module:my_func --dry-run
 """
 
 from __future__ import annotations
@@ -26,6 +27,7 @@ from coact import complete as _complete
 from coact import emit_agent as _emit
 from coact import plan_completion as _plan
 from coact import realize as _realize
+from coact import publish as _publish
 from coact import scaffold_fleet as _scaffold_fleet
 from coact.analysis import back as _back
 from coact.analysis import diff as _diff
@@ -132,10 +134,34 @@ def scaffold(
     return str(result)
 
 
+@argh.arg(
+    "source", nargs="+", help="Tool refs ('module:function'), a skill dir/SKILL.md, or both"
+)
+def publish(
+    source: list,
+    *,
+    target: str = "claude-local-mcpb",
+    dest: str | None = None,
+    name: str | None = None,
+    author: str | None = None,
+    dry_run: bool = False,
+) -> str:
+    """Publish a capability to a chatbot host (default: a local Claude Desktop .mcpb bundle).
+
+    ``--dry-run`` previews the bundle members (manifest + server) without writing
+    the ``.mcpb``.
+    """
+    src = source if len(source) > 1 else source[0]
+    res = _publish(
+        src, target=target, dest=dest, name=name, author=author, dry_run=dry_run
+    )
+    return res.render()
+
+
 def main() -> None:
     """Dispatch the coact CLI."""
     argh.dispatch_commands(
-        [plan, complete, emit, realize, diff, estimate, inventory, back, scaffold]
+        [plan, complete, emit, realize, diff, estimate, inventory, back, scaffold, publish]
     )
 
 

@@ -68,6 +68,9 @@ from coact.realize_crewai import (
     RunnableCrewAIAgent,
     realize_crewai,
 )  # registers 'crewai'
+from coact.integration import IntegrationSpec, integration_spec_from
+from coact.publish import PublishResult, publish, publish_targets
+from coact.publish_mcpb import publish_mcpb  # registers 'claude-local-mcpb'
 from coact.scaffold import scaffold_fleet
 from coact.stores import AgentStore, agents_dir
 from coact.synthesis import synthesize_persona, synthesize_return_contract
@@ -120,6 +123,13 @@ __all__ = [
     "RunnableLLMGraphAgent",
     "RunnableCrewAIAgent",
     "realization_backends",
+    # PUBLISH (ship a capability to a chatbot host; Claude-local .mcpb first; D17)
+    "IntegrationSpec",
+    "integration_spec_from",
+    "publish",
+    "publish_targets",
+    "PublishResult",
+    "publish_mcpb",
     # Scaffold (the one topology-adjacent emitter — a starter you own; D8)
     "scaffold_fleet",
     # Synthesis & LLM facade

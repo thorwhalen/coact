@@ -135,5 +135,5 @@ def test_main_wires_every_verb(monkeypatch):
     assert registered["callable"]
     assert set(registered["names"]) == {
         "plan", "complete", "emit", "realize",
-        "diff", "estimate", "inventory", "back", "scaffold",
+        "diff", "estimate", "inventory", "back", "scaffold", "publish",
     }
