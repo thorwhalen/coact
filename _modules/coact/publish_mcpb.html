@@ -56,6 +56,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/frontmatter.html">coact.frontmatter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/integration.html">coact.integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/llm.html">coact.llm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/nl_ingress.html">coact.nl_ingress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/publish.html">coact.publish</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/publish_mcpb.html">coact.publish_mcpb</a></li>
@@ -177,10 +178,34 @@
     <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;nothing to publish: the IntegrationSpec carries no tools.&quot;</span><span class="p">)</span>
 
+    <span class="n">runnable_refs</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">runnable_refs</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">runnable_refs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">tool_specs</span><span class="p">:</span>  <span class="c1"># proposed tools exist, none bound -&gt; a design draft</span>
+            <span class="n">proposed</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">tool_specs</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;This IntegrationSpec is a design draft: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">tool_specs</span><span class="p">)</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;proposed tool(s) [</span><span class="si">{</span><span class="n">proposed</span><span class="si">}</span><span class="s2">], none bound to an importable &quot;</span>
+                <span class="s2">&quot;&#39;module:function&#39; handler. Bind handlers (or pass module:function &quot;</span>
+                <span class="s2">&quot;refs) before building a runnable .mcpb — the draft is still usable &quot;</span>
+                <span class="s2">&quot;as a design artifact (see `coact describe`).&quot;</span>
+            <span class="p">)</span>
+        <span class="n">declared</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">resources</span><span class="p">:</span>
+            <span class="n">declared</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">resources</span><span class="p">)</span><span class="si">}</span><span class="s2"> resource(s)&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">prompts</span><span class="p">:</span>
+            <span class="n">declared</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">prompts</span><span class="p">)</span><span class="si">}</span><span class="s2"> prompt(s)&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;nothing to publish to a .mcpb: this IntegrationSpec declares &quot;</span>
+            <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">declared</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;no tools&quot;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">&quot; but no tools. The claude-local-mcpb target consumes tools only &quot;</span>
+            <span class="s2">&quot;(resources/prompts are reserved for future targets) — add &quot;</span>
+            <span class="s2">&quot;&#39;module:function&#39; tool refs (or bound ToolSpecs) to publish.&quot;</span>
+        <span class="p">)</span>
+
     <span class="n">manifest</span><span class="p">,</span> <span class="n">warnings</span> <span class="o">=</span> <span class="n">build_manifest</span><span class="p">(</span>
         <span class="n">spec</span><span class="p">,</span> <span class="n">manifest_version</span><span class="o">=</span><span class="n">manifest_version</span><span class="p">,</span> <span class="n">python_command</span><span class="o">=</span><span class="n">python_command</span>
     <span class="p">)</span>
-    <span class="n">server_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;refs&quot;</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">tools</span><span class="p">}</span>
+    <span class="n">server_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;refs&quot;</span><span class="p">:</span> <span class="n">runnable_refs</span><span class="p">}</span>
     <span class="n">members</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;manifest.json&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
         <span class="s2">&quot;server/main.py&quot;</span><span class="p">:</span> <span class="n">_SERVER_MAIN</span><span class="p">,</span>
@@ -229,8 +254,39 @@
 
 <span class="sd">    The server is a Python stdio server launched as ``python server/main.py``;</span>
 <span class="sd">    ``${__dirname}`` is resolved by Claude Desktop to the extracted bundle dir.</span>
+
+<span class="sd">    Tool metadata is introspected from every *runnable* ref (``module:function``</span>
+<span class="sd">    in ``tools`` plus bound ToolSpec handlers) — the bound function&#39;s own</span>
+<span class="sd">    name/docstring are authoritative because they are what ``py2mcp`` actually</span>
+<span class="sd">    serves at runtime (so the manifest never advertises a name the server won&#39;t</span>
+<span class="sd">    expose). A bound ToolSpec&#39;s curated description only *fills in* an empty</span>
+<span class="sd">    docstring. Any *proposed* (unbound) ToolSpec is listed by name/description for</span>
+<span class="sd">    design visibility, with a warning that it will not run until bound.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">tools</span><span class="p">,</span> <span class="n">warnings</span> <span class="o">=</span> <span class="n">_introspect_tools</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span>
+    <span class="n">runnable</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">runnable_refs</span><span class="p">()</span>
+    <span class="n">tools</span><span class="p">,</span> <span class="n">warnings</span> <span class="o">=</span> <span class="n">_introspect_tools</span><span class="p">(</span><span class="n">runnable</span><span class="p">)</span>
+    <span class="c1"># Fill an empty introspected description from the bound ToolSpec&#39;s curated one</span>
+    <span class="c1"># (a fidelity win that can&#39;t desync from runtime — names are left untouched).</span>
+    <span class="n">bound_by_ref</span> <span class="o">=</span> <span class="p">{</span><span class="n">ts</span><span class="o">.</span><span class="n">handler</span><span class="p">:</span> <span class="n">ts</span> <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">tool_specs</span> <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">handler</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">tool</span><span class="p">,</span> <span class="n">ref</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">tools</span><span class="p">,</span> <span class="n">runnable</span><span class="p">):</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="n">bound_by_ref</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ts</span> <span class="ow">and</span> <span class="n">ts</span><span class="o">.</span><span class="n">description</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tool</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]:</span>
+            <span class="n">tool</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">description</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="p">{</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">}</span>
+    <span class="n">unbound</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">tool_specs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">handler</span><span class="p">:</span>
+            <span class="k">continue</span>  <span class="c1"># already covered via runnable_refs introspection</span>
+        <span class="n">unbound</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="n">tools</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">ts</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">ts</span><span class="o">.</span><span class="n">description</span><span class="p">})</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">unbound</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unbound</span><span class="p">)</span><span class="si">}</span><span class="s2"> proposed tool(s) have no handler &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">unbound</span><span class="p">)</span><span class="si">}</span><span class="s2">); listed in the manifest for design but they &quot;</span>
+            <span class="s2">&quot;will NOT run until bound to importable module:function handlers.&quot;</span>
+        <span class="p">)</span>
     <span class="k">if</span> <span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;py2mcp&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="s2">&quot;py2mcp is not importable here; the bundle needs `py2mcp` and &quot;</span>

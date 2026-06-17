@@ -56,6 +56,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/frontmatter.html">coact.frontmatter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/integration.html">coact.integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/llm.html">coact.llm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/nl_ingress.html">coact.nl_ingress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/publish.html">coact.publish</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/publish_mcpb.html">coact.publish_mcpb</a></li>
@@ -102,7 +103,8 @@
 <span class="sd">Mirrors ``skill``&#39;s dispatch-to-interface pattern (CLI wrappers call the same</span>
 <span class="sd">core functions and format for the terminal), so the two packages feel like one</span>
 <span class="sd">toolkit. The verbs are ``plan``, ``complete``, ``emit``, ``realize``, ``diff``,</span>
-<span class="sd">``estimate``, ``inventory``, ``back``, ``scaffold``, and ``publish``. Usage::</span>
+<span class="sd">``estimate``, ``inventory``, ``back``, ``scaffold``, ``publish``, and</span>
+<span class="sd">``describe``. Usage::</span>
 
 <span class="sd">    python -m coact plan .claude/skills/ux-analyst</span>
 <span class="sd">    python -m coact complete .claude/skills/ux-analyst --dest .claude/agents</span>
@@ -115,6 +117,7 @@
 <span class="sd">    python -m coact back .claude/agents/ux-analyst.md</span>
 <span class="sd">    python -m coact scaffold .claude/agents/a.md .claude/agents/b.md</span>
 <span class="sd">    python -m coact publish my.module:my_func --dry-run</span>
+<span class="sd">    python -m coact describe &quot;a tool that looks up the weather for a city&quot;</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
@@ -286,12 +289,49 @@
 
 
 
+<div class="viewcode-block" id="describe">
+<a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.describe">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">describe</span><span class="p">(</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">llm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">author</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Refine an NL description into a draft IntegrationSpec (opt-in LLM, aix-backed).</span>
+
+<span class="sd">    The result is a *design draft*: proposed tools (with inferred input schemas).</span>
+<span class="sd">    Bind each tool to a ``module:function`` handler — or include such refs in the</span>
+<span class="sd">    description — then ``coact publish`` it. ``--llm`` is a model name (e.g.</span>
+<span class="sd">    ``gpt-4o``); the backend defaults to ``aix`` (multi-provider).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">coact.nl_ingress</span><span class="w"> </span><span class="kn">import</span> <span class="n">integration_spec_from_description</span>
+
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">integration_spec_from_description</span><span class="p">(</span>
+        <span class="n">description</span><span class="p">,</span> <span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="n">author</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">spec</span><span class="o">.</span><span class="n">render</span><span class="p">()</span></div>
+
+
+
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.main">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Dispatch the coact CLI.&quot;&quot;&quot;</span>
     <span class="n">argh</span><span class="o">.</span><span class="n">dispatch_commands</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">plan</span><span class="p">,</span> <span class="n">complete</span><span class="p">,</span> <span class="n">emit</span><span class="p">,</span> <span class="n">realize</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">estimate</span><span class="p">,</span> <span class="n">inventory</span><span class="p">,</span> <span class="n">back</span><span class="p">,</span> <span class="n">scaffold</span><span class="p">,</span> <span class="n">publish</span><span class="p">]</span>
+        <span class="p">[</span>
+            <span class="n">plan</span><span class="p">,</span>
+            <span class="n">complete</span><span class="p">,</span>
+            <span class="n">emit</span><span class="p">,</span>
+            <span class="n">realize</span><span class="p">,</span>
+            <span class="n">diff</span><span class="p">,</span>
+            <span class="n">estimate</span><span class="p">,</span>
+            <span class="n">inventory</span><span class="p">,</span>
+            <span class="n">back</span><span class="p">,</span>
+            <span class="n">scaffold</span><span class="p">,</span>
+            <span class="n">publish</span><span class="p">,</span>
+            <span class="n">describe</span><span class="p">,</span>
+        <span class="p">]</span>
     <span class="p">)</span></div>
 
 

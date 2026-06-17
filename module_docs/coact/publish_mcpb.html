@@ -59,6 +59,7 @@
 <li class="toctree-l1"><a class="reference internal" href="frontmatter.html">coact.frontmatter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="integration.html">coact.integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="llm.html">coact.llm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nl_ingress.html">coact.nl_ingress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="policy.html">coact.policy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="publish.html">coact.publish</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">coact.publish_mcpb</a><ul>
@@ -139,6 +140,13 @@ runtime dep is reported as a warning, not a build error.</p>
 <dd><p>Build the MCPB <code class="docutils literal notranslate"><span class="pre">manifest.json</span></code> dict and any build-time warnings.</p>
 <p>The server is a Python stdio server launched as <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">server/main.py</span></code>;
 <code class="docutils literal notranslate"><span class="pre">${__dirname}</span></code> is resolved by Claude Desktop to the extracted bundle dir.</p>
+<p>Tool metadata is introspected from every <em>runnable</em> ref (<code class="docutils literal notranslate"><span class="pre">module:function</span></code>
+in <code class="docutils literal notranslate"><span class="pre">tools</span></code> plus bound ToolSpec handlers) — the bound function’s own
+name/docstring are authoritative because they are what <code class="docutils literal notranslate"><span class="pre">py2mcp</span></code> actually
+serves at runtime (so the manifest never advertises a name the server won’t
+expose). A bound ToolSpec’s curated description only <em>fills in</em> an empty
+docstring. Any <em>proposed</em> (unbound) ToolSpec is listed by name/description for
+design visibility, with a warning that it will not run until bound.</p>
 </dd></dl>
 
 <dl class="py function">

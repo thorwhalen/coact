@@ -58,6 +58,7 @@
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/frontmatter.html">coact.frontmatter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/integration.html">coact.integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/llm.html">coact.llm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_docs/coact/nl_ingress.html">coact.nl_ingress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/policy.html">coact.policy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/publish.html">coact.publish</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/publish_mcpb.html">coact.publish_mcpb</a></li>
@@ -117,6 +118,7 @@
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact.html#coact.RunnableCrewAIAgent"><code class="docutils literal notranslate"><span class="pre">RunnableCrewAIAgent</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact.html#coact.RunnableLLMAgent"><code class="docutils literal notranslate"><span class="pre">RunnableLLMAgent</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact.html#coact.RunnableLLMGraphAgent"><code class="docutils literal notranslate"><span class="pre">RunnableLLMGraphAgent</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/coact.html#coact.ToolSpec"><code class="docutils literal notranslate"><span class="pre">ToolSpec</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact.html#coact.agents_dir"><code class="docutils literal notranslate"><span class="pre">agents_dir()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact.html#coact.back"><code class="docutils literal notranslate"><span class="pre">back()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact.html#coact.complete"><code class="docutils literal notranslate"><span class="pre">complete()</span></code></a></li>
@@ -125,6 +127,7 @@
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact.html#coact.estimate"><code class="docutils literal notranslate"><span class="pre">estimate()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact.html#coact.from_claude_agent_md"><code class="docutils literal notranslate"><span class="pre">from_claude_agent_md()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact.html#coact.integration_spec_from"><code class="docutils literal notranslate"><span class="pre">integration_spec_from()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/coact.html#coact.integration_spec_from_description"><code class="docutils literal notranslate"><span class="pre">integration_spec_from_description()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact.html#coact.inventory"><code class="docutils literal notranslate"><span class="pre">inventory()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact.html#coact.parse_coact_meta"><code class="docutils literal notranslate"><span class="pre">parse_coact_meta()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact.html#coact.plan_completion"><code class="docutils literal notranslate"><span class="pre">plan_completion()</span></code></a></li>
@@ -152,6 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/__main__.html">coact.__main__</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact/__main__.html#coact.__main__.back"><code class="docutils literal notranslate"><span class="pre">back()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact/__main__.html#coact.__main__.complete"><code class="docutils literal notranslate"><span class="pre">complete()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/coact/__main__.html#coact.__main__.describe"><code class="docutils literal notranslate"><span class="pre">describe()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact/__main__.html#coact.__main__.diff"><code class="docutils literal notranslate"><span class="pre">diff()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact/__main__.html#coact.__main__.emit"><code class="docutils literal notranslate"><span class="pre">emit()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact/__main__.html#coact.__main__.estimate"><code class="docutils literal notranslate"><span class="pre">estimate()</span></code></a></li>
@@ -214,12 +218,18 @@
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/integration.html">coact.integration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact/integration.html#coact.integration.IntegrationSource"><code class="docutils literal notranslate"><span class="pre">IntegrationSource</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact/integration.html#coact.integration.IntegrationSpec"><code class="docutils literal notranslate"><span class="pre">IntegrationSpec</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/coact/integration.html#coact.integration.ToolSpec"><code class="docutils literal notranslate"><span class="pre">ToolSpec</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact/integration.html#coact.integration.integration_spec_from"><code class="docutils literal notranslate"><span class="pre">integration_spec_from()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/llm.html">coact.llm</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact/llm.html#coact.llm.resolve_llm"><code class="docutils literal notranslate"><span class="pre">resolve_llm()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/coact/llm.html#coact.llm.structured"><code class="docutils literal notranslate"><span class="pre">structured()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="module_docs/coact/nl_ingress.html">coact.nl_ingress</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/coact/nl_ingress.html#coact.nl_ingress.DFLT_AUTHORING_PROMPTS"><code class="docutils literal notranslate"><span class="pre">DFLT_AUTHORING_PROMPTS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/coact/nl_ingress.html#coact.nl_ingress.integration_spec_from_description"><code class="docutils literal notranslate"><span class="pre">integration_spec_from_description()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/coact/policy.html">coact.policy</a><ul>

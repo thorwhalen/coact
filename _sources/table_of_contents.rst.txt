@@ -12,6 +12,7 @@
    module_docs/coact/frontmatter
    module_docs/coact/integration
    module_docs/coact/llm
+   module_docs/coact/nl_ingress
    module_docs/coact/policy
    module_docs/coact/publish
    module_docs/coact/publish_mcpb
