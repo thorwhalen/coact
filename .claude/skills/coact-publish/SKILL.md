@@ -10,11 +10,12 @@ description: >-
   functions for Claude", "turn this into a Claude extension/connector", "publish
   a local MCP server", "wrap my tools as a Claude Desktop extension". Also use to
   draft an integration from a natural-language description ("describe an
-  integration", "I want a Claude connector that can…") via `coact describe`. For
-  REMOTE claude.ai connectors (HTTPS + OAuth) this is the wrong target — that
-  surface is not built yet (see Limitations).
+  integration", "I want a Claude connector that can…") via `coact describe`. Also
+  covers REMOTE claude.ai connectors (a hosted Streamable-HTTP MCP server + OAuth
+  2.1) via the `claude-remote-connector` target — use when the user wants a
+  cloud-reachable connector, not a local install.
 metadata:
-  version: 0.2.0
+  version: 0.3.0
 ---
 
 # coact publish — Python capability → Claude integration
@@ -91,19 +92,47 @@ Install the result: Claude Desktop → Settings → Extensions → Install Exten
 (or double-click the `.mcpb`). The extension runs **on the user's machine** and
 needs a Python with `py2mcp` + `fastmcp` importable.
 
+## Remote claude.ai connector (Streamable-HTTP + OAuth 2.1)
+
+A claude.ai **custom connector** is a *remote* MCP server reached from Anthropic's
+cloud over HTTPS + OAuth — a different surface from the local `.mcpb`. Scaffold one
+(a hosted service you deploy) with the `claude-remote-connector` target:
+
+```bash
+coact publish mypkg.tools:summarize --target claude-remote-connector \
+  --name my-conn --dest ./out \
+  --connector-url https://my-conn.example.com --idp-issuer https://my-idp.example.com
+# → ./out/my-conn-connector/  (server/app.py, connector_config.json, requirements.txt,
+#                              DEPLOY.md, Dockerfile)
+```
+
+```python
+from coact import publish_remote
+publish_remote(["mypkg.tools:summarize"], name="my-conn", dest="out",
+               connector_url="https://my-conn.example.com",
+               idp_issuer="https://my-idp.example.com",
+               required_scopes=["mcp:read"])
+```
+
+It scaffolds an OAuth 2.1 **resource server** (validates a managed IdP's JWTs via
+`py2mcp.http.mk_http_app`; never issues tokens; audience-bound per RFC 8707). Omit
+`--connector-url`/`--idp-issuer` to scaffold with **fill-in placeholders + a loud
+warning**. Then follow the generated `DEPLOY.md`: set your IdP, run behind TLS
+(`uvicorn server.app:app`), and add the HTTPS URL as a custom connector in claude.ai.
+Needs `py2mcp>=0.1.4` + `fastmcp` + `uvicorn` where the service runs.
+
 ## Key distinctions (don't conflate)
 
-- **Local `.mcpb` (this target):** stdio, no OAuth, runs on the user's machine.
-- **Remote claude.ai connector (NOT this target):** a remote MCP server reached
-  from Anthropic's cloud over HTTPS + OAuth — a different surface, not yet built.
-- A `.mcpb` is *connectivity* (tools). A **Skill** (`SKILL.md`) is *procedural
-  knowledge*. They are complementary; this skill packages the former.
+- **Local `.mcpb` (`claude-local-mcpb`):** stdio, no OAuth, runs on the user's machine.
+- **Remote connector (`claude-remote-connector`):** a hosted MCP server reached from
+  Anthropic's cloud over HTTPS + OAuth — public, multi-user, you deploy it.
+- A connector is *connectivity* (tools). A **Skill** (`SKILL.md`) is *procedural
+  knowledge*. They are complementary.
 
 ## Limitations (current)
 
-- Only `claude-local-mcpb`. Remote connectors, Claude Code plugins, ChatGPT
-  Apps, and Gemini are planned targets (the registry is open-closed).
-- The bundle references tools by `module:function`; the **functions must be
-  importable** in the Python that Claude Desktop runs (full dependency vendoring
-  into the bundle is a future refinement).
+- Targets: `claude-local-mcpb` and `claude-remote-connector`. Claude Code plugins,
+  ChatGPT Apps, and Gemini are planned (the registry is open-closed).
+- Tools are referenced by `module:function`; the **functions must be importable**
+  where the server runs (dependency vendoring is a future refinement).
 - Background: `misc/docs/CHATBOT_INTEGRATION_LANDSCAPE.md`.
