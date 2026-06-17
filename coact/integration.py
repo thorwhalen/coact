@@ -33,12 +33,44 @@ IntegrationSource = Union[
 
 
 @dataclass
+class ToolSpec:
+    """A richer, target-neutral description of one tool in an :class:`IntegrationSpec`.
+
+    The *mechanical* ingress represents tools as bare ``'module:function'`` ref
+    strings (``IntegrationSpec.tools``). The *NL* ingress (:mod:`coact.nl_ingress`)
+    and the landscape-doc §9.1 model need more — a name, a description, an input
+    JSON Schema, and an **optional** handler ref:
+
+    - A ToolSpec **with** a ``handler`` is *bound* (runnable): its ref joins the
+      spec's runnable set and the published server can import and call it.
+    - A ToolSpec **without** a handler is a *proposed* tool — a design draft to
+      bind to real code (or supply a ref for) before it can run.
+
+    >>> ToolSpec(name='get_weather', handler='wx.api:current').is_bound()
+    True
+    >>> ToolSpec(name='get_weather').is_bound()
+    False
+    """
+
+    name: str
+    description: str = ""
+    input_schema: Optional[dict] = None
+    handler: Optional[str] = None  # 'module:function' ref, or None if unbound
+
+    def is_bound(self) -> bool:
+        """True when a ``module:function`` handler backs this tool (so it can run)."""
+        return bool(self.handler)
+
+
+@dataclass
 class IntegrationSpec:
     """Target-neutral description of an integration to publish.
 
-    The connectivity core maps onto MCP's three primitives. Only ``tools`` is
-    consumed by the local-``.mcpb`` target today; ``resources``/``prompts`` and
-    the ``auth``/``deployment`` hints are declared now (open-closed) for the
+    The connectivity core maps onto MCP's three primitives. Tools come in two
+    shapes that coexist: bare ``'module:function'`` refs in ``tools`` (the
+    mechanical/code ingress) and richer :class:`ToolSpec` descriptors in
+    ``tool_specs`` (the NL ingress, landscape-doc §9.1). ``resources``/``prompts``
+    and the ``auth``/``deployment`` hints are declared now (open-closed) for the
     remote connector and other targets to come.
 
     >>> spec = IntegrationSpec(name='paths', tools=['os.path:basename'])
@@ -46,6 +78,9 @@ class IntegrationSpec:
     ('paths', ['os.path:basename'], 'local-stdio')
     >>> IntegrationSpec(name='empty').is_empty()
     True
+    >>> draft = IntegrationSpec(name='wx', tool_specs=[ToolSpec(name='get')])
+    >>> draft.is_empty(), draft.runnable_refs()
+    (False, [])
     """
 
     name: str
@@ -54,6 +89,7 @@ class IntegrationSpec:
     tools: list[str] = field(default_factory=list)  # 'module:function' refs (MCP tools)
     resources: list[str] = field(default_factory=list)  # reserved (MCP resources)
     prompts: list[str] = field(default_factory=list)  # reserved (MCP prompts)
+    tool_specs: list[ToolSpec] = field(default_factory=list)  # richer tool descriptors
     instructions: Optional[str] = None  # reserved (SKILL.md procedural knowledge)
     auth: str = "none"  # 'none' | 'env' | 'oauth2.1' (reserved for remote targets)
     deployment: str = "local-stdio"  # 'local-stdio' | 'remote-http' (reserved)
@@ -61,8 +97,49 @@ class IntegrationSpec:
     source: Optional[str] = None  # provenance: the skill/module it came from
 
     def is_empty(self) -> bool:
-        """True when there is no connectivity to publish (no tools/resources/prompts)."""
-        return not (self.tools or self.resources or self.prompts)
+        """True when there is nothing to publish (no tools/tool_specs/resources/prompts)."""
+        return not (self.tools or self.tool_specs or self.resources or self.prompts)
+
+    def runnable_refs(self) -> list[str]:
+        """The importable ``'module:function'`` refs that back *runnable* tools.
+
+        Bare refs in ``tools`` plus the ``handler`` of every *bound* ToolSpec,
+        de-duplicated preserving order. A draft whose tools are all *proposed*
+        (unbound) returns ``[]`` — it has nothing a server can actually run yet.
+        """
+        refs = list(self.tools)
+        for ts in self.tool_specs:
+            if ts.handler and ts.handler not in refs:
+                refs.append(ts.handler)
+        return refs
+
+    def render(self) -> str:
+        """A terminal-friendly summary of the (possibly draft) integration."""
+        lines = [f"IntegrationSpec: {self.name} (v{self.version})"]
+        if self.description:
+            lines.append(f"  {self.description}")
+        lines.append(f"  deployment: {self.deployment}   auth: {self.auth}")
+        runnable = set(self.runnable_refs())
+        if self.tools or self.tool_specs:
+            lines.append("  tools:")
+            for ref in self.tools:
+                lines.append(f"    - {ref}  [ref]")
+            for ts in self.tool_specs:
+                tag = f"bound -> {ts.handler}" if ts.is_bound() else "proposed (no handler)"
+                lines.append(f"    - {ts.name}  [{tag}]")
+                if ts.description:
+                    lines.append(f"        {ts.description}")
+        if self.resources:
+            lines.append("  resources: " + ", ".join(self.resources))
+        if self.prompts:
+            lines.append("  prompts: " + ", ".join(self.prompts))
+        if self.tool_specs and not runnable:
+            lines.append(
+                "  NOTE: design draft — no tool is bound to importable code. Bind "
+                "each tool to a 'module:function' handler (or supply refs) before "
+                "building a runnable .mcpb."
+            )
+        return "\n".join(lines)
 
 
 def integration_spec_from(
@@ -90,6 +167,9 @@ def integration_spec_from(
         return source
 
     refs: list[str] = []
+    spec_tool_specs: list[ToolSpec] = []
+    spec_resources: list[str] = []
+    spec_prompts: list[str] = []
     derived_name: Optional[str] = name
     src_label: Optional[str] = None
     unrecognized: list[str] = []
@@ -97,7 +177,13 @@ def integration_spec_from(
 
     for item in items:
         if isinstance(item, IntegrationSpec):
+            # Carry the spec's richer connectivity, not just its bare refs — else a
+            # draft from `integration_spec_from_description` (whose runnable tools
+            # live in tool_specs[].handler) would silently lose every handler.
             refs.extend(item.tools)
+            spec_tool_specs.extend(item.tool_specs)
+            spec_resources.extend(item.resources)
+            spec_prompts.extend(item.prompts)
             derived_name = derived_name or item.name
         elif _is_skill_obj(item):  # before callable(): a Skill may define __call__
             sk_refs, sk_name = _refs_and_name_from_skill(item)
@@ -123,7 +209,7 @@ def integration_spec_from(
             + ". Expected a 'module:function' ref (note the colon), an existing "
             "skill directory / SKILL.md, or a live callable."
         )
-    if not refs:
+    if not (refs or spec_tool_specs or spec_resources or spec_prompts):
         raise ValueError(
             "No tools found to publish. Provide 'module:function' refs, live "
             "callables, or a skill carrying a `coact: mcp:` block (module + functions)."
@@ -134,6 +220,9 @@ def integration_spec_from(
         description=description,
         version=version,
         tools=refs,
+        resources=spec_resources,
+        prompts=spec_prompts,
+        tool_specs=spec_tool_specs,
         author=author,
         source=src_label,
     )

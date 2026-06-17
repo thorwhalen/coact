@@ -7,6 +7,7 @@ import pytest
 
 from coact import (
     IntegrationSpec,
+    ToolSpec,
     integration_spec_from,
     publish,
     publish_mcpb,
@@ -168,3 +169,98 @@ def test_duplicate_tool_names_warn(tmp_path):
         dry_run=True,
     )
     assert any("duplicate tool name" in w for w in res.warnings)
+
+
+# --- ToolSpec / draft mechanics (oa-free; run in CI) -------------------------
+# These cover the IntegrationSpec/publish-axis half of the NL ingress without
+# needing the oa backend, so they run in bare CI (the oa-dependent ingress tests
+# live in test_nl_ingress.py under importorskip("oa")).
+
+
+def test_proposed_tools_listed_in_manifest_with_warning(tmp_path):
+    # a bound tool (publishable) plus an unbound proposed tool
+    spec = IntegrationSpec(
+        name="mix",
+        tool_specs=[
+            ToolSpec(name="basename", handler="os.path:basename"),
+            ToolSpec(name="future_tool", description="not built yet"),
+        ],
+    )
+    res = publish(spec, dest=str(tmp_path), dry_run=True)
+    assert any("future_tool" in w for w in res.warnings)
+
+
+def test_spec_in_list_preserves_bound_handlers():
+    # #5 (high): a draft mixed into a list must not lose its bound handlers
+    draft = IntegrationSpec(
+        name="wx", tool_specs=[ToolSpec(name="dn", handler="os.path:dirname")]
+    )
+    out = integration_spec_from([draft, "os.path:basename"])
+    assert "os.path:dirname" in out.runnable_refs()
+    assert "os.path:basename" in out.runnable_refs()
+
+
+def test_pure_bound_draft_in_list_publishes(tmp_path):
+    draft = IntegrationSpec(
+        name="wx", tool_specs=[ToolSpec(name="bn", handler="os.path:basename")]
+    )
+    out = integration_spec_from([draft])
+    assert out.runnable_refs() == ["os.path:basename"]
+    res = publish(out, dest=str(tmp_path))
+    assert res.artifact is not None and res.artifact.exists()
+
+
+def test_bound_toolspec_fills_empty_manifest_description(monkeypatch):
+    """A bound tool whose docstring is empty gets its manifest desc from the ToolSpec."""
+    import importlib
+
+    pm = importlib.import_module("coact.publish_mcpb")
+    monkeypatch.setattr(
+        pm, "_introspect_tools", lambda refs: ([{"name": "basename", "description": ""}], [])
+    )
+    spec = IntegrationSpec(
+        name="mix",
+        tool_specs=[ToolSpec(name="x", description="curated", handler="os.path:basename")],
+    )
+    manifest, _ = pm.build_manifest(spec)
+    tool = next(t for t in manifest["tools"] if t["name"] == "basename")
+    assert tool["description"] == "curated"  # empty introspected desc filled in
+
+
+def test_bound_toolspec_does_not_clobber_introspected_description(monkeypatch):
+    """Runtime truth (the function's own docstring) wins — never desync manifest vs server."""
+    import importlib
+
+    pm = importlib.import_module("coact.publish_mcpb")
+    monkeypatch.setattr(
+        pm,
+        "_introspect_tools",
+        lambda refs: ([{"name": "basename", "description": "real docstring"}], []),
+    )
+    spec = IntegrationSpec(
+        name="mix",
+        tool_specs=[ToolSpec(name="x", description="curated", handler="os.path:basename")],
+    )
+    manifest, _ = pm.build_manifest(spec)
+    tool = next(t for t in manifest["tools"] if t["name"] == "basename")
+    assert tool["description"] == "real docstring"
+
+
+def test_resources_only_spec_rejected_with_clear_message():
+    with pytest.raises(ValueError, match="resource"):
+        publish_mcpb(IntegrationSpec(name="r", resources=["data1"]))
+
+
+def test_import_coact_is_provider_free():
+    """D10/D18: `import coact` must not pull in oa/aix/litellm (lazy provider deps)."""
+    import subprocess
+    import sys
+
+    code = (
+        "import sys, coact; "
+        "leaked=[m for m in ('oa','aix','litellm','openai') if m in sys.modules]; "
+        "assert not leaked, leaked; print('ok')"
+    )
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+    assert out.returncode == 0, out.stderr
+    assert out.stdout.strip() == "ok"

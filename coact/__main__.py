@@ -4,7 +4,8 @@
 Mirrors ``skill``'s dispatch-to-interface pattern (CLI wrappers call the same
 core functions and format for the terminal), so the two packages feel like one
 toolkit. The verbs are ``plan``, ``complete``, ``emit``, ``realize``, ``diff``,
-``estimate``, ``inventory``, ``back``, ``scaffold``, and ``publish``. Usage::
+``estimate``, ``inventory``, ``back``, ``scaffold``, ``publish``, and
+``describe``. Usage::
 
     python -m coact plan .claude/skills/ux-analyst
     python -m coact complete .claude/skills/ux-analyst --dest .claude/agents
@@ -17,6 +18,7 @@ toolkit. The verbs are ``plan``, ``complete``, ``emit``, ``realize``, ``diff``,
     python -m coact back .claude/agents/ux-analyst.md
     python -m coact scaffold .claude/agents/a.md .claude/agents/b.md
     python -m coact publish my.module:my_func --dry-run
+    python -m coact describe "a tool that looks up the weather for a city"
 """
 
 from __future__ import annotations
@@ -158,10 +160,44 @@ def publish(
     return res.render()
 
 
+def describe(
+    description: str,
+    *,
+    name: str | None = None,
+    llm: str | None = None,
+    author: str | None = None,
+) -> str:
+    """Refine an NL description into a draft IntegrationSpec (opt-in LLM, aix-backed).
+
+    The result is a *design draft*: proposed tools (with inferred input schemas).
+    Bind each tool to a ``module:function`` handler — or include such refs in the
+    description — then ``coact publish`` it. ``--llm`` is a model name (e.g.
+    ``gpt-4o``); the backend defaults to ``aix`` (multi-provider).
+    """
+    from coact.nl_ingress import integration_spec_from_description
+
+    spec = integration_spec_from_description(
+        description, llm=llm, name=name, author=author
+    )
+    return spec.render()
+
+
 def main() -> None:
     """Dispatch the coact CLI."""
     argh.dispatch_commands(
-        [plan, complete, emit, realize, diff, estimate, inventory, back, scaffold, publish]
+        [
+            plan,
+            complete,
+            emit,
+            realize,
+            diff,
+            estimate,
+            inventory,
+            back,
+            scaffold,
+            publish,
+            describe,
+        ]
     )
 
 

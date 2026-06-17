@@ -49,6 +49,14 @@ mcpb = [
     "py2mcp",
     "fastmcp",
 ]
+# The opt-in NL ingress (`coact describe` / `integration_spec_from_description`)
+# routes LLM generation through `aix` (provider-agnostic) via `oa`'s
+# prompt-as-function machinery. Both are imported lazily, so they are needed only
+# when the NL path is actually used (DECISIONS D10 / D18).
+nl = [
+    "oa",
+    "aix",
+]
 litellm = [
     "litellm>=1.0",
 ]

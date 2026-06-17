@@ -421,3 +421,78 @@ Verified end-to-end: `coact publish os.path:basename --name demo --dest <dir>`
 writes a valid `.mcpb` (ZIP) with a `manifest_version: "0.3"` manifest
 (`server.type: python`, `${__dirname}/server/main.py`), docstring-introspected
 `tools` metadata, and a `py2mcp_config.json` the shim feeds to `py2mcp.serve`.
+
+## D18 — PUBLISH ingress, part 2: NL-description → IntegrationSpec (the opt-in LLM path)
+
+D17 shipped the *mechanical* PUBLISH ingress (`integration_spec_from`: refs /
+callables / skills → spec, zero LLM). This adds the **second input arm** from the
+landscape doc §9.2 — a **natural-language description** → a *draft*
+`IntegrationSpec` — as a deliberately separate, opt-in LLM path
+(`coact.nl_ingress.integration_spec_from_description`). Decision and rationale:
+
+- **A separate entry point, not an overload of `integration_spec_from`.** A
+  `module:function` ref and an NL description are both `str`; routing them through
+  one function would make the mechanical path's behavior depend on an LLM (a clean
+  D10 violation, and ambiguous to boot). So `integration_spec_from` stays LLM-free
+  and `integration_spec_from_description` is the *named* opt-in LLM path. D10 holds
+  structurally: nothing on a mechanical path imports `nl_ingress`, and `oa`/`aix`
+  are imported **lazily inside** the entry function (so `import coact` pulls in
+  neither; a missing backend is an actionable `ImportError`, not a hard dep).
+
+- **Generation routes through `aix` (provider-agnostic), via `oa`.** Per the
+  route-through-aix policy, the default backend is `aix.chat` (multi-provider) —
+  *not* oa's OpenAI default — so the multi-target promise stays honest. The
+  prompt-as-function machinery is `oa`'s (`prompt_function` for the structured
+  extraction; the now backend-injectable `oa.infer_schema_from_verbal_description`
+  for per-tool input-schema inference when a tool lacks one). `oa` was the missing
+  seam: `infer_schema_from_verbal_description` was hardwired to oa's `chat`; it was
+  made backend-injectable upstream (first customer = coact, cross-package policy).
+  The backend is injectable (`llm=` accepts a callable / model-name / `None`), so
+  the whole path is unit-testable offline with a fake — no provider call.
+
+- **The result is a *draft*; tools grow a richer descriptor (`ToolSpec`).** The
+  landscape doc §9.1 always modeled a tool as *(name, description, input schema,
+  handler ref)*; the D17 P1 simplification (`tools: list[str]` refs) was a
+  code-path shortcut. NL tools have **no importable handler yet**, so the spec gains
+  `tool_specs: list[ToolSpec]` (name / description / input_schema / optional
+  handler) **alongside** the unchanged `tools` refs (non-breaking — refs still
+  compare equal). A `ToolSpec` *with* a handler is *bound* (its ref joins
+  `runnable_refs()`); *without*, it is a *proposed* tool — a design draft to bind
+  before it can run. `is_empty()` now also counts `tool_specs`.
+
+- **Publishing a draft is honest about runnability (no silent dead bundle).**
+  `publish_mcpb` builds the server config from `runnable_refs()` (bare refs +
+  bound-ToolSpec handlers). A pure draft (no runnable ref) **raises** with guidance
+  rather than writing a `.mcpb` that runs nothing; proposed tools are still listed
+  in the manifest for design visibility, with a warning that they will not run
+  until bound. This mirrors the D8/D13 "coact writes the design, the user owns the
+  code" stance — the draft is a design artifact, not a runnable lie.
+
+- **Authoring prompts: SSOT in coact, injectable, pyrompt as the iteration home.**
+  The per-target authoring prompt(s) live in coact (`DFLT_AUTHORING_PROMPTS`, one
+  entry per target — extend as targets land) so behavior is committed and
+  reproducible with no hard `pyrompt` dependency. `prompt_template=` lets a caller
+  inject an alternative (e.g. one *managed/iterated* in `pyrompt`), which is the
+  right home for prompt curation without duplicating the SSOT into uncommitted
+  machine-state. (A future `pyrompt`-sync helper can register these for management.)
+
+- **Packaging.** `coact/nl_ingress.py`; exports `ToolSpec` +
+  `integration_spec_from_description`; optional extra `coact[nl]` (`oa`, `aix`); CLI
+  verb `coact describe "<NL>"` (renders the draft); skill updated. Offline tests
+  inject a fake backend (no provider call); the `oa` injection has its own upstream
+  test + PR.
+
+- **Review hardening (adversarial multi-agent pass, 9 confirmed findings, all
+  fixed).** The NL output is *untrusted*, so every extracted field is coerced
+  (non-string name/description → `str`; a bare-string `resources`/`prompts` is
+  wrapped, not iterated per-char) and the JSON parse tries the whole reply, a fenced
+  body, then *each* top-level balanced `{…}` span (brace-bearing prose before the
+  JSON no longer defeats it). `integration_spec_from` now carries a spec's
+  `tool_specs`/`resources`/`prompts` through the **list** branch (a draft mixed into
+  a list previously lost its bound handlers silently). `check_requirements` is
+  path-aware (an injected callable needs neither `aix` installed nor a provider
+  call — honoring the "offline when injected" contract). The `.mcpb` draft guard
+  distinguishes a *design draft* (proposed tools) from a *tools-less* spec
+  (resources/prompts only) in its message. The manifest keeps the bound function's
+  own name/docstring (what `py2mcp` actually serves — no manifest↔runtime desync); a
+  curated ToolSpec description only *fills an empty* one.

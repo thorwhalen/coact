@@ -85,6 +85,7 @@ coact inventory .                                         # skills + agents + MC
 coact back      .claude/agents/ux-analyst.md              # lossy agent → skill stub
 coact scaffold  .claude/agents/a.md .claude/agents/b.md   # a starter fleet shim (you own it)
 coact publish   mypkg.tools:summarize --name my-tools --dry-run   # → a Claude .mcpb (preview)
+coact describe  "a tool that looks up the weather for a city"     # NL → a draft IntegrationSpec
 ```
 
 ## Publish — ship a capability to a chatbot host
@@ -108,6 +109,27 @@ writing it. This is the **local** surface (stdio, no OAuth); remote claude.ai
 planned targets on the same open-closed registry. Background:
 [`misc/docs/CHATBOT_INTEGRATION_LANDSCAPE.md`](misc/docs/CHATBOT_INTEGRATION_LANDSCAPE.md).
 Install: `pip install coact[mcpb]`.
+
+There are two ways to get an `IntegrationSpec`. The **mechanical** ingress above
+(refs / callables / skills) uses **no LLM**. The **opt-in** ingress refines a
+natural-language description into a *draft* spec — proposed tools with inferred
+input schemas — routing generation through [`aix`](https://github.com/thorwhalen/aix)
+(multi-provider) via [`oa`](https://github.com/thorwhalen/oa):
+
+```python
+from coact import integration_spec_from_description
+
+# This routes through aix/oa — it makes a real LLM call (needs a configured
+# provider). Inject `llm=<callable>` to run it offline (e.g. in tests).
+spec = integration_spec_from_description("expose os.path.basename as a tool")
+print(spec.render())   # a DRAFT: a tool becomes a runnable ref only if the model
+                       # binds it to module:function code — else it stays proposed
+```
+
+The draft is a **design artifact**: tools without a `module:function` handler are
+*proposed* (won't run until you bind them to real code). The LLM touches **only**
+this path — the code → `.mcpb` path stays LLM-free (`DECISIONS.md` D10/D18).
+Install: `pip install coact[nl]`.
 
 ## The model in one minute
 
