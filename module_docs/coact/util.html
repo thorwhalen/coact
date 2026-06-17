@@ -56,8 +56,11 @@
 <li class="toctree-l1"><a class="reference internal" href="complete.html">coact.complete</a></li>
 <li class="toctree-l1"><a class="reference internal" href="emit.html">coact.emit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integration.html">coact.integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="llm.html">coact.llm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="policy.html">coact.policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publish.html">coact.publish</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publish_mcpb.html">coact.publish_mcpb</a></li>
 <li class="toctree-l1"><a class="reference internal" href="realize.html">coact.realize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="realize_crewai.html">coact.realize_crewai</a></li>
 <li class="toctree-l1"><a class="reference internal" href="realize_langgraph.html">coact.realize_langgraph</a></li>
@@ -72,6 +75,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#coact.util.check_requirements"><code class="docutils literal notranslate"><span class="pre">check_requirements()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.util.first_balanced_span"><code class="docutils literal notranslate"><span class="pre">first_balanced_span()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.util.import_object"><code class="docutils literal notranslate"><span class="pre">import_object()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.util.safe_filename"><code class="docutils literal notranslate"><span class="pre">safe_filename()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.util.to_kebab_case"><code class="docutils literal notranslate"><span class="pre">to_kebab_case()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coact.util.to_snake_case"><code class="docutils literal notranslate"><span class="pre">to_snake_case()</span></code></a></li>
 </ul>
@@ -176,6 +180,25 @@ last dot for the dotted form.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="coact.util.safe_filename">
+<span class="sig-prename descclassname"><span class="pre">coact.util.</span></span><span class="sig-name descname"><span class="pre">safe_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'name'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/coact/util.html#safe_filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.util.safe_filename" title="Link to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">f&quot;{name}{suffix}&quot;</span></code> after rejecting unsafe, path-bearing names.</p>
+<p>Names that become files must be bare filename stems; one carrying a path
+separator or <code class="docutils literal notranslate"><span class="pre">..</span></code> could escape its directory (CWE-22) on write <em>or</em> read.
+Raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> on an empty, non-string, or path-bearing name. <code class="docutils literal notranslate"><span class="pre">kind</span></code>
+customizes the error wording for the caller’s domain. Shared by
+<a class="reference internal" href="#coact.util.agent_filename" title="coact.util.agent_filename"><code class="xref py py-func docutils literal notranslate"><span class="pre">agent_filename()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">.md</span></code> agents) and the publish axis (<code class="docutils literal notranslate"><span class="pre">.mcpb</span></code> bundles).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">safe_filename</span><span class="p">(</span><span class="s1">&#39;paths&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.mcpb&#39;</span><span class="p">)</span>
+<span class="go">&#39;paths.mcpb&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">safe_filename</span><span class="p">(</span><span class="s1">&#39;../x&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.mcpb&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">unsafe name &#39;../x&#39;: ...</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="coact.util.to_kebab_case">
 <span class="sig-prename descclassname"><span class="pre">coact.util.</span></span><span class="sig-name descname"><span class="pre">to_kebab_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/coact/util.html#to_kebab_case"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.util.to_kebab_case" title="Link to this definition"></a></dt>
 <dd><p>Convert CamelCase / snake_case / spaces to kebab-case.</p>
@@ -213,7 +236,7 @@ last dot for the dotted form.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright NO COPYRIGHT.</p>
+    <p></p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

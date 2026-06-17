@@ -1,0 +1,4 @@
+coact.publish
+=============
+.. automodule:: coact.publish
+   :members:

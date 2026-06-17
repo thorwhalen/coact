@@ -1,0 +1,4 @@
+coact.publish_mcpb
+==================
+.. automodule:: coact.publish_mcpb
+   :members:

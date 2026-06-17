@@ -1,0 +1,340 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coact.integration &mdash; coact 0.0.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8c5712d9"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            coact
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/_pydantic_schema.html">coact._pydantic_schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/analysis.html">coact.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/base.html">coact.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/complete.html">coact.complete</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/emit.html">coact.emit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/integration.html">coact.integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/llm.html">coact.llm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/publish.html">coact.publish</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/publish_mcpb.html">coact.publish_mcpb</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize.html">coact.realize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_crewai.html">coact.realize_crewai</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_langgraph.html">coact.realize_langgraph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/schema.html">coact.schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/stores.html">coact.stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/synthesis.html">coact.synthesis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/util.html">coact.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">coact</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">coact.integration</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for coact.integration</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;IntegrationSpec — the target-neutral SSOT for a *published* integration.</span>
+
+<span class="sd">coact&#39;s COMPLETE/REALIZE axes turn skills into agent definitions and run them.</span>
+<span class="sd">The **PUBLISH** axis (this module + :mod:`coact.publish`) is orthogonal: it takes</span>
+<span class="sd">a *capability* — a set of Python tools given as ``&#39;module:function&#39;`` refs, live</span>
+<span class="sd">callables, or a skill&#39;s ``coact: mcp:`` block — and ships it to a chatbot host as</span>
+<span class="sd">a deployable integration (a Claude Desktop ``.mcpb`` bundle today; remote</span>
+<span class="sd">connectors / skills / plugins / other hosts later).</span>
+
+<span class="sd">The spec is deliberately **separate from** :class:`~coact.base.AgentDefinition`</span>
+<span class="sd">(which is agent-persona-centric): an integration is MCP-server-shaped</span>
+<span class="sd">(tools/resources/prompts + auth + deployment), per the chatbot-integration</span>
+<span class="sd">landscape research (``misc/docs/CHATBOT_INTEGRATION_LANDSCAPE.md``). The canonical</span>
+<span class="sd">artifact is an MCP server, built by ``py2mcp`` — coact owns the spec, the</span>
+<span class="sd">packaging, and the target registry, **not** the MCP plumbing (mirrors the ``mcp``</span>
+<span class="sd">realize backend, DECISIONS §6.1.3 / D17).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_kebab_case</span>
+
+<span class="c1">#: What :func:`integration_spec_from` accepts: a built spec, a ``module:function``</span>
+<span class="c1">#: ref, a skill source (path/``Skill``), a live callable, or an iterable of those.</span>
+<span class="n">IntegrationSource</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span>
+    <span class="s2">&quot;IntegrationSpec&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="IntegrationSpec">
+<a class="viewcode-back" href="../../module_docs/coact/integration.html#coact.IntegrationSpec">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IntegrationSpec</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Target-neutral description of an integration to publish.</span>
+
+<span class="sd">    The connectivity core maps onto MCP&#39;s three primitives. Only ``tools`` is</span>
+<span class="sd">    consumed by the local-``.mcpb`` target today; ``resources``/``prompts`` and</span>
+<span class="sd">    the ``auth``/``deployment`` hints are declared now (open-closed) for the</span>
+<span class="sd">    remote connector and other targets to come.</span>
+
+<span class="sd">    &gt;&gt;&gt; spec = IntegrationSpec(name=&#39;paths&#39;, tools=[&#39;os.path:basename&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; spec.name, spec.tools, spec.deployment</span>
+<span class="sd">    (&#39;paths&#39;, [&#39;os.path:basename&#39;], &#39;local-stdio&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; IntegrationSpec(name=&#39;empty&#39;).is_empty()</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0.1.0&quot;</span>
+    <span class="n">tools</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># &#39;module:function&#39; refs (MCP tools)</span>
+    <span class="n">resources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># reserved (MCP resources)</span>
+    <span class="n">prompts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># reserved (MCP prompts)</span>
+    <span class="n">instructions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># reserved (SKILL.md procedural knowledge)</span>
+    <span class="n">auth</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>  <span class="c1"># &#39;none&#39; | &#39;env&#39; | &#39;oauth2.1&#39; (reserved for remote targets)</span>
+    <span class="n">deployment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;local-stdio&quot;</span>  <span class="c1"># &#39;local-stdio&#39; | &#39;remote-http&#39; (reserved)</span>
+    <span class="n">author</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># provenance: the skill/module it came from</span>
+
+<div class="viewcode-block" id="IntegrationSpec.is_empty">
+<a class="viewcode-back" href="../../module_docs/coact/integration.html#coact.IntegrationSpec.is_empty">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;True when there is no connectivity to publish (no tools/resources/prompts).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tools</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">resources</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompts</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="integration_spec_from">
+<a class="viewcode-back" href="../../module_docs/coact/integration.html#coact.integration_spec_from">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">integration_spec_from</span><span class="p">(</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">IntegrationSource</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0.1.0&quot;</span><span class="p">,</span>
+    <span class="n">author</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntegrationSpec</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Coerce a capability source into an :class:`IntegrationSpec`.</span>
+
+<span class="sd">    Accepts (and flattens lists of): a prebuilt :class:`IntegrationSpec`, a</span>
+<span class="sd">    ``&#39;module:function&#39;`` ref string, a live callable (its</span>
+<span class="sd">    ``__module__:__qualname__`` becomes the ref), or a skill source carrying a</span>
+<span class="sd">    ``coact: mcp:`` block. The resulting ``name`` is kebab-cased so it is a safe,</span>
+<span class="sd">    machine-readable bundle identifier.</span>
+
+<span class="sd">    &gt;&gt;&gt; integration_spec_from([&#39;os.path:basename&#39;], name=&#39;paths&#39;).tools</span>
+<span class="sd">    [&#39;os.path:basename&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; integration_spec_from(&#39;os.path:basename&#39;, name=&#39;My Tools&#39;).name</span>
+<span class="sd">    &#39;my-tools&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">IntegrationSpec</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">source</span>
+
+    <span class="n">refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">derived_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="n">src_label</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">unrecognized</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="k">else</span> <span class="p">[</span><span class="n">source</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">IntegrationSpec</span><span class="p">):</span>
+            <span class="n">refs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span>
+            <span class="n">derived_name</span> <span class="o">=</span> <span class="n">derived_name</span> <span class="ow">or</span> <span class="n">item</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">elif</span> <span class="n">_is_skill_obj</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>  <span class="c1"># before callable(): a Skill may define __call__</span>
+            <span class="n">sk_refs</span><span class="p">,</span> <span class="n">sk_name</span> <span class="o">=</span> <span class="n">_refs_and_name_from_skill</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="n">refs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sk_refs</span><span class="p">)</span>
+            <span class="n">derived_name</span> <span class="o">=</span> <span class="n">derived_name</span> <span class="ow">or</span> <span class="n">sk_name</span>
+        <span class="k">elif</span> <span class="nb">callable</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+            <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_ref_from_callable</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+            <span class="n">derived_name</span> <span class="o">=</span> <span class="n">derived_name</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_looks_like_ref</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+            <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">))</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">sk_refs</span><span class="p">,</span> <span class="n">sk_name</span> <span class="o">=</span> <span class="n">_refs_and_name_from_skill</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="n">refs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sk_refs</span><span class="p">)</span>
+            <span class="n">derived_name</span> <span class="o">=</span> <span class="n">derived_name</span> <span class="ow">or</span> <span class="n">sk_name</span>
+            <span class="n">src_label</span> <span class="o">=</span> <span class="n">src_label</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># a string/path that is neither a ref nor an existing skill source</span>
+            <span class="n">unrecognized</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">))</span> <span class="k">else</span> <span class="nb">repr</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">unrecognized</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Unrecognized publish source(s): &quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">unrecognized</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">&quot;. Expected a &#39;module:function&#39; ref (note the colon), an existing &quot;</span>
+            <span class="s2">&quot;skill directory / SKILL.md, or a live callable.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">refs</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;No tools found to publish. Provide &#39;module:function&#39; refs, live &quot;</span>
+            <span class="s2">&quot;callables, or a skill carrying a `coact: mcp:` block (module + functions).&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">IntegrationSpec</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">to_kebab_case</span><span class="p">(</span><span class="n">derived_name</span> <span class="ow">or</span> <span class="s2">&quot;integration&quot;</span><span class="p">),</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+        <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
+        <span class="n">tools</span><span class="o">=</span><span class="n">refs</span><span class="p">,</span>
+        <span class="n">author</span><span class="o">=</span><span class="n">author</span><span class="p">,</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">src_label</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_ref_from_callable</span><span class="p">(</span><span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive a ``&#39;module:qualname&#39;`` ref from a live callable.</span>
+
+<span class="sd">    Rejects ``__main__``-defined functions: a published server re-imports tools</span>
+<span class="sd">    by reference, so they must live in an importable module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fn</span><span class="si">!r}</span><span class="s2"> is a bound method; pass the underlying function or a &quot;</span>
+            <span class="s2">&quot;&#39;module:function&#39; ref — a bound method can&#39;t be re-imported by reference.&quot;</span>
+        <span class="p">)</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;__module__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">qual</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;__qualname__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">module</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">qual</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cannot derive a &#39;module:function&#39; ref from </span><span class="si">{</span><span class="n">fn</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">qual</span><span class="si">!r}</span><span class="s2"> is defined in __main__; move it into an importable module &quot;</span>
+            <span class="s2">&quot;so the published server can import it by reference.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">qual</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_skill_obj</span><span class="p">(</span><span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;True if ``item`` is a :class:`skill.base.Skill` (checked before ``callable``).&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">skill.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Skill</span>
+
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">Skill</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># pragma: no cover - skill import is best-effort here</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_looks_like_ref</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A ``&#39;module:function&#39;`` ref, as opposed to a filesystem skill source.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">s</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_refs_and_name_from_skill</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Collect ``&#39;module:function&#39;`` refs (and a name) from a skill&#39;s coact: mcp block.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">coact.frontmatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_coact_meta</span>
+
+    <span class="n">refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">parse_coact_meta</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="o">.</span><span class="n">mcp</span><span class="p">:</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;module&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">module</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;functions&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">skill.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Skill</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">Skill</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># pragma: no cover - skill import/shape is best-effort here</span>
+        <span class="k">pass</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="k">else</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">refs</span><span class="p">,</span> <span class="n">name</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

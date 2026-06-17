@@ -1,0 +1,211 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coact.integration &mdash; coact 0.0.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8c5712d9"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="coact.llm" href="llm.html" />
+    <link rel="prev" title="coact.frontmatter" href="frontmatter.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            coact
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_pydantic_schema.html">coact._pydantic_schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">coact.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">coact.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complete.html">coact.complete</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emit.html">coact.emit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">coact.integration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#coact.integration.IntegrationSource"><code class="docutils literal notranslate"><span class="pre">IntegrationSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.integration.IntegrationSpec"><code class="docutils literal notranslate"><span class="pre">IntegrationSpec</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coact.integration.IntegrationSpec.is_empty"><code class="docutils literal notranslate"><span class="pre">IntegrationSpec.is_empty()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.integration.integration_spec_from"><code class="docutils literal notranslate"><span class="pre">integration_spec_from()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="llm.html">coact.llm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="policy.html">coact.policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publish.html">coact.publish</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publish_mcpb.html">coact.publish_mcpb</a></li>
+<li class="toctree-l1"><a class="reference internal" href="realize.html">coact.realize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="realize_crewai.html">coact.realize_crewai</a></li>
+<li class="toctree-l1"><a class="reference internal" href="realize_langgraph.html">coact.realize_langgraph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema.html">coact.schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stores.html">coact.stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="synthesis.html">coact.synthesis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">coact.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">coact</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">coact.integration</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/coact/integration.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-coact.integration">
+<span id="coact-integration"></span><h1>coact.integration<a class="headerlink" href="#module-coact.integration" title="Link to this heading"></a></h1>
+<p>IntegrationSpec — the target-neutral SSOT for a <em>published</em> integration.</p>
+<p>coact’s COMPLETE/REALIZE axes turn skills into agent definitions and run them.
+The <strong>PUBLISH</strong> axis (this module + <a class="reference internal" href="publish.html#module-coact.publish" title="coact.publish"><code class="xref py py-mod docutils literal notranslate"><span class="pre">coact.publish</span></code></a>) is orthogonal: it takes
+a <em>capability</em> — a set of Python tools given as <code class="docutils literal notranslate"><span class="pre">'module:function'</span></code> refs, live
+callables, or a skill’s <code class="docutils literal notranslate"><span class="pre">coact:</span> <span class="pre">mcp:</span></code> block — and ships it to a chatbot host as
+a deployable integration (a Claude Desktop <code class="docutils literal notranslate"><span class="pre">.mcpb</span></code> bundle today; remote
+connectors / skills / plugins / other hosts later).</p>
+<p>The spec is deliberately <strong>separate from</strong> <a class="reference internal" href="base.html#coact.base.AgentDefinition" title="coact.base.AgentDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">AgentDefinition</span></code></a>
+(which is agent-persona-centric): an integration is MCP-server-shaped
+(tools/resources/prompts + auth + deployment), per the chatbot-integration
+landscape research (<code class="docutils literal notranslate"><span class="pre">misc/docs/CHATBOT_INTEGRATION_LANDSCAPE.md</span></code>). The canonical
+artifact is an MCP server, built by <code class="docutils literal notranslate"><span class="pre">py2mcp</span></code> — coact owns the spec, the
+packaging, and the target registry, <strong>not</strong> the MCP plumbing (mirrors the <code class="docutils literal notranslate"><span class="pre">mcp</span></code>
+realize backend, DECISIONS §6.1.3 / D17).</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="coact.integration.IntegrationSource">
+<span class="sig-prename descclassname"><span class="pre">coact.integration.</span></span><span class="sig-name descname"><span class="pre">IntegrationSource</span></span><a class="headerlink" href="#coact.integration.IntegrationSource" title="Link to this definition"></a></dt>
+<dd><p>a built spec, a <code class="docutils literal notranslate"><span class="pre">module:function</span></code>
+ref, a skill source (path/<code class="docutils literal notranslate"><span class="pre">Skill</span></code>), a live callable, or an iterable of those.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>What <a class="reference internal" href="#coact.integration.integration_spec_from" title="coact.integration.integration_spec_from"><code class="xref py py-func docutils literal notranslate"><span class="pre">integration_spec_from()</span></code></a> accepts</p>
+</dd>
+</dl>
+<p>alias of <a class="reference internal" href="#coact.integration.IntegrationSpec" title="coact.integration.IntegrationSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegrationSpec</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code>[[…], <code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code>] | <code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code>]</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coact.integration.IntegrationSpec">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">coact.integration.</span></span><span class="sig-name descname"><span class="pre">IntegrationSpec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'0.1.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tools</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resources</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deployment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'local-stdio'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">author</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/coact/integration.html#IntegrationSpec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.integration.IntegrationSpec" title="Link to this definition"></a></dt>
+<dd><p>Target-neutral description of an integration to publish.</p>
+<p>The connectivity core maps onto MCP’s three primitives. Only <code class="docutils literal notranslate"><span class="pre">tools</span></code> is
+consumed by the local-<code class="docutils literal notranslate"><span class="pre">.mcpb</span></code> target today; <code class="docutils literal notranslate"><span class="pre">resources</span></code>/<code class="docutils literal notranslate"><span class="pre">prompts</span></code> and
+the <code class="docutils literal notranslate"><span class="pre">auth</span></code>/<code class="docutils literal notranslate"><span class="pre">deployment</span></code> hints are declared now (open-closed) for the
+remote connector and other targets to come.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">spec</span> <span class="o">=</span> <span class="n">IntegrationSpec</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;paths&#39;</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;os.path:basename&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">tools</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">deployment</span>
+<span class="go">(&#39;paths&#39;, [&#39;os.path:basename&#39;], &#39;local-stdio&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">IntegrationSpec</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;empty&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="coact.integration.IntegrationSpec.is_empty">
+<span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/coact/integration.html#IntegrationSpec.is_empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.integration.IntegrationSpec.is_empty" title="Link to this definition"></a></dt>
+<dd><p>True when there is no connectivity to publish (no tools/resources/prompts).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.integration.integration_spec_from">
+<span class="sig-prename descclassname"><span class="pre">coact.integration.</span></span><span class="sig-name descname"><span class="pre">integration_spec_from</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coact.integration.IntegrationSpec" title="coact.integration.IntegrationSpec"><span class="pre">IntegrationSpec</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'0.1.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">author</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coact.integration.IntegrationSpec" title="coact.integration.IntegrationSpec"><span class="pre">IntegrationSpec</span></a></span></span><a class="reference internal" href="../../_modules/coact/integration.html#integration_spec_from"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.integration.integration_spec_from" title="Link to this definition"></a></dt>
+<dd><p>Coerce a capability source into an <a class="reference internal" href="#coact.integration.IntegrationSpec" title="coact.integration.IntegrationSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegrationSpec</span></code></a>.</p>
+<p>Accepts (and flattens lists of): a prebuilt <a class="reference internal" href="#coact.integration.IntegrationSpec" title="coact.integration.IntegrationSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegrationSpec</span></code></a>, a
+<code class="docutils literal notranslate"><span class="pre">'module:function'</span></code> ref string, a live callable (its
+<code class="docutils literal notranslate"><span class="pre">__module__:__qualname__</span></code> becomes the ref), or a skill source carrying a
+<code class="docutils literal notranslate"><span class="pre">coact:</span> <span class="pre">mcp:</span></code> block. The resulting <code class="docutils literal notranslate"><span class="pre">name</span></code> is kebab-cased so it is a safe,
+machine-readable bundle identifier.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">integration_spec_from</span><span class="p">([</span><span class="s1">&#39;os.path:basename&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;paths&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">tools</span>
+<span class="go">[&#39;os.path:basename&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">integration_spec_from</span><span class="p">(</span><span class="s1">&#39;os.path:basename&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;My Tools&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+<span class="go">&#39;my-tools&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="frontmatter.html" class="btn btn-neutral float-left" title="coact.frontmatter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="llm.html" class="btn btn-neutral float-right" title="coact.llm" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

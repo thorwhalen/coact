@@ -1,0 +1,188 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coact.publish_mcpb &mdash; coact 0.0.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8c5712d9"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="coact.realize" href="realize.html" />
+    <link rel="prev" title="coact.publish" href="publish.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            coact
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_pydantic_schema.html">coact._pydantic_schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">coact.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">coact.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complete.html">coact.complete</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emit.html">coact.emit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integration.html">coact.integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="llm.html">coact.llm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="policy.html">coact.policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publish.html">coact.publish</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">coact.publish_mcpb</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#coact.publish_mcpb.MCPB_MANIFEST_VERSION"><code class="docutils literal notranslate"><span class="pre">MCPB_MANIFEST_VERSION</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.publish_mcpb.SERVER_CONFIG_NAME"><code class="docutils literal notranslate"><span class="pre">SERVER_CONFIG_NAME</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.publish_mcpb.build_manifest"><code class="docutils literal notranslate"><span class="pre">build_manifest()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coact.publish_mcpb.publish_mcpb"><code class="docutils literal notranslate"><span class="pre">publish_mcpb()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="realize.html">coact.realize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="realize_crewai.html">coact.realize_crewai</a></li>
+<li class="toctree-l1"><a class="reference internal" href="realize_langgraph.html">coact.realize_langgraph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema.html">coact.schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stores.html">coact.stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="synthesis.html">coact.synthesis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">coact.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">coact</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">coact.publish_mcpb</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/coact/publish_mcpb.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-coact.publish_mcpb">
+<span id="coact-publish-mcpb"></span><h1>coact.publish_mcpb<a class="headerlink" href="#module-coact.publish_mcpb" title="Link to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">claude-local-mcpb</span></code> publish target — bundle a capability as a Claude Desktop
+Desktop Extension (<code class="docutils literal notranslate"><span class="pre">.mcpb</span></code>) for one-click <strong>local</strong> install.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">.mcpb</span></code> is a ZIP carrying a <code class="docutils literal notranslate"><span class="pre">manifest.json</span></code> + a small <code class="docutils literal notranslate"><span class="pre">server/</span></code> that runs
+a <strong>local stdio</strong> MCP server. We delegate the MCP server to <code class="docutils literal notranslate"><span class="pre">py2mcp</span></code> (which
+already builds a FastMCP server from <code class="docutils literal notranslate"><span class="pre">'module:function'</span></code> refs); the bundle’s
+manifest launches <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">server/main.py</span></code> → <code class="docutils literal notranslate"><span class="pre">py2mcp.serve</span></code> over stdio. coact
+writes no MCP plumbing — only the <em>packaging</em> (mirrors the <code class="docutils literal notranslate"><span class="pre">mcp</span></code> realize
+backend, DECISIONS §6.1.3 / D17).</p>
+<p>Scope (P1): the LOCAL surface — stdio, no OAuth, runs on the user’s machine. This
+is <strong>not</strong> a claude.ai remote <em>connector</em> (a remote MCP server reached from
+Anthropic’s cloud over HTTPS + OAuth — a separate target, later). See
+<code class="docutils literal notranslate"><span class="pre">misc/docs/CHATBOT_INTEGRATION_LANDSCAPE.md</span></code> §5.1/§5.4 &amp; §9.3.</p>
+<p>Building a bundle is pure stdlib (<code class="docutils literal notranslate"><span class="pre">json</span></code> + <code class="docutils literal notranslate"><span class="pre">zipfile</span></code>); <code class="docutils literal notranslate"><span class="pre">py2mcp</span></code>/<code class="docutils literal notranslate"><span class="pre">fastmcp</span></code>
+are needed only in the Python that <em>runs</em> the installed extension — so a missing
+runtime dep is reported as a warning, not a build error.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="coact.publish_mcpb.MCPB_MANIFEST_VERSION">
+<span class="sig-prename descclassname"><span class="pre">coact.publish_mcpb.</span></span><span class="sig-name descname"><span class="pre">MCPB_MANIFEST_VERSION</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.3'</span></span><a class="headerlink" href="#coact.publish_mcpb.MCPB_MANIFEST_VERSION" title="Link to this definition"></a></dt>
+<dd><p>MCPB manifest schema version emitted (modelcontextprotocol/mcpb; current 0.3).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="coact.publish_mcpb.SERVER_CONFIG_NAME">
+<span class="sig-prename descclassname"><span class="pre">coact.publish_mcpb.</span></span><span class="sig-name descname"><span class="pre">SERVER_CONFIG_NAME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'py2mcp_config.json'</span></span><a class="headerlink" href="#coact.publish_mcpb.SERVER_CONFIG_NAME" title="Link to this definition"></a></dt>
+<dd><p>Name of the bundled py2mcp server config, under <code class="docutils literal notranslate"><span class="pre">server/</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.publish_mcpb.build_manifest">
+<span class="sig-prename descclassname"><span class="pre">coact.publish_mcpb.</span></span><span class="sig-name descname"><span class="pre">build_manifest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#coact.integration.IntegrationSpec" title="coact.integration.IntegrationSpec"><span class="pre">IntegrationSpec</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">manifest_version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'0.3'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">python_command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'python'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/coact/publish_mcpb.html#build_manifest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.publish_mcpb.build_manifest" title="Link to this definition"></a></dt>
+<dd><p>Build the MCPB <code class="docutils literal notranslate"><span class="pre">manifest.json</span></code> dict and any build-time warnings.</p>
+<p>The server is a Python stdio server launched as <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">server/main.py</span></code>;
+<code class="docutils literal notranslate"><span class="pre">${__dirname}</span></code> is resolved by Claude Desktop to the extracted bundle dir.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.publish_mcpb.publish_mcpb">
+<span class="sig-prename descclassname"><span class="pre">coact.publish_mcpb.</span></span><span class="sig-name descname"><span class="pre">publish_mcpb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#coact.integration.IntegrationSpec" title="coact.integration.IntegrationSpec"><span class="pre">IntegrationSpec</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">author</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'0.1.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">python_command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'python'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">manifest_version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'0.3'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="publish.html#coact.publish.PublishResult" title="coact.publish.PublishResult"><span class="pre">PublishResult</span></a></span></span><a class="reference internal" href="../../_modules/coact/publish_mcpb.html#publish_mcpb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.publish_mcpb.publish_mcpb" title="Link to this definition"></a></dt>
+<dd><p>Bundle <code class="docutils literal notranslate"><span class="pre">source</span></code> into a Claude Desktop <code class="docutils literal notranslate"><span class="pre">.mcpb</span></code> extension.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">publish_mcpb</span><span class="p">([</span><span class="s1">&#39;os.path:basename&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;paths&#39;</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">dry_run</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">artifact</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">files</span><span class="p">)</span>
+<span class="go">(True, None, [&#39;manifest.json&#39;, &#39;server/main.py&#39;, &#39;server/py2mcp_config.json&#39;])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="publish.html" class="btn btn-neutral float-left" title="coact.publish" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="realize.html" class="btn btn-neutral float-right" title="coact.realize" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

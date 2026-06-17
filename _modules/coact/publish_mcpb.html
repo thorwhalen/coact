@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coact.publish_mcpb &mdash; coact 0.0.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8c5712d9"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            coact
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact.html">coact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/__main__.html">coact.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/_pydantic_schema.html">coact._pydantic_schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/analysis.html">coact.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/base.html">coact.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/complete.html">coact.complete</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/emit.html">coact.emit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/frontmatter.html">coact.frontmatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/integration.html">coact.integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/llm.html">coact.llm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/policy.html">coact.policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/publish.html">coact.publish</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/publish_mcpb.html">coact.publish_mcpb</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize.html">coact.realize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_crewai.html">coact.realize_crewai</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_langgraph.html">coact.realize_langgraph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/realize_litellm.html">coact.realize_litellm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/return_contract.html">coact.return_contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/scaffold.html">coact.scaffold</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/schema.html">coact.schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/stores.html">coact.stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/synthesis.html">coact.synthesis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/coact/util.html">coact.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">coact</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">coact.publish_mcpb</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for coact.publish_mcpb</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;``claude-local-mcpb`` publish target — bundle a capability as a Claude Desktop</span>
+<span class="sd">Desktop Extension (``.mcpb``) for one-click **local** install.</span>
+
+<span class="sd">A ``.mcpb`` is a ZIP carrying a ``manifest.json`` + a small ``server/`` that runs</span>
+<span class="sd">a **local stdio** MCP server. We delegate the MCP server to ``py2mcp`` (which</span>
+<span class="sd">already builds a FastMCP server from ``&#39;module:function&#39;`` refs); the bundle&#39;s</span>
+<span class="sd">manifest launches ``python server/main.py`` → ``py2mcp.serve`` over stdio. coact</span>
+<span class="sd">writes no MCP plumbing — only the *packaging* (mirrors the ``mcp`` realize</span>
+<span class="sd">backend, DECISIONS §6.1.3 / D17).</span>
+
+<span class="sd">Scope (P1): the LOCAL surface — stdio, no OAuth, runs on the user&#39;s machine. This</span>
+<span class="sd">is **not** a claude.ai remote *connector* (a remote MCP server reached from</span>
+<span class="sd">Anthropic&#39;s cloud over HTTPS + OAuth — a separate target, later). See</span>
+<span class="sd">``misc/docs/CHATBOT_INTEGRATION_LANDSCAPE.md`` §5.1/§5.4 &amp; §9.3.</span>
+
+<span class="sd">Building a bundle is pure stdlib (``json`` + ``zipfile``); ``py2mcp``/``fastmcp``</span>
+<span class="sd">are needed only in the Python that *runs* the installed extension — so a missing</span>
+<span class="sd">runtime dep is reported as a warning, not a build error.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zipfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_spec</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.integration</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationSource</span><span class="p">,</span> <span class="n">IntegrationSpec</span><span class="p">,</span> <span class="n">integration_spec_from</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.publish</span><span class="w"> </span><span class="kn">import</span> <span class="n">PublishResult</span><span class="p">,</span> <span class="n">targets</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coact.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_object</span><span class="p">,</span> <span class="n">safe_filename</span>
+
+<span class="c1">#: MCPB manifest schema version emitted (modelcontextprotocol/mcpb; current 0.3).</span>
+<span class="n">MCPB_MANIFEST_VERSION</span> <span class="o">=</span> <span class="s2">&quot;0.3&quot;</span>
+<span class="c1">#: Name of the bundled py2mcp server config, under ``server/``.</span>
+<span class="n">SERVER_CONFIG_NAME</span> <span class="o">=</span> <span class="s2">&quot;py2mcp_config.json&quot;</span>
+
+<span class="c1">#: The generated ``server/main.py`` shim (launches py2mcp&#39;s stdio runner).</span>
+<span class="n">_SERVER_MAIN</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span><span class="se">\</span>
+<span class="s1">&quot;&quot;&quot;Entry point for a coact-generated Claude Desktop (.mcpb) extension.</span>
+
+<span class="s1">Runs a py2mcp MCP server over stdio from the bundled config. Requires `py2mcp`</span>
+<span class="s1">(and `fastmcp`) to be importable by the Python that Claude Desktop launches.</span>
+<span class="s1">&quot;&quot;&quot;</span>
+<span class="s1">import os</span>
+
+<span class="s1">from py2mcp.serve import main</span>
+
+<span class="s1">if __name__ == &quot;__main__&quot;:</span>
+<span class="s1">    config = os.path.join(os.path.dirname(__file__), &quot;</span><span class="si">{config_name}</span><span class="s1">&quot;)</span>
+<span class="s1">    main([&quot;--config&quot;, config])</span>
+<span class="s1">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">config_name</span><span class="o">=</span><span class="n">SERVER_CONFIG_NAME</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="publish_mcpb">
+<a class="viewcode-back" href="../../module_docs/coact/publish_mcpb.html#coact.publish_mcpb">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">publish_mcpb</span><span class="p">(</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">IntegrationSource</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">dest</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">author</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0.1.0&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">python_command</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;python&quot;</span><span class="p">,</span>
+    <span class="n">manifest_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">MCPB_MANIFEST_VERSION</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PublishResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bundle ``source`` into a Claude Desktop ``.mcpb`` extension.</span>
+
+<span class="sd">    &gt;&gt;&gt; res = publish_mcpb([&#39;os.path:basename&#39;], name=&#39;paths&#39;, dry_run=True)</span>
+<span class="sd">    &gt;&gt;&gt; res.dry_run, res.artifact, sorted(res.files)</span>
+<span class="sd">    (True, None, [&#39;manifest.json&#39;, &#39;server/main.py&#39;, &#39;server/py2mcp_config.json&#39;])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">integration_spec_from</span><span class="p">(</span>
+        <span class="n">source</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="n">author</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">description</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;nothing to publish: the IntegrationSpec carries no tools.&quot;</span><span class="p">)</span>
+
+    <span class="n">manifest</span><span class="p">,</span> <span class="n">warnings</span> <span class="o">=</span> <span class="n">build_manifest</span><span class="p">(</span>
+        <span class="n">spec</span><span class="p">,</span> <span class="n">manifest_version</span><span class="o">=</span><span class="n">manifest_version</span><span class="p">,</span> <span class="n">python_command</span><span class="o">=</span><span class="n">python_command</span>
+    <span class="p">)</span>
+    <span class="n">server_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;refs&quot;</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">tools</span><span class="p">}</span>
+    <span class="n">members</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;manifest.json&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+        <span class="s2">&quot;server/main.py&quot;</span><span class="p">:</span> <span class="n">_SERVER_MAIN</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;server/</span><span class="si">{</span><span class="n">SERVER_CONFIG_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">server_config</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="n">bundle_name</span> <span class="o">=</span> <span class="n">safe_filename</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.mcpb&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;integration name&quot;</span><span class="p">)</span>
+    <span class="n">instructions</span> <span class="o">=</span> <span class="n">_install_instructions</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">bundle_name</span><span class="p">)</span>
+    <span class="n">previews</span> <span class="o">=</span> <span class="p">{</span><span class="n">rel</span><span class="p">:</span> <span class="n">_preview</span><span class="p">(</span><span class="n">content</span><span class="p">)</span> <span class="k">for</span> <span class="n">rel</span><span class="p">,</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">members</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">PublishResult</span><span class="p">(</span>
+            <span class="n">target</span><span class="o">=</span><span class="s2">&quot;claude-local-mcpb&quot;</span><span class="p">,</span>
+            <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">files</span><span class="o">=</span><span class="n">previews</span><span class="p">,</span>
+            <span class="n">instructions</span><span class="o">=</span><span class="n">instructions</span><span class="p">,</span>
+            <span class="n">warnings</span><span class="o">=</span><span class="n">warnings</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">dest_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span> <span class="k">if</span> <span class="n">dest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+    <span class="n">dest_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">artifact</span> <span class="o">=</span> <span class="n">dest_dir</span> <span class="o">/</span> <span class="n">bundle_name</span>
+    <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">artifact</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZIP_DEFLATED</span><span class="p">)</span> <span class="k">as</span> <span class="n">zf</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">rel</span><span class="p">,</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">members</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">zf</span><span class="o">.</span><span class="n">writestr</span><span class="p">(</span><span class="n">rel</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">PublishResult</span><span class="p">(</span>
+        <span class="n">target</span><span class="o">=</span><span class="s2">&quot;claude-local-mcpb&quot;</span><span class="p">,</span>
+        <span class="n">dry_run</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">artifact</span><span class="o">=</span><span class="n">artifact</span><span class="p">,</span>
+        <span class="n">files</span><span class="o">=</span><span class="n">previews</span><span class="p">,</span>
+        <span class="n">instructions</span><span class="o">=</span><span class="n">instructions</span><span class="p">,</span>
+        <span class="n">warnings</span><span class="o">=</span><span class="n">warnings</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="build_manifest">
+<a class="viewcode-back" href="../../module_docs/coact/publish_mcpb.html#coact.build_manifest">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_manifest</span><span class="p">(</span>
+    <span class="n">spec</span><span class="p">:</span> <span class="n">IntegrationSpec</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">manifest_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">MCPB_MANIFEST_VERSION</span><span class="p">,</span>
+    <span class="n">python_command</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;python&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build the MCPB ``manifest.json`` dict and any build-time warnings.</span>
+
+<span class="sd">    The server is a Python stdio server launched as ``python server/main.py``;</span>
+<span class="sd">    ``${__dirname}`` is resolved by Claude Desktop to the extracted bundle dir.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tools</span><span class="p">,</span> <span class="n">warnings</span> <span class="o">=</span> <span class="n">_introspect_tools</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;py2mcp&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;py2mcp is not importable here; the bundle needs `py2mcp` and &quot;</span>
+            <span class="s2">&quot;`fastmcp` installed in the Python that Claude Desktop runs.&quot;</span>
+        <span class="p">)</span>
+    <span class="n">tool_names</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;(none)&quot;</span>
+    <span class="n">manifest</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;manifest_version&quot;</span><span class="p">:</span> <span class="n">manifest_version</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> — MCP tools: </span><span class="si">{</span><span class="n">tool_names</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">author</span> <span class="ow">or</span> <span class="s2">&quot;unknown&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;server&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;python&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;entry_point&quot;</span><span class="p">:</span> <span class="s2">&quot;server/main.py&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mcp_config&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="n">python_command</span><span class="p">,</span>
+                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;$</span><span class="si">{__dirname}</span><span class="s2">/server/main.py&quot;</span><span class="p">],</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">tools</span><span class="p">:</span>
+        <span class="n">manifest</span><span class="p">[</span><span class="s2">&quot;tools&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tools</span>
+    <span class="k">return</span> <span class="n">manifest</span><span class="p">,</span> <span class="n">warnings</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_introspect_tools</span><span class="p">(</span><span class="n">refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Best-effort ``[{name, description}]`` per ref; importing is never fatal.&quot;&quot;&quot;</span>
+    <span class="n">tools</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">warnings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">refs</span><span class="p">:</span>
+        <span class="n">tool_name</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">import_object</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__doc__&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">description</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">doc</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - any import failure is non-fatal here</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;could not import </span><span class="si">{</span><span class="n">ref</span><span class="si">!r}</span><span class="s2"> to read its docstring &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">); listed by name only&quot;</span>
+            <span class="p">)</span>
+        <span class="n">tools</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tool_name</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">})</span>
+    <span class="n">duplicates</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">duplicates</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;duplicate tool name(s) &quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">duplicates</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">&quot;: only the last wins at runtime — rename or namespace the colliding functions.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">tools</span><span class="p">,</span> <span class="n">warnings</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_install_instructions</span><span class="p">(</span><span class="n">spec</span><span class="p">:</span> <span class="n">IntegrationSpec</span><span class="p">,</span> <span class="n">bundle_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Human next-steps for installing the produced bundle.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Install </span><span class="si">{</span><span class="n">bundle_name</span><span class="si">!r}</span><span class="s2">: open Claude Desktop → Settings → Extensions → &quot;</span>
+        <span class="s2">&quot;Install Extension… (or double-click the file).</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;This is a LOCAL extension (stdio) — it runs on this machine and needs a &quot;</span>
+        <span class="s2">&quot;Python with `py2mcp` + `fastmcp` importable. It is NOT a claude.ai remote &quot;</span>
+        <span class="s2">&quot;connector (those are remote MCP servers over HTTPS + OAuth — a separate &quot;</span>
+        <span class="s2">&quot;publish target).&quot;</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_preview</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A one-line, length-bounded preview of a bundle member&#39;s content.&quot;&quot;&quot;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">content</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="nb">repr</span><span class="p">(</span><span class="n">content</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">text</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">limit</span> <span class="k">else</span> <span class="n">text</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;…&quot;</span>
+
+
+<span class="n">targets</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;claude-local-mcpb&quot;</span><span class="p">,</span> <span class="n">publish_mcpb</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
