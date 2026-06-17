@@ -72,6 +72,7 @@ from coact.integration import IntegrationSpec, ToolSpec, integration_spec_from
 from coact.nl_ingress import integration_spec_from_description
 from coact.publish import PublishResult, publish, publish_targets
 from coact.publish_mcpb import publish_mcpb  # registers 'claude-local-mcpb'
+from coact.publish_remote import publish_remote  # registers 'claude-remote-connector'
 from coact.scaffold import scaffold_fleet
 from coact.stores import AgentStore, agents_dir
 from coact.synthesis import synthesize_persona, synthesize_return_contract
@@ -133,6 +134,7 @@ __all__ = [
     "publish_targets",
     "PublishResult",
     "publish_mcpb",
+    "publish_remote",  # remote claude.ai connector (Streamable-HTTP + OAuth 2.1; D19)
     # Scaffold (the one topology-adjacent emitter — a starter you own; D8)
     "scaffold_fleet",
     # Synthesis & LLM facade

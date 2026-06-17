@@ -496,3 +496,61 @@ landscape doc §9.2 — a **natural-language description** → a *draft*
   (resources/prompts only) in its message. The manifest keeps the bound function's
   own name/docstring (what `py2mcp` actually serves — no manifest↔runtime desync); a
   curated ToolSpec description only *fills an empty* one.
+
+## D19 — PUBLISH: the remote claude.ai connector (Streamable-HTTP + OAuth 2.1)
+
+`claude-local-mcpb` (D17) is the **local** surface — stdio, no OAuth, on the
+user's machine. A claude.ai **custom connector** is the **remote** surface: a
+public Streamable-HTTP MCP server reached from Anthropic's cloud (even on Desktop)
+over HTTPS + OAuth 2.1. It is a *second target* (`claude-remote-connector`,
+`coact/publish_remote.py`), never a flag on the local one — the local/remote split
+is load-bearing (landscape §9.3). Decisions:
+
+- **The artifact is a deployment *scaffold*, not one file.** A remote connector is
+  a hosted service, so the target writes a small project (a `server/app.py` ASGI
+  entry, a `connector_config.json`, `requirements.txt`, a `DEPLOY.md` guide, an
+  optional `Dockerfile`) you host — coact "writes the design, you own the deploy"
+  (D8/D13), exactly as the `.mcpb` packs a bundle you install.
+
+- **coact writes packaging; py2mcp builds + serves the MCP server (D17 again).**
+  The Streamable-HTTP transport + OAuth 2.1 wiring is **py2mcp's**
+  (`py2mcp.http.mk_http_app` / `serve_http`, added upstream — first customer this
+  target), which wraps FastMCP's native machinery. So building the scaffold is
+  **pure stdlib** (`json`); `py2mcp`/`fastmcp`/`uvicorn` are needed only where the
+  service *runs*, and a missing one is a **warning**, not a build error — the same
+  posture as `.mcpb`. (aw_agents was the original hosting candidate but has no
+  HTTP/OAuth; py2mcp+FastMCP is the right substrate, so the plan moved there.)
+
+- **Resource-server OAuth, by construction (landscape §4.4/§8.5).** The emitted
+  `auth` block is `type: jwt`: the server is an OAuth 2.1 **resource server** that
+  *validates* a managed IdP's JWTs (`JWTVerifier` → `RemoteAuthProvider`) — it is
+  **never an authorization server** ("never roll your own AS"), tokens are
+  **audience-bound** (RFC 8707; a token for another service can't be replayed), it
+  publishes RFC 9728 protected-resource metadata, and it **never forwards** the
+  inbound token upstream (no confused-deputy). `DEPLOY.md` states the rules; the
+  config is generated to honor them.
+
+- **No silent unauthenticated config.** A remote connector MUST require OAuth, so
+  when the IdP / connector URL aren't supplied the scaffold emits clearly-marked
+  **placeholders + a loud warning** (never a working-but-open config). `IntegrationSpec`
+  carries `auth='oauth2.1'` / `deployment='remote-http'` (the slots reserved at D17
+  go live). Same draft/empty guards as `.mcpb` (no scaffold for a handler-less draft).
+
+- **Packaging.** `coact/publish_remote.py` (self-registers `claude-remote-connector`);
+  exports `publish_remote`; CLI `coact publish … --target claude-remote-connector
+  [--connector-url … --idp-issuer …]`; reuses `coact[mcpb]` runtime deps (+ uvicorn
+  via the scaffold's `requirements.txt`). Offline tests assert the emitted files; a
+  dev-only test execs the generated `app.py` to prove it builds a real authed ASGI
+  app. The py2mcp HTTP layer has its own upstream test + PR.
+
+- **Review hardening (adversarial security pass, 8 confirmed / 8 refuted).** Two
+  HIGH: (1) the CLI `--connector-url`/`--idp-issuer` forwarded unconditionally and
+  crashed the default `.mcpb` target with a raw `TypeError` — now they are rejected
+  with a clear error unless `--target claude-remote-connector`; (2) **upstream
+  security fix in py2mcp**: `JWTVerifier` *skips* audience validation when `audience`
+  is `None`, so `mk_auth_provider` now **requires** `audience` (RFC 8707 is
+  mandatory — fail-closed, not fail-open). Plus: the tools-less-spec guard message is
+  distinguished from the design-draft one (as in `.mcpb`); the scaffold's py2mcp pin
+  is `>=0.1.5` (the release that actually ships `py2mcp.http`); CLI routing,
+  `py2mcp`-absent warning, placeholder audience-binding, and preview truncation are
+  now tested.

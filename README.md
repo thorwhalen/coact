@@ -104,11 +104,27 @@ publish(["mypkg.tools:summarize", "mypkg.tools:translate"],
 
 Sources can be `module:function` refs, live callables, or a skill carrying a
 `coact: mcp:` block. `dry_run=True` (or `--dry-run`) previews the bundle without
-writing it. This is the **local** surface (stdio, no OAuth); remote claude.ai
-*connectors* (HTTPS + OAuth), Claude Code plugins, ChatGPT Apps, and Gemini are
-planned targets on the same open-closed registry. Background:
+writing it. This is the **local** surface (stdio, no OAuth). Install: `pip install coact[mcpb]`.
+
+For the **remote** surface — a claude.ai *custom connector* (a hosted
+Streamable-HTTP MCP server reached from Anthropic's cloud over HTTPS + OAuth 2.1) —
+use the `claude-remote-connector` target, which scaffolds a deployable service:
+
+```python
+from coact import publish_remote
+publish_remote(["mypkg.tools:summarize"], name="my-conn", dest="out",
+               connector_url="https://my-conn.example.com",   # this server's public URL
+               idp_issuer="https://my-idp.example.com")        # your managed IdP
+# → out/my-conn-connector/  (server/app.py + connector_config.json + DEPLOY.md + …)
+```
+
+The scaffold is an OAuth 2.1 **resource server** (validates a managed IdP's
+audience-bound JWTs; never issues tokens) built by
+[`py2mcp`](https://github.com/i2mint/py2mcp)'s `http.mk_http_app`; coact writes the
+deploy packaging, py2mcp/FastMCP serves the MCP. Follow the generated `DEPLOY.md`.
+Claude Code plugins, ChatGPT Apps, and Gemini are further planned targets on the
+same open-closed registry. Background:
 [`misc/docs/CHATBOT_INTEGRATION_LANDSCAPE.md`](misc/docs/CHATBOT_INTEGRATION_LANDSCAPE.md).
-Install: `pip install coact[mcpb]`.
 
 There are two ways to get an `IntegrationSpec`. The **mechanical** ingress above
 (refs / callables / skills) uses **no LLM**. The **opt-in** ingress refines a

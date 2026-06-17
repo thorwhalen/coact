@@ -147,15 +147,30 @@ def publish(
     name: str | None = None,
     author: str | None = None,
     dry_run: bool = False,
+    connector_url: str | None = None,
+    idp_issuer: str | None = None,
 ) -> str:
     """Publish a capability to a chatbot host (default: a local Claude Desktop .mcpb bundle).
 
-    ``--dry-run`` previews the bundle members (manifest + server) without writing
-    the ``.mcpb``.
+    ``--target claude-remote-connector`` instead scaffolds a REMOTE connector
+    (Streamable-HTTP MCP server + OAuth 2.1); ``--connector-url`` (its public URL)
+    and ``--idp-issuer`` (your managed identity provider) configure OAuth — omit
+    them to scaffold with fill-in placeholders. ``--dry-run`` previews without writing.
     """
     src = source if len(source) > 1 else source[0]
+    extra: dict = {}
+    if connector_url is not None or idp_issuer is not None:
+        if target != "claude-remote-connector":
+            raise SystemExit(
+                "--connector-url/--idp-issuer apply only to "
+                f"--target claude-remote-connector, not {target!r}."
+            )
+        if connector_url is not None:
+            extra["connector_url"] = connector_url
+        if idp_issuer is not None:
+            extra["idp_issuer"] = idp_issuer
     res = _publish(
-        src, target=target, dest=dest, name=name, author=author, dry_run=dry_run
+        src, target=target, dest=dest, name=name, author=author, dry_run=dry_run, **extra
     )
     return res.render()
 
