@@ -77,10 +77,21 @@ def publish_mcpb(
     if spec.is_empty():
         raise ValueError("nothing to publish: the IntegrationSpec carries no tools.")
 
+    runnable_refs = spec.runnable_refs()
+    if not runnable_refs:
+        proposed = ", ".join(ts.name for ts in spec.tool_specs) or "(none)"
+        raise ValueError(
+            f"This IntegrationSpec is a design draft: {len(spec.tool_specs)} "
+            f"proposed tool(s) [{proposed}], none bound to an importable "
+            "'module:function' handler. Bind handlers (or pass module:function "
+            "refs) before building a runnable .mcpb — the draft is still usable as "
+            "a design artifact (see `coact describe`)."
+        )
+
     manifest, warnings = build_manifest(
         spec, manifest_version=manifest_version, python_command=python_command
     )
-    server_config = {"name": spec.name, "refs": spec.tools}
+    server_config = {"name": spec.name, "refs": runnable_refs}
     members = {
         "manifest.json": json.dumps(manifest, indent=2),
         "server/main.py": _SERVER_MAIN,
@@ -126,8 +137,28 @@ def build_manifest(
 
     The server is a Python stdio server launched as ``python server/main.py``;
     ``${__dirname}`` is resolved by Claude Desktop to the extracted bundle dir.
+
+    Tool metadata is introspected from every *runnable* ref (``module:function``
+    in ``tools`` plus bound ToolSpec handlers); any *proposed* (unbound) ToolSpec
+    is listed by name/description for design visibility, with a warning that it
+    will not run until bound.
     """
-    tools, warnings = _introspect_tools(spec.tools)
+    tools, warnings = _introspect_tools(spec.runnable_refs())
+    seen = {t["name"] for t in tools}
+    unbound: list[str] = []
+    for ts in spec.tool_specs:
+        if ts.handler:
+            continue  # already covered via runnable_refs introspection
+        unbound.append(ts.name)
+        if ts.name not in seen:
+            tools.append({"name": ts.name, "description": ts.description})
+            seen.add(ts.name)
+    if unbound:
+        warnings.append(
+            f"{len(unbound)} proposed tool(s) have no handler "
+            f"({', '.join(unbound)}); listed in the manifest for design but they "
+            "will NOT run until bound to importable module:function handlers."
+        )
     if find_spec("py2mcp") is None:
         warnings.append(
             "py2mcp is not importable here; the bundle needs `py2mcp` and "

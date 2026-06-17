@@ -122,6 +122,34 @@ def test_cli_scaffold_prints_and_writes(tmp_path):
     assert "Wrote" in wrote and dest.exists()
 
 
+def test_cli_describe_renders_draft(monkeypatch):
+    import json
+
+    from coact import nl_ingress
+
+    reply = json.dumps(
+        {
+            "name": "wx",
+            "description": "weather",
+            "tools": [
+                {
+                    "name": "get_weather",
+                    "description": "lookup",
+                    "input_schema": {"type": "object", "properties": {}},
+                    "handler": None,
+                }
+            ],
+            "resources": [],
+            "prompts": [],
+        }
+    )
+    # default backend is aix.chat; stub it so the CLI verb runs offline
+    monkeypatch.setattr(nl_ingress, "_aix_chat", lambda: (lambda p, **k: reply))
+    out = cli.describe("a weather tool")
+    assert "IntegrationSpec: wx" in out
+    assert "get_weather" in out and "proposed" in out
+
+
 def test_main_wires_every_verb(monkeypatch):
     # main() registers exactly the documented verbs into argh.dispatch_commands.
     registered = {}
@@ -135,5 +163,5 @@ def test_main_wires_every_verb(monkeypatch):
     assert registered["callable"]
     assert set(registered["names"]) == {
         "plan", "complete", "emit", "realize",
-        "diff", "estimate", "inventory", "back", "scaffold", "publish",
+        "diff", "estimate", "inventory", "back", "scaffold", "publish", "describe",
     }

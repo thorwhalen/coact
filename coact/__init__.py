@@ -68,7 +68,8 @@ from coact.realize_crewai import (
     RunnableCrewAIAgent,
     realize_crewai,
 )  # registers 'crewai'
-from coact.integration import IntegrationSpec, integration_spec_from
+from coact.integration import IntegrationSpec, ToolSpec, integration_spec_from
+from coact.nl_ingress import integration_spec_from_description
 from coact.publish import PublishResult, publish, publish_targets
 from coact.publish_mcpb import publish_mcpb  # registers 'claude-local-mcpb'
 from coact.scaffold import scaffold_fleet
@@ -125,7 +126,9 @@ __all__ = [
     "realization_backends",
     # PUBLISH (ship a capability to a chatbot host; Claude-local .mcpb first; D17)
     "IntegrationSpec",
+    "ToolSpec",
     "integration_spec_from",
+    "integration_spec_from_description",  # opt-in LLM NL ingress (aix-backed; D18)
     "publish",
     "publish_targets",
     "PublishResult",

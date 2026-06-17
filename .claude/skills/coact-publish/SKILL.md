@@ -8,11 +8,13 @@ description: >-
   connector / plugin / MCP server / .mcpb / Desktop Extension / "integration"
   from existing Python code or a skill — e.g. "make an mcpb", "package these
   functions for Claude", "turn this into a Claude extension/connector", "publish
-  a local MCP server", "wrap my tools as a Claude Desktop extension". For REMOTE
-  claude.ai connectors (HTTPS + OAuth) this is the wrong target — that surface is
-  not built yet (see Limitations).
+  a local MCP server", "wrap my tools as a Claude Desktop extension". Also use to
+  draft an integration from a natural-language description ("describe an
+  integration", "I want a Claude connector that can…") via `coact describe`. For
+  REMOTE claude.ai connectors (HTTPS + OAuth) this is the wrong target — that
+  surface is not built yet (see Limitations).
 metadata:
-  version: 0.1.0
+  version: 0.2.0
 ---
 
 # coact publish — Python capability → Claude integration
@@ -47,6 +49,34 @@ coact publish my.package.module:my_func --name my-tools --dest ~/Downloads
 Sources accepted (mix freely): `module:function` refs, a skill directory /
 `SKILL.md` (its `coact: mcp:` block supplies the refs), or — from Python — live
 callables and a prebuilt `IntegrationSpec`.
+
+## From a natural-language description (opt-in LLM)
+
+To go from an English description to a *draft* integration (proposed tools with
+inferred input schemas), use `coact describe` — the **only** LLM-using path here
+(the `module:function` → `.mcpb` path stays LLM-free). Generation routes through
+`aix` (multi-provider) by default; `--llm` picks a model.
+
+```bash
+coact describe "a connector that looks up the weather for a city and converts currencies"
+# → renders a draft IntegrationSpec: proposed tools, each marked "proposed (no handler)"
+```
+
+```python
+from coact import integration_spec_from_description, publish
+
+spec = integration_spec_from_description(
+    "expose os.path.basename and os.path.dirname as tools", name="paths"
+)
+# tools the description bound to existing code become runnable refs:
+publish(spec, name="paths", dest="dist")   # works iff spec.runnable_refs()
+```
+
+The draft is a **design artifact**: tools are *proposed* (no importable handler)
+unless the description named existing code. **Bind** each proposed tool to a real
+`module:function` handler (write the code, or point at existing functions) before
+`publish` can build a runnable `.mcpb` — coact writes the design, you own the
+code. Needs `coact[nl]` (`oa`, `aix`), imported lazily only on this path.
 
 Python API:
 
