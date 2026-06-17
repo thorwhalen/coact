@@ -159,10 +159,16 @@ def publish(
     """
     src = source if len(source) > 1 else source[0]
     extra: dict = {}
-    if connector_url is not None:
-        extra["connector_url"] = connector_url
-    if idp_issuer is not None:
-        extra["idp_issuer"] = idp_issuer
+    if connector_url is not None or idp_issuer is not None:
+        if target != "claude-remote-connector":
+            raise SystemExit(
+                "--connector-url/--idp-issuer apply only to "
+                f"--target claude-remote-connector, not {target!r}."
+            )
+        if connector_url is not None:
+            extra["connector_url"] = connector_url
+        if idp_issuer is not None:
+            extra["idp_issuer"] = idp_issuer
     res = _publish(
         src, target=target, dest=dest, name=name, author=author, dry_run=dry_run, **extra
     )

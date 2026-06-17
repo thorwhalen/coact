@@ -15,7 +15,8 @@ from coact import (
     publish_remote,
     publish_targets,
 )
-from coact.publish_remote import SERVER_CONFIG_NAME
+from coact import __main__ as cli
+from coact.publish_remote import SERVER_CONFIG_NAME, _PLACEHOLDER_HOST
 
 _MEMBERS = {
     "DEPLOY.md",
@@ -95,6 +96,8 @@ def test_unconfigured_oauth_warns_and_uses_placeholders(tmp_path):
     assert any("OAuth is NOT fully configured" in w for w in res.warnings)
     auth = json.loads((res.artifact / "server" / SERVER_CONFIG_NAME).read_text())["auth"]
     assert "YOUR-IDP" in auth["issuer"]  # placeholder emitted, not a silent unauthenticated config
+    assert auth["base_url"] == _PLACEHOLDER_HOST
+    assert auth["audience"] == _PLACEHOLDER_HOST + "/mcp"  # still audience-bound (RFC 8707)
     assert auth["type"] == "jwt"
 
 
@@ -130,6 +133,12 @@ def test_empty_rejected():
         publish_remote(IntegrationSpec(name="empty"))
 
 
+def test_resources_only_rejected_with_clear_message():
+    # not a "0 proposed tool(s)" draft message — a tools-less spec gets its own
+    with pytest.raises(ValueError, match="serves tools only"):
+        publish_remote(IntegrationSpec(name="r", resources=["data1"]))
+
+
 def test_unsafe_name_rejected(tmp_path):
     with pytest.raises(ValueError):
         publish_remote(["os.path:basename"], name="../evil", dest=str(tmp_path))
@@ -143,6 +152,60 @@ def test_bound_draft_scaffolds(tmp_path):
     )
     cfg = json.loads((res.artifact / "server" / SERVER_CONFIG_NAME).read_text())
     assert cfg["refs"] == ["os.path:basename"]
+
+
+def test_py2mcp_missing_warns(tmp_path, monkeypatch):
+    """When py2mcp isn't importable, the scaffold warns (runtime dep, not a build dep)."""
+    import importlib
+
+    pr = importlib.import_module("coact.publish_remote")
+    monkeypatch.setattr(pr, "find_spec", lambda n: None)
+    res = pr.publish_remote(
+        ["os.path:basename"],
+        name="x",
+        dest=str(tmp_path),
+        connector_url="https://c.example.com",
+        idp_issuer="https://i.example.com",
+    )
+    assert any("py2mcp is not importable" in w for w in res.warnings)
+
+
+def test_dry_run_previews_are_bounded_one_liners(tmp_path):
+    res = publish(
+        ["os.path:basename"],
+        target="claude-remote-connector",
+        name="paths",
+        dest=str(tmp_path),
+        dry_run=True,
+    )
+    # long members are truncated to a bounded single-line preview
+    assert res.files["DEPLOY.md"].endswith("…")
+    assert len(res.files["DEPLOY.md"]) == 201  # 200 chars + the ellipsis
+    assert "\n" not in res.files["server/app.py"]
+    # short members pass through verbatim (no ellipsis)
+    assert not res.files["requirements.txt"].endswith("…")
+
+
+# --- CLI flag routing (the --connector-url/--idp-issuer guard) ---------------
+
+
+def test_cli_connector_flags_rejected_for_mcpb_target():
+    # the connector flags apply ONLY to the remote target — a clear error, not a TypeError
+    with pytest.raises(SystemExit, match="claude-remote-connector"):
+        cli.publish(["os.path:basename"], connector_url="https://x.example.com")
+
+
+def test_cli_remote_target_forwards_flags(tmp_path):
+    out = cli.publish(
+        ["os.path:basename"],
+        target="claude-remote-connector",
+        name="paths",
+        dest=str(tmp_path),
+        dry_run=True,
+        connector_url="https://c.example.com",
+        idp_issuer="https://i.example.com",
+    )
+    assert "Would publish" in out and "claude-remote-connector" in out
 
 
 def test_scaffolded_app_builds_real_authed_asgi_app(tmp_path):

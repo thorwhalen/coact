@@ -542,3 +542,15 @@ is load-bearing (landscape §9.3). Decisions:
   via the scaffold's `requirements.txt`). Offline tests assert the emitted files; a
   dev-only test execs the generated `app.py` to prove it builds a real authed ASGI
   app. The py2mcp HTTP layer has its own upstream test + PR.
+
+- **Review hardening (adversarial security pass, 8 confirmed / 8 refuted).** Two
+  HIGH: (1) the CLI `--connector-url`/`--idp-issuer` forwarded unconditionally and
+  crashed the default `.mcpb` target with a raw `TypeError` — now they are rejected
+  with a clear error unless `--target claude-remote-connector`; (2) **upstream
+  security fix in py2mcp**: `JWTVerifier` *skips* audience validation when `audience`
+  is `None`, so `mk_auth_provider` now **requires** `audience` (RFC 8707 is
+  mandatory — fail-closed, not fail-open). Plus: the tools-less-spec guard message is
+  distinguished from the design-draft one (as in `.mcpb`); the scaffold's py2mcp pin
+  is `>=0.1.5` (the release that actually ships `py2mcp.http`); CLI routing,
+  `py2mcp`-absent warning, placeholder audience-binding, and preview truncation are
+  now tested.

@@ -48,7 +48,7 @@ server). Run behind TLS, e.g.:
 
     uvicorn server.app:app --host 127.0.0.1 --port 8000
 
-Requires `py2mcp` (>=0.1.4), `fastmcp`, and an ASGI server (uvicorn) importable.
+Requires `py2mcp` (>=0.1.5), `fastmcp`, and an ASGI server (uvicorn) importable.
 """
 import json
 import os
@@ -72,7 +72,7 @@ app = mk_http_app(
 SERVER_CONFIG_NAME = "connector_config.json"
 _SERVER_APP = _SERVER_APP.format(config_name=SERVER_CONFIG_NAME)
 
-_REQUIREMENTS = "py2mcp>=0.1.4\nfastmcp>=3\nuvicorn[standard]>=0.27\n"
+_REQUIREMENTS = "py2mcp>=0.1.5\nfastmcp>=3\nuvicorn[standard]>=0.27\n"
 
 _DOCKERFILE = '''\
 FROM python:3.12-slim
@@ -127,12 +127,24 @@ def publish_remote(
 
     runnable_refs = spec.runnable_refs()
     if not runnable_refs:
-        proposed = ", ".join(ts.name for ts in spec.tool_specs) or "(none)"
+        if spec.tool_specs:  # proposed tools exist, none bound -> a design draft
+            proposed = ", ".join(ts.name for ts in spec.tool_specs)
+            raise ValueError(
+                f"This IntegrationSpec is a design draft: {len(spec.tool_specs)} "
+                f"proposed tool(s) [{proposed}], none bound to an importable "
+                "'module:function' handler. Bind handlers (or pass refs) before "
+                "scaffolding a runnable remote connector (see `coact describe`)."
+            )
+        declared = []
+        if spec.resources:
+            declared.append(f"{len(spec.resources)} resource(s)")
+        if spec.prompts:
+            declared.append(f"{len(spec.prompts)} prompt(s)")
         raise ValueError(
-            f"This IntegrationSpec is a design draft: {len(spec.tool_specs)} "
-            f"proposed tool(s) [{proposed}], none bound to an importable "
-            "'module:function' handler. Bind handlers (or pass refs) before "
-            "scaffolding a runnable remote connector (see `coact describe`)."
+            "nothing to scaffold a remote connector from: this IntegrationSpec "
+            "declares " + (", ".join(declared) or "no tools") + " but no tools. The "
+            "claude-remote-connector target serves tools only — add 'module:function' "
+            "tool refs (or bound ToolSpecs)."
         )
 
     auth, auth_warnings = _build_auth(
@@ -164,7 +176,7 @@ def publish_remote(
     if find_spec("py2mcp") is None:
         warnings.append(
             "py2mcp is not importable here; the deployed service needs `py2mcp` "
-            ">=0.1.4, `fastmcp`, and `uvicorn` installed where it runs."
+            ">=0.1.5, `fastmcp`, and `uvicorn` installed where it runs."
         )
 
     dir_name = safe_filename(spec.name, suffix="-connector", kind="integration name")
