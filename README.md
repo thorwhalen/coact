@@ -250,3 +250,37 @@ crew_step  = realize(agent, backend="crewai")       # crew_step.agent is a crewa
   is installed) and realization backends — register your own without touching core.
 - Decisions are recorded in [`misc/docs/DECISIONS.md`](misc/docs/DECISIONS.md);
   the build brief is [`misc/docs/COACT_SPEC.md`](misc/docs/COACT_SPEC.md).
+
+## Skills
+
+This package ships agent skills you can install into any agent host with
+[`gh skill`](https://cli.github.com/manual/gh_skill) (don't have it?
+[install gh](https://cli.github.com/)):
+
+```bash
+gh skill install thorwhalen/coact coact --agent claude-code
+gh skill install thorwhalen/coact coact-complete --agent claude-code
+gh skill install thorwhalen/coact coact-realize --agent claude-code
+gh skill install thorwhalen/coact coact-analyze --agent claude-code
+gh skill install thorwhalen/coact coact-publish --agent claude-code
+gh skill install thorwhalen/coact coact-dev --agent claude-code
+gh skill install thorwhalen/coact ai-assistant-architect --agent claude-code
+gh skill install thorwhalen/coact ai-assistant-chat-ui --agent claude-code
+gh skill install thorwhalen/coact ai-assistant-prompts-skills --agent claude-code
+gh skill install thorwhalen/coact ai-assistant-command-mcp --agent claude-code
+gh skill install thorwhalen/coact ai-assistant-agent-runtime --agent claude-code
+```
+
+| Skill | Use it when… |
+|-------|--------------|
+| `coact` | starting with coact — routing to the right capability (turn skills into agents, reuse AI assets across the stack) |
+| `coact-complete` | turning a `.claude/skills/` skill into a `.claude/agents/` agent definition (COMPLETE) |
+| `coact-realize` | turning an agent definition (or skill) into something that runs — host / Agent SDK / LiteLLM / LangGraph / CrewAI / MCP backends (REALIZE) |
+| `coact-analyze` | inspecting or moving between skill/agent layers — diff, fleet cost estimate, inventory, or harvesting an agent back into a skill |
+| `coact-publish` | packaging a Python capability or skill into a Claude Desktop `.mcpb` extension or remote claude.ai connector |
+| `coact-dev` (developer) | developing, debugging, or extending the coact package itself — emit targets, realize backends, COMPLETE/REALIZE internals |
+| `ai-assistant-architect` | adding, auditing, or maintaining an embedded AI assistant (chat + agentic) in your own app — the entry point that routes to the focused sub-skills |
+| `ai-assistant-chat-ui` | building or auditing the chat UI / streaming / wire-protocol layer (React + Vite + shadcn, SSE, assistant-ui, Vercel AI SDK) |
+| `ai-assistant-prompts-skills` | managing system prompts, user-editable prompts, or Anthropic-style skills (prompt registry, versioning, evals) |
+| `ai-assistant-command-mcp` | exposing application operations to an assistant via tools / function-calling / MCP (command dispatch → MCP, approval flow, scoping) |
+| `ai-assistant-agent-runtime` | adding or refactoring the agent runtime — the multi-step tool-using loop, optionally with durable execution |
