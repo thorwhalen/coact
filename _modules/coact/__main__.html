@@ -123,7 +123,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">argh</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cw</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact</span><span class="w"> </span><span class="kn">import</span> <span class="n">complete</span> <span class="k">as</span> <span class="n">_complete</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact</span><span class="w"> </span><span class="kn">import</span> <span class="n">emit_agent</span> <span class="k">as</span> <span class="n">_emit</span>
@@ -234,7 +234,6 @@
 
 <div class="viewcode-block" id="inventory">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.inventory">[docs]</a>
-<span class="nd">@argh</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="s2">"project"</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">"?"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"."</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Project root (default: current dir)"</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">inventory</span><span class="p">(</span><span class="n">project</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Enumerate a project's skills, derived agents, and MCP-exposed tools."""</span>
     <span class="k">return</span> <span class="n">_inventory</span><span class="p">(</span><span class="n">project</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">()</span></div>
@@ -251,7 +250,6 @@
 
 <div class="viewcode-block" id="scaffold">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.scaffold">[docs]</a>
-<span class="nd">@argh</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="s2">"agents"</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">"+"</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Agent .md files / skill sources to wire"</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">scaffold</span><span class="p">(</span>
     <span class="n">agents</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">agents_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">".claude/agents"</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -265,9 +263,6 @@
 
 <div class="viewcode-block" id="publish">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.publish">[docs]</a>
-<span class="nd">@argh</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span>
-    <span class="s2">"source"</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">"+"</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Tool refs ('module:function'), a skill dir/SKILL.md, or both"</span>
-<span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">publish</span><span class="p">(</span>
     <span class="n">source</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -330,25 +325,46 @@
 
 
 
+<span class="c1">#: The verbs, in the order ``--help`` lists them.</span>
+<span class="n">COMMANDS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">plan</span><span class="p">,</span>
+    <span class="n">complete</span><span class="p">,</span>
+    <span class="n">emit</span><span class="p">,</span>
+    <span class="n">realize</span><span class="p">,</span>
+    <span class="n">diff</span><span class="p">,</span>
+    <span class="n">estimate</span><span class="p">,</span>
+    <span class="n">inventory</span><span class="p">,</span>
+    <span class="n">back</span><span class="p">,</span>
+    <span class="n">scaffold</span><span class="p">,</span>
+    <span class="n">publish</span><span class="p">,</span>
+    <span class="n">describe</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1">#: Per-parameter ``add_argument`` particulars the signatures cannot express.</span>
+<span class="c1">#: Keyed like ``COMMANDS``: command name, then parameter name.</span>
+<span class="n">CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"inventory"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"project"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">nargs</span><span class="o">=</span><span class="s2">"?"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"."</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Project root (default: current dir)"</span>
+        <span class="p">)</span>
+    <span class="p">},</span>
+    <span class="s2">"scaffold"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"agents"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">nargs</span><span class="o">=</span><span class="s2">"+"</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Agent .md files / skill sources to wire"</span><span class="p">)</span>
+    <span class="p">},</span>
+    <span class="s2">"publish"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"source"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">nargs</span><span class="o">=</span><span class="s2">"+"</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">"Tool refs ('module:function'), a skill dir/SKILL.md, or both"</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.main">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Dispatch the coact CLI."""</span>
-    <span class="n">argh</span><span class="o">.</span><span class="n">dispatch_commands</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="n">plan</span><span class="p">,</span>
-            <span class="n">complete</span><span class="p">,</span>
-            <span class="n">emit</span><span class="p">,</span>
-            <span class="n">realize</span><span class="p">,</span>
-            <span class="n">diff</span><span class="p">,</span>
-            <span class="n">estimate</span><span class="p">,</span>
-            <span class="n">inventory</span><span class="p">,</span>
-            <span class="n">back</span><span class="p">,</span>
-            <span class="n">scaffold</span><span class="p">,</span>
-            <span class="n">publish</span><span class="p">,</span>
-            <span class="n">describe</span><span class="p">,</span>
-        <span class="p">]</span>
-    <span class="p">)</span></div>
+    <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span><span class="n">cw</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="n">COMMANDS</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">CONFIG</span><span class="p">))</span></div>
 
 
 
