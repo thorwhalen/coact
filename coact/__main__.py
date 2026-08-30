@@ -23,7 +23,7 @@ toolkit. The verbs are ``plan``, ``complete``, ``emit``, ``realize``, ``diff``,
 
 from __future__ import annotations
 
-import argh
+import cw
 
 from coact import complete as _complete
 from coact import emit_agent as _emit
@@ -114,7 +114,6 @@ def estimate(*agents: str) -> str:
     return _estimate(list(agents)).render()
 
 
-@argh.arg("project", nargs="?", default=".", help="Project root (default: current dir)")
 def inventory(project: str) -> str:
     """Enumerate a project's skills, derived agents, and MCP-exposed tools."""
     return _inventory(project).render()
@@ -125,7 +124,6 @@ def back(agent: str) -> str:
     return _back(agent).to_string()
 
 
-@argh.arg("agents", nargs="+", help="Agent .md files / skill sources to wire")
 def scaffold(
     agents: list, *, dest: str | None = None, agents_dir: str = ".claude/agents"
 ) -> str:
@@ -136,9 +134,6 @@ def scaffold(
     return str(result)
 
 
-@argh.arg(
-    "source", nargs="+", help="Tool refs ('module:function'), a skill dir/SKILL.md, or both"
-)
 def publish(
     source: list,
     *,
@@ -197,23 +192,44 @@ def describe(
     return spec.render()
 
 
+#: The verbs, in the order ``--help`` lists them.
+COMMANDS = [
+    plan,
+    complete,
+    emit,
+    realize,
+    diff,
+    estimate,
+    inventory,
+    back,
+    scaffold,
+    publish,
+    describe,
+]
+
+#: Per-parameter ``add_argument`` particulars the signatures cannot express.
+#: Keyed like ``COMMANDS``: command name, then parameter name.
+CONFIG = {
+    "inventory": {
+        "project": dict(
+            nargs="?", default=".", help="Project root (default: current dir)"
+        )
+    },
+    "scaffold": {
+        "agents": dict(nargs="+", help="Agent .md files / skill sources to wire")
+    },
+    "publish": {
+        "source": dict(
+            nargs="+",
+            help="Tool refs ('module:function'), a skill dir/SKILL.md, or both",
+        )
+    },
+}
+
+
 def main() -> None:
     """Dispatch the coact CLI."""
-    argh.dispatch_commands(
-        [
-            plan,
-            complete,
-            emit,
-            realize,
-            diff,
-            estimate,
-            inventory,
-            back,
-            scaffold,
-            publish,
-            describe,
-        ]
-    )
+    raise SystemExit(cw.dispatch(COMMANDS, config=CONFIG))
 
 
 if __name__ == "__main__":

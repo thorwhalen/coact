@@ -184,7 +184,7 @@ Frontend build step (in `package.json`):
 "build:schemas": "json-schema-to-zod -i ../schemas/commands.json -o src/commands.gen.ts"
 ```
 
-## Emitter C: CLI (argparse / Click)
+## Emitter C: CLI (`cw` / argparse)
 
 Follow Thor's `python-package-architecture` skill conventions. The dispatch table is
 `{spec.id: spec.handler}` — the same registry every other emitter reads, so the CLI is a
@@ -215,14 +215,32 @@ def main(argv=None) -> None:
     print(json.dumps(handler(payload), default=str))
 ```
 
-**Do not use `argh`.** It is LGPL-3.0-or-later, and it is being removed across this fleet;
-new code uses stdlib `argparse` or Click. A house CLI adapter is being built to take this
-emitter's place — a third string-referenced adapter beside `py2mcp` (MCP) and `qh` (HTTP)
-over the same plain Python functions — and this section will name it and show its idiom
-once it ships.
+**Do not use `argh`.** It is LGPL-3.0-or-later and has been removed across this fleet.
 
-<!-- argh-migration stage 2: name the house CLI adapter here and replace the argparse
-     sample with its dispatch-table idiom. Marker string: argh-migration -->
+The house CLI adapter is **`cw`** (MIT, no dependencies) — the third string-referenced
+adapter beside `py2mcp` (MCP) and `qh` (HTTP) over the same plain Python functions. It reads
+the dispatch table directly, so the whole emitter above collapses to:
+
+```python
+# emitters/cli_emitter.py
+import cw
+from command_registry.core import registry
+
+COMMANDS = {
+    spec.id: spec.handler for spec in registry().values() if "cli" in spec.surfaces
+}
+
+def main() -> None:
+    raise SystemExit(cw.dispatch(COMMANDS, prog="app"))
+```
+
+`cw.dispatch` reads each handler's signature and docstring; `cw.mk_parser(COMMANDS)` returns
+the same thing as a plain `argparse.ArgumentParser` when you want to inspect or extend it.
+Per-parameter `add_argument` particulars that a signature cannot express go in a `config`
+dict shaped like `COMMANDS` — see `coact/__main__.py` for a worked example.
+
+`cw.dispatch` *returns* an exit code rather than exiting, so the `raise SystemExit(...)`
+above is load-bearing: drop it and every usage error exits 0.
 
 ## Emitter D: OpenAPI (FastAPI)
 

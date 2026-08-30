@@ -27,7 +27,7 @@ architecture. **Reused symbols:**
 | `ParsedKey`, `find_project_root`, `atomic_write` | `skill.util` | Key normalization, project-root detection, safe writes. |
 | `chat`, `is_ai_available` | `skill.ai` | Provider-agnostic LLM facade (aisuite→anthropic→openai, lazy, degrades gracefully). `coact.llm` wraps this as one option for the *optional* persona-synthesis path. |
 | `load_config`, `data_dir`, `skills_dir` | `skill.config` | platformdirs-based config; `coact.config` mirrors the pattern for policy defaults. |
-| argh `dispatch_commands` + `cli_format` pattern | `skill.__main__` | `coact.__main__` mirrors the dispatch-to-interface CLI shape so the two packages feel like one toolkit. |
+| `cw.dispatch` + `cli_format` pattern | `skill.__main__` | `coact.__main__` mirrors the dispatch-to-interface CLI shape so the two packages feel like one toolkit. |
 
 **`coact` does NOT build:** a skill parser, a skills store, a plugin-registry
 mechanism, a validation framework, a config system, a cross-agent installer,

@@ -138,7 +138,7 @@ def test_aw_emitters_registered_when_aw_present():
 
 
 # ---------------------------------------------------------------------------
-# CLI smoke (exercises argh dispatch end-to-end)
+# CLI smoke (exercises cw dispatch end-to-end)
 # ---------------------------------------------------------------------------
 
 

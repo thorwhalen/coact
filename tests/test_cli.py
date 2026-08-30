@@ -1,4 +1,4 @@
-"""Tests for the argh CLI verbs (``coact.__main__``).
+"""Tests for the CLI verbs (``coact.__main__``).
 
 The CLI wrappers format core results for the terminal; calling them directly
 (rather than via a subprocess) exercises ``__main__.py`` and keeps the suite fast
@@ -8,7 +8,9 @@ and offline. The sdk verb is gated on the optional SDK.
 from __future__ import annotations
 
 import importlib.util
+import io
 
+import cw
 import pytest
 
 from coact import __main__ as cli
@@ -151,18 +153,94 @@ def test_cli_describe_renders_draft(monkeypatch):
     assert "get_weather" in out and "proposed" in out
 
 
-def test_main_wires_every_verb(monkeypatch):
-    # main() registers exactly the documented verbs into argh.dispatch_commands.
-    registered = {}
+VERBS = {
+    "plan", "complete", "emit", "realize", "diff", "estimate",
+    "inventory", "back", "scaffold", "publish", "describe",
+}
 
-    def fake_dispatch(commands):
-        registered["names"] = [c.__name__ for c in commands]
-        registered["callable"] = all(callable(c) for c in commands)
 
-    monkeypatch.setattr(cli.argh, "dispatch_commands", fake_dispatch)
-    cli.main()
-    assert registered["callable"]
-    assert set(registered["names"]) == {
-        "plan", "complete", "emit", "realize",
-        "diff", "estimate", "inventory", "back", "scaffold", "publish", "describe",
-    }
+def _subcommands(parser):
+    """The subcommand names a built parser actually offers."""
+    import argparse
+
+    for action in parser._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            return set(action.choices)
+    raise AssertionError("parser has no subcommands")
+
+
+def test_parser_offers_every_verb():
+    # The parser cw builds is a plain argparse parser, so the wiring is
+    # inspectable directly -- no monkeypatching the dispatcher to find out.
+    parser = cw.mk_parser(cli.COMMANDS, config=cli.CONFIG, prog="coact")
+    assert all(callable(c) for c in cli.COMMANDS)
+    assert _subcommands(parser) == VERBS
+
+
+@pytest.mark.parametrize(
+    "verb,param,nargs,default",
+    [
+        ("inventory", "project", "?", "."),  # optional positional with a default
+        ("scaffold", "agents", "+", None),  # one-or-more
+        ("publish", "source", "+", None),  # one-or-more
+        ("estimate", "agents", "*", None),  # inferred from *args
+    ],
+)
+def test_positional_nargs_shapes(verb, param, nargs, default):
+    # The three declared nargs shapes (plus the one inferred from *args) are
+    # what this CLI's grammar hangs on; assert them on the real parser.
+    parser = cw.mk_parser(cli.COMMANDS, config=cli.CONFIG, prog="coact")
+    sub = _subcommands_parser(parser, verb)
+    action = next(a for a in sub._actions if a.dest == param)
+    assert action.nargs == nargs
+    assert action.default == default
+    assert not action.option_strings  # still positional
+
+
+def _subcommands_parser(parser, name):
+    import argparse
+
+    for action in parser._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            return action.choices[name]
+    raise AssertionError("parser has no subcommands")
+
+
+def test_dispatch_runs_a_verb_end_to_end(tmp_path):
+    # The whole path -- parse, bind, call, print -- without a subprocess.
+    _skill(tmp_path)
+    buf = io.StringIO()
+    code = cw.dispatch(
+        cli.COMMANDS,
+        ["inventory", str(tmp_path)],
+        config=cli.CONFIG,
+        prog="coact",
+        out=buf,
+    )
+    assert code == 0
+    assert "inventory:" in buf.getvalue() and "ux" in buf.getvalue()
+
+
+def test_inventory_project_defaults_to_cwd(tmp_path, monkeypatch):
+    # nargs='?' + default='.': the verb is callable with no positional at all.
+    _skill(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    buf = io.StringIO()
+    assert cw.dispatch(cli.COMMANDS, ["inventory"], config=cli.CONFIG, out=buf) == 0
+    assert "ux" in buf.getvalue()
+
+
+def test_bad_command_line_still_exits_2(monkeypatch):
+    # A console script that starts exiting 0 on a bad command line breaks every
+    # CI step that checks $?. cw.dispatch *returns* the code, so main() must
+    # re-raise it -- assert the console-script path, not just the return value.
+    buf, err = io.StringIO(), io.StringIO()
+    assert (
+        cw.dispatch(cli.COMMANDS, ["scaffold"], config=cli.CONFIG, out=buf, err=err)
+        == 2
+    )
+
+    monkeypatch.setattr("sys.argv", ["coact", "scaffold"])
+    with pytest.raises(SystemExit) as excinfo:
+        cli.main()
+    assert excinfo.value.code == 2
