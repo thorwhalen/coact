@@ -34,7 +34,7 @@ classifiers = [
 license = "MIT"
 dependencies = [
     "skill",
-    "argh",
+    "cw",
 ]
 
 [project.urls]

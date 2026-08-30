@@ -214,7 +214,7 @@ Follow the user's two loaded skills (`python-coding-standards`, `python-package-
 - **Dependency injection / no provider lock-in**: any LLM use goes through an injected facade (reuse `aw`'s `llm` / `StepConfig`; honor `ov` #4's provider-agnostic `structured(prompt, schema)->model` shape). `coact` must run its mechanical paths with **no LLM at all**.
 - **Mapping interfaces**: prefer `Mapping`/`MutableMapping` facades (a skills store, an agents store) consistent with `dol`/`py2mcp` idioms; this also makes `py2mcp.mk_mcp_from_store` reuse natural.
 - **Progressive disclosure**: simple things simple (`complete(skill)` one-liner with good defaults), complex things possible (full policy injection, custom emitters/backends). Always offer a dry-run/plan before a writing/spawning action.
-- **CLI via `argh`**, dispatch-to-interface pattern (CLI / http via `qh` / programmatic share one core), package structure per `python-package-architecture` (`__init__.py` curated exports, `base.py`, `util.py`, `__main__.py`). The verbs (`complete`, `realize`, `diff`, `estimate`, `inventory`) are both Python functions and CLI subcommands.
+- **CLI via `cw`**, dispatch-to-interface pattern (CLI / http via `qh` / programmatic share one core), package structure per `python-package-architecture` (`__init__.py` curated exports, `base.py`, `util.py`, `__main__.py`). The verbs (`complete`, `realize`, `diff`, `estimate`, `inventory`) are both Python functions and CLI subcommands.
 - **Informative errors & `check_requirements`** for optional backends/deps (Agent SDK, FastMCP/`py2mcp`, an LLM provider).
 
 ---
@@ -233,7 +233,7 @@ coact/
 ├── analysis.py          # diff, estimate, inventory
 ├── llm.py               # provider-agnostic LLM facade (thin; prefer importing aw's; only add structured() helper if absent)
 ├── util.py
-└── __main__.py          # argh CLI dispatch
+└── __main__.py          # cw CLI dispatch
 misc/docs/
 └── REUSE.md             # output of §1
 ```
@@ -253,7 +253,7 @@ If `complete.py`/`realize.py` grow, split into subpackages with their own regist
 7. **Persona/return-contract synthesis with optional injected LLM** (§5.5).
 8. **REALIZE `mcp` backend via `py2mcp`** (§6.1.3).
 9. **Analysis utilities** (§7): `diff`, `estimate`, `inventory`.
-10. **CLI** (`argh`, §8) wrapping the verbs; completion via the same pattern `skill` uses.
+10. **CLI** (`cw`, §8) wrapping the verbs; completion via the same pattern `skill` uses.
 
 Each milestone should be independently useful and shippable (progressive disclosure applies to the *roadmap* too).
 

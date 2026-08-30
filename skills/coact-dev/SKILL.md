@@ -40,7 +40,7 @@ job belongs to one of those, delegate — don't reimplement.
 | `analysis.py` | `diff` / `estimate` / `inventory` / `back` — tooling to see and move between the layers. |
 | `stores.py` | `AgentStore` (a `dol`-style mapping over `.claude/agents/`), `agents_dir`. |
 | `util.py` | `check_requirements`, `import_object`, and small shared helpers. |
-| `__main__.py` | argh CLI — thin wrappers over the same core functions (incl. `realize --dry-run`, `scaffold`). |
+| `__main__.py` | `cw` CLI — thin wrappers over the same core functions (incl. `realize --dry-run`, `scaffold`). |
 
 The public facade is `coact/__init__.py` (its `__all__` is the supported API).
 Decisions are logged in `misc/docs/DECISIONS.md`; the build brief is
