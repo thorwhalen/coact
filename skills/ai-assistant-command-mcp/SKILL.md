@@ -184,13 +184,49 @@ Frontend build step (in `package.json`):
 "build:schemas": "json-schema-to-zod -i ../schemas/commands.json -o src/commands.gen.ts"
 ```
 
-## Emitter C: CLI (argh / Click)
+## Emitter C: CLI (argparse / Click)
 
-Follow Thor's `python-package-architecture` skill conventions. The dispatch table is `{spec.id: spec.handler}`.
+Follow Thor's `python-package-architecture` skill conventions. The dispatch table is
+`{spec.id: spec.handler}` — the same registry every other emitter reads, so the CLI is a
+*projection* of the SSOT, never a second definition of it.
+
+```python
+# emitters/cli_emitter.py
+import argparse, json
+from command_registry.core import registry
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="app")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    for spec in registry().values():
+        if "cli" not in spec.surfaces:
+            continue
+        sub = subparsers.add_parser(spec.id, help=spec.summary, description=spec.description)
+        for name, field in spec.schema.model_fields.items():
+            sub.add_argument(f"--{name.replace('_', '-')}", dest=name, help=field.description)
+        sub.set_defaults(_handler=spec.handler, _schema=spec.schema)
+    return parser
+
+def main(argv=None) -> None:
+    args = vars(build_parser().parse_args(argv))
+    handler, schema = args.pop("_handler"), args.pop("_schema")
+    args.pop("command", None)
+    payload = schema(**{k: v for k, v in args.items() if v is not None})
+    print(json.dumps(handler(payload), default=str))
+```
+
+**Do not use `argh`.** It is LGPL-3.0-or-later, and it is being removed across this fleet;
+new code uses stdlib `argparse` or Click. A house CLI adapter is being built to take this
+emitter's place — a third string-referenced adapter beside `py2mcp` (MCP) and `qh` (HTTP)
+over the same plain Python functions — and this section will name it and show its idiom
+once it ships.
+
+<!-- argh-migration stage 2: name the house CLI adapter here and replace the argparse
+     sample with its dispatch-table idiom. Marker string: argh-migration -->
 
 ## Emitter D: OpenAPI (FastAPI)
 
-Mount each command as a route. `FastMCP.from_fastapi()` can then re-emit an MCP server from the OpenAPI doc — useful if you want both surfaces from one source.
+Mount each command as a route. `FastMCP.from_fastapi()` can then re-emit an MCP server from the OpenAPI doc — useful if you want both surfaces from one source. Thor's `qh` does the same job straight from plain Python functions; prefer it where it covers the case, on the same "one registry, many adapters" principle as `py2mcp`.
 
 ## Emitter E: Multi-provider tool catalogues
 
