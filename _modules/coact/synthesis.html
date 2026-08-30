@@ -98,7 +98,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for coact.synthesis</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Persona &amp; return-contract synthesis — the two real &quot;extras&quot; of a skill→agent lift.</span>
+<span></span><span class="sd">"""Persona &amp; return-contract synthesis — the two real "extras" of a skill→agent lift.</span>
 
 <span class="sd">COACT_SPEC §5.5 / §3.2. A skill body is *procedural*, not a persona, and skills</span>
 <span class="sd">return *nothing*. The two fields that actually turn a skill into an agent are the</span>
@@ -112,8 +112,8 @@
 <span class="sd">(inspectable, overridable, LLM-assisted-but-not-required, DECISIONS D10).</span>
 
 <span class="sd">Crucially the persona **references** the skill by name and instructs the agent to</span>
-<span class="sd">follow it — it never copies the skill body (point-don&#39;t-copy / SSOT, §3.3).</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">follow it — it never copies the skill body (point-don't-copy / SSOT, §3.3).</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -126,16 +126,16 @@
 
 <span class="c1">#: A generic-but-useful default return schema (used when the author pins none).</span>
 <span class="n">DEFAULT_RETURN_SCHEMA</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;summary&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;One-paragraph summary of what was done.&quot;</span><span class="p">,</span>
+    <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"object"</span><span class="p">,</span>
+    <span class="s2">"properties"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"summary"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"string"</span><span class="p">,</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"One-paragraph summary of what was done."</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;The primary artifact or finding.&quot;</span><span class="p">},</span>
-        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span> <span class="s2">&quot;enum&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;partial&quot;</span><span class="p">,</span> <span class="s2">&quot;failed&quot;</span><span class="p">]},</span>
+        <span class="s2">"result"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"description"</span><span class="p">:</span> <span class="s2">"The primary artifact or finding."</span><span class="p">},</span>
+        <span class="s2">"status"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"string"</span><span class="p">,</span> <span class="s2">"enum"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ok"</span><span class="p">,</span> <span class="s2">"partial"</span><span class="p">,</span> <span class="s2">"failed"</span><span class="p">]},</span>
     <span class="p">},</span>
-    <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;summary&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">],</span>
+    <span class="s2">"required"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"summary"</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">],</span>
 <span class="p">}</span>
 
 
@@ -144,27 +144,27 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">synthesize_return_contract</span><span class="p">(</span>
     <span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">coact_meta</span><span class="p">:</span> <span class="n">CoactMeta</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ReturnContract</span><span class="p">,</span> <span class="n">ProvenanceSource</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Choose the agent&#39;s return contract: author-pinned, else a template default.</span>
+<span class="w">    </span><span class="sd">"""Choose the agent's return contract: author-pinned, else a template default.</span>
 
 <span class="sd">    &gt;&gt;&gt; from skill.base import Skill, SkillMeta</span>
-<span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name=&#39;x&#39;, description=&#39;y&#39;), body=&#39;z&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name='x', description='y'), body='z')</span>
 <span class="sd">    &gt;&gt;&gt; rc, src = synthesize_return_contract(s, coact_meta=CoactMeta())</span>
-<span class="sd">    &gt;&gt;&gt; rc.json_schema[&#39;type&#39;], src</span>
-<span class="sd">    (&#39;object&#39;, &#39;synthesized-template&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; rc2, src2 = synthesize_return_contract(s, coact_meta=CoactMeta(returns={&#39;schema_ref&#39;: &#39;m:N&#39;}))</span>
+<span class="sd">    &gt;&gt;&gt; rc.json_schema['type'], src</span>
+<span class="sd">    ('object', 'synthesized-template')</span>
+<span class="sd">    &gt;&gt;&gt; rc2, src2 = synthesize_return_contract(s, coact_meta=CoactMeta(returns={'schema_ref': 'm:N'}))</span>
 <span class="sd">    &gt;&gt;&gt; rc2.ref, src2</span>
-<span class="sd">    (&#39;m:N&#39;, &#39;coact-frontmatter&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    ('m:N', 'coact-frontmatter')</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">returns</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">return_contract</span><span class="p">(),</span> <span class="s2">&quot;coact-frontmatter&quot;</span>
+        <span class="k">return</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">return_contract</span><span class="p">(),</span> <span class="s2">"coact-frontmatter"</span>
     <span class="n">description</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Result of the </span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> agent: </span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="sa">f</span><span class="s2">"Result of the </span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> agent: </span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="n">ReturnContract</span><span class="p">(</span>
             <span class="n">json_schema</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">DEFAULT_RETURN_SCHEMA</span><span class="p">),</span> <span class="n">description</span><span class="o">=</span><span class="n">description</span>
         <span class="p">),</span>
-        <span class="s2">&quot;synthesized-template&quot;</span><span class="p">,</span>
+        <span class="s2">"synthesized-template"</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -172,30 +172,30 @@
 <div class="viewcode-block" id="render_return_contract_section">
 <a class="viewcode-back" href="../../module_docs/coact/synthesis.html#coact.render_return_contract_section">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">render_return_contract_section</span><span class="p">(</span><span class="n">rc</span><span class="p">:</span> <span class="n">ReturnContract</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render the human/model-facing &quot;Return contract&quot; markdown for a persona body.</span>
+<span class="w">    </span><span class="sd">"""Render the human/model-facing "Return contract" markdown for a persona body.</span>
 
-<span class="sd">    &gt;&gt;&gt; rc = ReturnContract(json_schema={&#39;type&#39;: &#39;object&#39;}, description=&#39;findings&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; &#39;Return contract&#39; in render_return_contract_section(rc)</span>
+<span class="sd">    &gt;&gt;&gt; rc = ReturnContract(json_schema={'type': 'object'}, description='findings')</span>
+<span class="sd">    &gt;&gt;&gt; 'Return contract' in render_return_contract_section(rc)</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;## Return contract&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+<span class="sd">    """</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"## Return contract"</span><span class="p">,</span> <span class="s2">""</span><span class="p">]</span>
     <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-        <span class="s2">&quot;Your final message MUST be consumable by the agent that delegated to &quot;</span>
-        <span class="s2">&quot;you — return the result in this shape:&quot;</span>
+        <span class="s2">"Your final message MUST be consumable by the agent that delegated to "</span>
+        <span class="s2">"you — return the result in this shape:"</span>
     <span class="p">)</span>
-    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">rc</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rc</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
-        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">rc</span><span class="o">.</span><span class="n">json_schema</span><span class="p">:</span>
-        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;```json&quot;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"```json"</span><span class="p">)</span>
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">rc</span><span class="o">.</span><span class="n">json_schema</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;```&quot;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"```"</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">rc</span><span class="o">.</span><span class="n">ref</span><span class="p">:</span>
-        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Conform to the schema `</span><span class="si">{</span><span class="n">rc</span><span class="o">.</span><span class="n">ref</span><span class="si">}</span><span class="s2">`.&quot;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Conform to the schema `</span><span class="si">{</span><span class="n">rc</span><span class="o">.</span><span class="n">ref</span><span class="si">}</span><span class="s2">`."</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Return a concise structured summary of the outcome.&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"Return a concise structured summary of the outcome."</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
 
 
 
@@ -209,9 +209,9 @@
     <span class="n">extra_skills</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">llm</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ProvenanceSource</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Synthesize the system prompt (persona) for an agent derived from ``skill``.</span>
+<span class="w">    </span><span class="sd">"""Synthesize the system prompt (persona) for an agent derived from ``skill``.</span>
 
-<span class="sd">    Wraps the skill&#39;s intent as an identity, states operating invariants, and</span>
+<span class="sd">    Wraps the skill's intent as an identity, states operating invariants, and</span>
 <span class="sd">    appends the return contract — while **pointing at** the source skill rather</span>
 <span class="sd">    than inlining it (§3.3). The identity paragraph is template-generated by</span>
 <span class="sd">    default; when an ``llm`` is resolvable it is *drafted* by the LLM instead</span>
@@ -220,67 +220,67 @@
 <span class="sd">    optional — absent one, the template path is a sound default (DECISIONS D10).</span>
 
 <span class="sd">    &gt;&gt;&gt; from skill.base import Skill, SkillMeta</span>
-<span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name=&#39;ux-analyst&#39;, description=&#39;Analyze UX bundles.&#39;), body=&#39;steps&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; rc = ReturnContract(json_schema={&#39;type&#39;: &#39;object&#39;}, description=&#39;findings&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; persona, src = synthesize_persona(s, return_contract=rc, tools=[&#39;Read&#39;, &#39;Grep&#39;])</span>
-<span class="sd">    &gt;&gt;&gt; &#39;ux-analyst&#39; in persona and &#39;Return contract&#39; in persona and src == &#39;synthesized-template&#39;</span>
+<span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name='ux-analyst', description='Analyze UX bundles.'), body='steps')</span>
+<span class="sd">    &gt;&gt;&gt; rc = ReturnContract(json_schema={'type': 'object'}, description='findings')</span>
+<span class="sd">    &gt;&gt;&gt; persona, src = synthesize_persona(s, return_contract=rc, tools=['Read', 'Grep'])</span>
+<span class="sd">    &gt;&gt;&gt; 'ux-analyst' in persona and 'Return contract' in persona and src == 'synthesized-template'</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">tool_note</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Stay within your tool allowlist: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="sa">f</span><span class="s2">"Stay within your tool allowlist: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2">."</span>
         <span class="k">if</span> <span class="n">tools</span>
-        <span class="k">else</span> <span class="s2">&quot;Use only the tools you have been granted.&quot;</span>
+        <span class="k">else</span> <span class="s2">"Use only the tools you have been granted."</span>
     <span class="p">)</span>
 
     <span class="n">identity</span><span class="p">,</span> <span class="n">source</span> <span class="o">=</span> <span class="n">_persona_identity</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">extra_skills</span><span class="o">=</span><span class="n">extra_skills</span><span class="p">,</span> <span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">)</span>
 
     <span class="n">sections</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">identity</span><span class="p">,</span>
-        <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;## Operating invariants&quot;</span><span class="p">,</span>
-        <span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">tool_note</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;- Work only on the task delegated to you; stop and return once the &quot;</span>
-        <span class="s2">&quot;skill&#39;s procedure is complete.&quot;</span><span class="p">,</span>
-        <span class="s1">&#39;- If you cannot complete the task, return status `&quot;failed&quot;` with a short &#39;</span>
-        <span class="s2">&quot;reason rather than guessing.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"## Operating invariants"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"- </span><span class="si">{</span><span class="n">tool_note</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="s2">"- Work only on the task delegated to you; stop and return once the "</span>
+        <span class="s2">"skill's procedure is complete."</span><span class="p">,</span>
+        <span class="s1">'- If you cannot complete the task, return status `"failed"` with a short '</span>
+        <span class="s2">"reason rather than guessing."</span><span class="p">,</span>
+        <span class="s2">""</span><span class="p">,</span>
         <span class="n">render_return_contract_section</span><span class="p">(</span><span class="n">return_contract</span><span class="p">),</span>
     <span class="p">]</span>
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sections</span><span class="p">),</span> <span class="n">source</span></div>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sections</span><span class="p">),</span> <span class="n">source</span></div>
 
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_persona_identity</span><span class="p">(</span>
     <span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">extra_skills</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">llm</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ProvenanceSource</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build the identity paragraph — LLM-drafted when available, else template.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Build the identity paragraph — LLM-drafted when available, else template."""</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span>
-    <span class="n">description</span> <span class="o">=</span> <span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-    <span class="n">skills_clause</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;the `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` skill&quot;</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+    <span class="n">skills_clause</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"the `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` skill"</span>
     <span class="k">if</span> <span class="n">extra_skills</span><span class="p">:</span>
-        <span class="n">others</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">`&quot;</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">extra_skills</span><span class="p">)</span>
-        <span class="n">skills_clause</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;the `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` skill (and </span><span class="si">{</span><span class="n">others</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="n">others</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">`"</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">extra_skills</span><span class="p">)</span>
+        <span class="n">skills_clause</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"the `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` skill (and </span><span class="si">{</span><span class="n">others</span><span class="si">}</span><span class="s2">)"</span>
 
     <span class="n">template</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;You are the **</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">** agent. </span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s2">.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;You have </span><span class="si">{</span><span class="n">skills_clause</span><span class="si">}</span><span class="s2"> loaded — follow its procedure exactly; do not &quot;</span>
-        <span class="s2">&quot;re-derive or duplicate it. The skill is the single source of truth for &quot;</span>
-        <span class="s2">&quot;*how* to do the work; you add identity, judgment, and a consumable result.&quot;</span>
+        <span class="sa">f</span><span class="s2">"You are the **</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">** agent. </span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s2">.</span><span class="se">\n\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"You have </span><span class="si">{</span><span class="n">skills_clause</span><span class="si">}</span><span class="s2"> loaded — follow its procedure exactly; do not "</span>
+        <span class="s2">"re-derive or duplicate it. The skill is the single source of truth for "</span>
+        <span class="s2">"*how* to do the work; you add identity, judgment, and a consumable result."</span>
     <span class="p">)</span>
 
     <span class="n">drafted</span> <span class="o">=</span> <span class="n">_llm_draft_identity</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">drafted</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">drafted</span><span class="p">,</span> <span class="s2">&quot;synthesized-llm&quot;</span>
-    <span class="k">return</span> <span class="n">template</span><span class="p">,</span> <span class="s2">&quot;synthesized-template&quot;</span>
+        <span class="k">return</span> <span class="n">drafted</span><span class="p">,</span> <span class="s2">"synthesized-llm"</span>
+    <span class="k">return</span> <span class="n">template</span><span class="p">,</span> <span class="s2">"synthesized-template"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_llm_draft_identity</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">llm</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Draft a 2-3 sentence identity via an *explicitly injected* LLM, else None.</span>
+<span class="w">    </span><span class="sd">"""Draft a 2-3 sentence identity via an *explicitly injected* LLM, else None.</span>
 
 <span class="sd">    Drafting requires the caller to pass ``llm`` — coact never reaches for an</span>
 <span class="sd">    ambient provider on its own (the mechanical path stays offline, DECISIONS</span>
 <span class="sd">    D10). To use whatever provider is configured, pass ``llm=resolve_llm()``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">llm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">coact.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_llm</span>
@@ -289,13 +289,13 @@
     <span class="k">if</span> <span class="n">fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="n">prompt</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="s2">&quot;Write a concise 2-3 sentence system-prompt identity for a Claude subagent &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;derived from a skill named &#39;</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; described as: &quot;</span>
-        <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s1">&quot;.</span><span class="se">\n\n</span><span class="s1">&#39;</span>
-        <span class="s2">&quot;Rules: speak in second person (&#39;You are ...&#39;); reference the skill by &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;name (`</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">`) and instruct the agent to follow that skill&#39;s &quot;</span>
-        <span class="s2">&quot;procedure as the single source of truth; do NOT restate or invent the &quot;</span>
-        <span class="s2">&quot;procedure&#39;s steps; no markdown headers; identity prose only.&quot;</span>
+        <span class="s2">"Write a concise 2-3 sentence system-prompt identity for a Claude subagent "</span>
+        <span class="sa">f</span><span class="s2">"derived from a skill named '</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">' described as: "</span>
+        <span class="sa">f</span><span class="s1">'"</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s1">".</span><span class="se">\n\n</span><span class="s1">'</span>
+        <span class="s2">"Rules: speak in second person ('You are ...'); reference the skill by "</span>
+        <span class="sa">f</span><span class="s2">"name (`</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">`) and instruct the agent to follow that skill's "</span>
+        <span class="s2">"procedure as the single source of truth; do NOT restate or invent the "</span>
+        <span class="s2">"procedure's steps; no markdown headers; identity prose only."</span>
     <span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">text</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>

@@ -98,7 +98,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for coact.frontmatter</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;The additive ``coact:`` SKILL.md frontmatter convention and its validator.</span>
+<span></span><span class="sd">"""The additive ``coact:`` SKILL.md frontmatter convention and its validator.</span>
 
 <span class="sd">COACT_SPEC §4 / DECISIONS D1. The standard SKILL.md frontmatter (``name``,</span>
 <span class="sd">``description``) does not carry what COMPLETE needs to derive tools, model, MCP,</span>
@@ -128,7 +128,7 @@
 <span class="sd">The validator is registered into ``skill.create.validators`` (additive) and also</span>
 <span class="sd">exposed via a ``skill.validators`` entry point, so ``skill validate`` checks the</span>
 <span class="sd">block without coact having to be the entry point.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -141,21 +141,21 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReturnContract</span>
 
 <span class="c1">#: The single namespaced frontmatter key coact reads/writes.</span>
-<span class="n">COACT_KEY</span> <span class="o">=</span> <span class="s2">&quot;coact&quot;</span>
+<span class="n">COACT_KEY</span> <span class="o">=</span> <span class="s2">"coact"</span>
 
-<span class="n">_VALID_MODELS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;sonnet&quot;</span><span class="p">,</span> <span class="s2">&quot;opus&quot;</span><span class="p">,</span> <span class="s2">&quot;haiku&quot;</span><span class="p">,</span> <span class="s2">&quot;inherit&quot;</span><span class="p">}</span>
-<span class="n">_VALID_MEMORY</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;project&quot;</span><span class="p">,</span> <span class="s2">&quot;local&quot;</span><span class="p">}</span>
+<span class="n">_VALID_MODELS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"sonnet"</span><span class="p">,</span> <span class="s2">"opus"</span><span class="p">,</span> <span class="s2">"haiku"</span><span class="p">,</span> <span class="s2">"inherit"</span><span class="p">}</span>
+<span class="n">_VALID_MEMORY</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"user"</span><span class="p">,</span> <span class="s2">"project"</span><span class="p">,</span> <span class="s2">"local"</span><span class="p">}</span>
 <span class="n">_KNOWN_KEYS</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;tools&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;disallowed_tools&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;model&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;memory&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;permission_mode&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;skills&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;mcp&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;returns&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;consumes&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;persona&quot;</span><span class="p">,</span>
+    <span class="s2">"tools"</span><span class="p">,</span>
+    <span class="s2">"disallowed_tools"</span><span class="p">,</span>
+    <span class="s2">"model"</span><span class="p">,</span>
+    <span class="s2">"memory"</span><span class="p">,</span>
+    <span class="s2">"permission_mode"</span><span class="p">,</span>
+    <span class="s2">"skills"</span><span class="p">,</span>
+    <span class="s2">"mcp"</span><span class="p">,</span>
+    <span class="s2">"returns"</span><span class="p">,</span>
+    <span class="s2">"consumes"</span><span class="p">,</span>
+    <span class="s2">"persona"</span><span class="p">,</span>
 <span class="p">}</span>
 
 
@@ -163,14 +163,14 @@
 <a class="viewcode-back" href="../../module_docs/coact/frontmatter.html#coact.CoactMeta">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CoactMeta</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The parsed ``coact:`` block (every field optional; all default to absent).</span>
+<span class="w">    </span><span class="sd">"""The parsed ``coact:`` block (every field optional; all default to absent).</span>
 
-<span class="sd">    &gt;&gt;&gt; m = CoactMeta.from_frontmatter({&#39;coact&#39;: {&#39;model&#39;: &#39;opus&#39;, &#39;tools&#39;: [&#39;Read&#39;]}})</span>
+<span class="sd">    &gt;&gt;&gt; m = CoactMeta.from_frontmatter({'coact': {'model': 'opus', 'tools': ['Read']}})</span>
 <span class="sd">    &gt;&gt;&gt; m.model, m.tools, m.is_empty()</span>
-<span class="sd">    (&#39;opus&#39;, [&#39;Read&#39;], False)</span>
-<span class="sd">    &gt;&gt;&gt; CoactMeta.from_frontmatter({&#39;name&#39;: &#39;x&#39;}).is_empty()</span>
+<span class="sd">    ('opus', ['Read'], False)</span>
+<span class="sd">    &gt;&gt;&gt; CoactMeta.from_frontmatter({'name': 'x'}).is_empty()</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">tools</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">disallowed_tools</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
@@ -186,36 +186,36 @@
 <div class="viewcode-block" id="CoactMeta.from_frontmatter">
 <a class="viewcode-back" href="../../module_docs/coact/frontmatter.html#coact.CoactMeta.from_frontmatter">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">from_frontmatter</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CoactMeta&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build from a full frontmatter dict (reads the ``coact`` sub-mapping).&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_frontmatter</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"CoactMeta"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build from a full frontmatter dict (reads the ``coact`` sub-mapping)."""</span>
         <span class="n">block</span> <span class="o">=</span> <span class="p">(</span><span class="n">meta</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">COACT_KEY</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
-            <span class="n">tools</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">),</span>
-            <span class="n">disallowed_tools</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;disallowed_tools&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[],</span>
-            <span class="n">model</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">),</span>
-            <span class="n">memory</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;memory&quot;</span><span class="p">),</span>
-            <span class="n">permission_mode</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;permission_mode&quot;</span><span class="p">),</span>
-            <span class="n">skills</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;skills&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[],</span>
-            <span class="n">mcp</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mcp&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[],</span>
-            <span class="n">returns</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;returns&quot;</span><span class="p">),</span>
-            <span class="n">consumes</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;consumes&quot;</span><span class="p">),</span>
-            <span class="n">persona</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;persona&quot;</span><span class="p">),</span>
+            <span class="n">tools</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"tools"</span><span class="p">),</span>
+            <span class="n">disallowed_tools</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"disallowed_tools"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[],</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"model"</span><span class="p">),</span>
+            <span class="n">memory</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"memory"</span><span class="p">),</span>
+            <span class="n">permission_mode</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"permission_mode"</span><span class="p">),</span>
+            <span class="n">skills</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"skills"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[],</span>
+            <span class="n">mcp</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"mcp"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[],</span>
+            <span class="n">returns</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"returns"</span><span class="p">),</span>
+            <span class="n">consumes</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"consumes"</span><span class="p">),</span>
+            <span class="n">persona</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"persona"</span><span class="p">),</span>
         <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CoactMeta.is_empty">
 <a class="viewcode-back" href="../../module_docs/coact/frontmatter.html#coact.CoactMeta.is_empty">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;True when the block carries no author-provided information.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""True when the block carries no author-provided information."""</span>
         <span class="k">return</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">CoactMeta</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="CoactMeta.return_contract">
 <a class="viewcode-back" href="../../module_docs/coact/frontmatter.html#coact.CoactMeta.return_contract">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">return_contract</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReturnContract</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The author-pinned :class:`~coact.base.ReturnContract`, if any.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""The author-pinned :class:`~coact.base.ReturnContract`, if any."""</span>
         <span class="k">return</span> <span class="n">ReturnContract</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">returns</span><span class="p">)</span></div>
 </div>
 
@@ -224,7 +224,7 @@
 <div class="viewcode-block" id="parse_coact_meta">
 <a class="viewcode-back" href="../../module_docs/coact/frontmatter.html#coact.parse_coact_meta">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">parse_coact_meta</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="n">Skill</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoactMeta</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a :class:`CoactMeta` from a SKILL.md path/text/``Skill``/frontmatter dict.</span>
+<span class="w">    </span><span class="sd">"""Parse a :class:`CoactMeta` from a SKILL.md path/text/``Skill``/frontmatter dict.</span>
 
 <span class="sd">    Accepts the several shapes coact callers have on hand:</span>
 
@@ -234,16 +234,16 @@
 <span class="sd">    - raw SKILL.md text;</span>
 <span class="sd">    - an already-parsed frontmatter dict.</span>
 
-<span class="sd">    &gt;&gt;&gt; parse_coact_meta(&quot;---\\nname: x\\ncoact:\\n  model: haiku\\n---\\nbody&quot;).model</span>
-<span class="sd">    &#39;haiku&#39;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; parse_coact_meta("---\\nname: x\\ncoact:\\n  model: haiku\\n---\\nbody").model</span>
+<span class="sd">    'haiku'</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">CoactMeta</span><span class="p">):</span>  <span class="c1"># idempotent convenience</span>
         <span class="k">return</span> <span class="n">source</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">CoactMeta</span><span class="o">.</span><span class="n">from_frontmatter</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">Skill</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">source_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">source_path</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;SKILL.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">source_path</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"SKILL.md"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">CoactMeta</span><span class="o">.</span><span class="n">from_frontmatter</span><span class="p">(</span><span class="n">parse_frontmatter</span><span class="p">(</span><span class="n">text</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">CoactMeta</span><span class="p">()</span>  <span class="c1"># no path -&gt; coact block was not retained; nothing to read</span>
     <span class="n">text</span> <span class="o">=</span> <span class="n">_read_skill_md_text</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
@@ -252,11 +252,11 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_read_skill_md_text</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return SKILL.md text given a directory, a file path, or the text itself.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return SKILL.md text given a directory, a file path, or the text itself."""</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-            <span class="k">return</span> <span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="s2">&quot;SKILL.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="s2">"SKILL.md"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
             <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
@@ -267,23 +267,23 @@
 <div class="viewcode-block" id="validate_coact_block">
 <a class="viewcode-back" href="../../module_docs/coact/frontmatter.html#coact.validate_coact_block">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">validate_coact_block</span><span class="p">(</span><span class="n">skill_or_meta</span><span class="p">:</span> <span class="n">Skill</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate a ``coact:`` block, returning issue strings (empty = valid/absent).</span>
+<span class="w">    </span><span class="sd">"""Validate a ``coact:`` block, returning issue strings (empty = valid/absent).</span>
 
 <span class="sd">    Additive: a skill with no ``coact:`` block passes trivially. Checks key</span>
 <span class="sd">    spelling, ``model``/``memory`` enums, ``mcp`` entry shape, and that</span>
 <span class="sd">    ``returns`` carries exactly one of ``schema_ref``/``json_schema``.</span>
 
-<span class="sd">    &gt;&gt;&gt; validate_coact_block({&#39;coact&#39;: {&#39;model&#39;: &#39;gpt-4&#39;}})</span>
-<span class="sd">    [&quot;coact.model: &#39;gpt-4&#39; is not one of sonnet, opus, haiku, inherit&quot;]</span>
-<span class="sd">    &gt;&gt;&gt; validate_coact_block({&#39;coact&#39;: {&#39;mcp&#39;: [{&#39;functions&#39;: [&#39;f&#39;]}]}})</span>
-<span class="sd">    [&quot;coact.mcp[0]: missing required &#39;module&#39;&quot;]</span>
-<span class="sd">    &gt;&gt;&gt; validate_coact_block({&#39;name&#39;: &#39;ok&#39;})</span>
+<span class="sd">    &gt;&gt;&gt; validate_coact_block({'coact': {'model': 'gpt-4'}})</span>
+<span class="sd">    ["coact.model: 'gpt-4' is not one of sonnet, opus, haiku, inherit"]</span>
+<span class="sd">    &gt;&gt;&gt; validate_coact_block({'coact': {'mcp': [{'functions': ['f']}]}})</span>
+<span class="sd">    ["coact.mcp[0]: missing required 'module'"]</span>
+<span class="sd">    &gt;&gt;&gt; validate_coact_block({'name': 'ok'})</span>
 <span class="sd">    []</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">skill_or_meta</span><span class="p">,</span> <span class="n">Skill</span><span class="p">):</span>
         <span class="n">meta</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">parse_frontmatter</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">skill_or_meta</span><span class="o">.</span><span class="n">source_path</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;SKILL.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+                <span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">skill_or_meta</span><span class="o">.</span><span class="n">source_path</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"SKILL.md"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
             <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">skill_or_meta</span><span class="o">.</span><span class="n">source_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="k">else</span> <span class="p">{}</span>
@@ -296,65 +296,65 @@
         <span class="k">return</span> <span class="p">[]</span>
     <span class="n">issues</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;coact: block must be a mapping, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">block</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"coact: block must be a mapping, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">block</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">block</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_KNOWN_KEYS</span><span class="p">:</span>
             <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;coact.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: unknown key (known: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">_KNOWN_KEYS</span><span class="p">))</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="sa">f</span><span class="s2">"coact.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: unknown key (known: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">_KNOWN_KEYS</span><span class="p">))</span><span class="si">}</span><span class="s2">)"</span>
             <span class="p">)</span>
 
-    <span class="n">model</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"model"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_VALID_MODELS</span><span class="p">:</span>
         <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;coact.model: </span><span class="si">{</span><span class="n">model</span><span class="si">!r}</span><span class="s2"> is not one of sonnet, opus, haiku, inherit&quot;</span>
+            <span class="sa">f</span><span class="s2">"coact.model: </span><span class="si">{</span><span class="n">model</span><span class="si">!r}</span><span class="s2"> is not one of sonnet, opus, haiku, inherit"</span>
         <span class="p">)</span>
 
-    <span class="n">memory</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;memory&quot;</span><span class="p">)</span>
+    <span class="n">memory</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"memory"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">memory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">memory</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_VALID_MEMORY</span><span class="p">:</span>
-        <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;coact.memory: </span><span class="si">{</span><span class="n">memory</span><span class="si">!r}</span><span class="s2"> is not one of user, project, local&quot;</span><span class="p">)</span>
+        <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"coact.memory: </span><span class="si">{</span><span class="n">memory</span><span class="si">!r}</span><span class="s2"> is not one of user, project, local"</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">list_key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="s2">&quot;disallowed_tools&quot;</span><span class="p">,</span> <span class="s2">&quot;skills&quot;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">list_key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"tools"</span><span class="p">,</span> <span class="s2">"disallowed_tools"</span><span class="p">,</span> <span class="s2">"skills"</span><span class="p">):</span>
         <span class="n">val</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">list_key</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_list_of_str</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
-            <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;coact.</span><span class="si">{</span><span class="n">list_key</span><span class="si">}</span><span class="s2">: must be a list of strings&quot;</span><span class="p">)</span>
+            <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"coact.</span><span class="si">{</span><span class="n">list_key</span><span class="si">}</span><span class="s2">: must be a list of strings"</span><span class="p">)</span>
 
-    <span class="n">mcp</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mcp&quot;</span><span class="p">)</span>
+    <span class="n">mcp</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"mcp"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">mcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mcp</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;coact.mcp: must be a list of {module, functions} entries&quot;</span><span class="p">)</span>
+            <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"coact.mcp: must be a list of {module, functions} entries"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mcp</span><span class="p">):</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                    <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;coact.mcp[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: must be a mapping&quot;</span><span class="p">)</span>
+                    <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"coact.mcp[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: must be a mapping"</span><span class="p">)</span>
                     <span class="k">continue</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;module&quot;</span><span class="p">):</span>
-                    <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;coact.mcp[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: missing required &#39;module&#39;&quot;</span><span class="p">)</span>
-                <span class="n">functions</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;functions&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"module"</span><span class="p">):</span>
+                    <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"coact.mcp[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: missing required 'module'"</span><span class="p">)</span>
+                <span class="n">functions</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"functions"</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">functions</span><span class="p">:</span>
                     <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;coact.mcp[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: missing required &#39;functions&#39; &quot;</span>
-                        <span class="s2">&quot;(a non-empty list of function names)&quot;</span>
+                        <span class="sa">f</span><span class="s2">"coact.mcp[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: missing required 'functions' "</span>
+                        <span class="s2">"(a non-empty list of function names)"</span>
                     <span class="p">)</span>
                 <span class="k">elif</span> <span class="ow">not</span> <span class="n">_is_list_of_str</span><span class="p">(</span><span class="n">functions</span><span class="p">):</span>
                     <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;coact.mcp[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: &#39;functions&#39; must be a list of strings&quot;</span>
+                        <span class="sa">f</span><span class="s2">"coact.mcp[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: 'functions' must be a list of strings"</span>
                     <span class="p">)</span>
 
-    <span class="n">returns</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;returns&quot;</span><span class="p">)</span>
+    <span class="n">returns</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"returns"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">returns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">returns</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;coact.returns: must be a mapping&quot;</span><span class="p">)</span>
+            <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"coact.returns: must be a mapping"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">has_ref</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">returns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;schema_ref&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">returns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">))</span>
-            <span class="n">has_inline</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">returns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;json_schema&quot;</span><span class="p">))</span>
+            <span class="n">has_ref</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">returns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"schema_ref"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">returns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ref"</span><span class="p">))</span>
+            <span class="n">has_inline</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">returns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"json_schema"</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">has_ref</span> <span class="ow">and</span> <span class="n">has_inline</span><span class="p">:</span>
                 <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="s2">&quot;coact.returns: provide only one of &#39;schema_ref&#39; or &#39;json_schema&#39;&quot;</span>
+                    <span class="s2">"coact.returns: provide only one of 'schema_ref' or 'json_schema'"</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="ow">not</span> <span class="n">has_ref</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_inline</span><span class="p">:</span>
                 <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="s2">&quot;coact.returns: needs one of &#39;schema_ref&#39; or &#39;json_schema&#39;&quot;</span>
+                    <span class="s2">"coact.returns: needs one of 'schema_ref' or 'json_schema'"</span>
                 <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">issues</span></div>
@@ -366,17 +366,17 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_coact_validator</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;``skill.create.validators`` adapter: validate the ``coact:`` block of a Skill.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""``skill.create.validators`` adapter: validate the ``coact:`` block of a Skill."""</span>
     <span class="k">return</span> <span class="n">validate_coact_block</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="register_validator">
 <a class="viewcode-back" href="../../module_docs/coact/frontmatter.html#coact.register_validator">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_validator</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register the coact-block validator into ``skill.create.validators`` (idempotent).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Register the coact-block validator into ``skill.create.validators`` (idempotent)."""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">skill.create</span><span class="w"> </span><span class="kn">import</span> <span class="n">validators</span>
 
-    <span class="n">validators</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;coact_frontmatter&quot;</span><span class="p">,</span> <span class="n">_coact_validator</span><span class="p">)</span></div>
+    <span class="n">validators</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"coact_frontmatter"</span><span class="p">,</span> <span class="n">_coact_validator</span><span class="p">)</span></div>
 
 </pre></div>
 

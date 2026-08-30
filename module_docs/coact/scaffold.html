@@ -139,11 +139,11 @@ written and its <code class="xref py py-class docutils literal notranslate"><spa
 topology-adjacent artifact coact produces (DECISIONS D8): coact writes it once
 and never runs it; you own the control flow from there.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">coact</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentDefinition</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">shim</span> <span class="o">=</span> <span class="n">scaffold_fleet</span><span class="p">([</span><span class="n">AgentDefinition</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;collector&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">),</span>
-<span class="gp">... </span>                        <span class="n">AgentDefinition</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;summarizer&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;AGENTS = [&quot;collector&quot;, &quot;summarizer&quot;]&#39;</span> <span class="ow">in</span> <span class="n">shim</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shim</span> <span class="o">=</span> <span class="n">scaffold_fleet</span><span class="p">([</span><span class="n">AgentDefinition</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">'collector'</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">'x'</span><span class="p">),</span>
+<span class="gp">... </span>                        <span class="n">AgentDefinition</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">'summarizer'</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">'y'</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">'AGENTS = ["collector", "summarizer"]'</span> <span class="ow">in</span> <span class="n">shim</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;backend=&quot;sdk&quot;&#39;</span> <span class="ow">in</span> <span class="n">shim</span> <span class="ow">and</span> <span class="s1">&#39;YOU OWN THIS FILE&#39;</span> <span class="ow">in</span> <span class="n">shim</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">'backend="sdk"'</span> <span class="ow">in</span> <span class="n">shim</span> <span class="ow">and</span> <span class="s1">'YOU OWN THIS FILE'</span> <span class="ow">in</span> <span class="n">shim</span>
 <span class="go">True</span>
 </pre></div>
 </div>

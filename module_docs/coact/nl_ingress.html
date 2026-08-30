@@ -166,14 +166,14 @@ refs (<code class="docutils literal notranslate"><span class="pre">spec.runnable
 </dl>
 <p>Example (offline, with an injected backend):</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reply</span> <span class="o">=</span> <span class="p">(</span>
-<span class="gp">... </span>    <span class="s1">&#39;{&quot;name&quot;: &quot;wx&quot;, &quot;description&quot;: &quot;weather&quot;,&#39;</span>
-<span class="gp">... </span>    <span class="s1">&#39; &quot;tools&quot;: [{&quot;name&quot;: &quot;get_weather&quot;, &quot;description&quot;: &quot;lookup&quot;,&#39;</span>
-<span class="gp">... </span>    <span class="s1">&#39; &quot;input_schema&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;city&quot;:&#39;</span>
-<span class="gp">... </span>    <span class="s1">&#39; {&quot;type&quot;: &quot;string&quot;}}}, &quot;handler&quot;: null}]}&#39;</span>
+<span class="gp">... </span>    <span class="s1">'{"name": "wx", "description": "weather",'</span>
+<span class="gp">... </span>    <span class="s1">' "tools": [{"name": "get_weather", "description": "lookup",'</span>
+<span class="gp">... </span>    <span class="s1">' "input_schema": {"type": "object", "properties": {"city":'</span>
+<span class="gp">... </span>    <span class="s1">' {"type": "string"}}}, "handler": null}]}'</span>
 <span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">spec</span> <span class="o">=</span> <span class="n">integration_spec_from_description</span><span class="p">(</span><span class="s2">&quot;a weather tool&quot;</span><span class="p">,</span> <span class="n">llm</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="o">**</span><span class="n">k</span><span class="p">:</span> <span class="n">reply</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spec</span> <span class="o">=</span> <span class="n">integration_spec_from_description</span><span class="p">(</span><span class="s2">"a weather tool"</span><span class="p">,</span> <span class="n">llm</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="o">**</span><span class="n">k</span><span class="p">:</span> <span class="n">reply</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">tool_specs</span><span class="p">],</span> <span class="n">spec</span><span class="o">.</span><span class="n">runnable_refs</span><span class="p">()</span>
-<span class="go">(&#39;wx&#39;, [&#39;get_weather&#39;], [])</span>
+<span class="go">('wx', ['get_weather'], [])</span>
 </pre></div>
 </div>
 </dd></dl>

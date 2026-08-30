@@ -129,8 +129,8 @@ only in packaging + where it runs (§9.1/§9.3 of that doc).</p>
 <p><code class="docutils literal notranslate"><span class="pre">dry_run</span></code> mirrors <code class="docutils literal notranslate"><span class="pre">realize(backend='host',</span> <span class="pre">dry_run=True)</span></code>: in a dry run
 <code class="docutils literal notranslate"><span class="pre">artifact</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> and <code class="docutils literal notranslate"><span class="pre">files</span></code> holds the would-write bundle members
 (relpath → short preview), so you can look before you leap.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PublishResult</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="s1">&#39;claude-local-mcpb&#39;</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-<span class="go">&quot;Would publish (target=&#39;claude-local-mcpb&#39;, dry-run)&quot;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PublishResult</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="s1">'claude-local-mcpb'</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">"Would publish (target='claude-local-mcpb', dry-run)"</span>
 </pre></div>
 </div>
 <dl class="py method">

@@ -98,7 +98,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for coact.realize_litellm</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;LiteLLM realization backend — proof that the canonical definition is portable.</span>
+<span></span><span class="sd">"""LiteLLM realization backend — proof that the canonical definition is portable.</span>
 
 <span class="sd">The ``host``/``sdk`` backends realize an :class:`~coact.base.AgentDefinition`</span>
 <span class="sd">against the *Anthropic* stack. This backend realizes the **same** definition</span>
@@ -114,7 +114,7 @@
 <span class="sd">into :data:`coact.realize.backends` on import — **no core change** (open-closed).</span>
 
 <span class="sd">Topology stays out (D8): one definition → one runnable; no graph is serialized.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -129,36 +129,36 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.return_contract</span><span class="w"> </span><span class="kn">import</span> <span class="n">render_json_return_instruction</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_requirements</span><span class="p">,</span> <span class="n">first_balanced_span</span>
 
-<span class="c1">#: Map coact&#39;s model *selectors* to LiteLLM model strings. Data, not code — pass a</span>
-<span class="c1">#: ``model_map=`` to ``realize(..., backend=&#39;litellm&#39;)`` to target any provider.</span>
+<span class="c1">#: Map coact's model *selectors* to LiteLLM model strings. Data, not code — pass a</span>
+<span class="c1">#: ``model_map=`` to ``realize(..., backend='litellm')`` to target any provider.</span>
 <span class="c1">#: An explicit LiteLLM string in ``AgentDefinition.model`` is used verbatim.</span>
 <span class="n">DEFAULT_MODEL_MAP</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;haiku&quot;</span><span class="p">:</span> <span class="s2">&quot;anthropic/claude-3-5-haiku-latest&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sonnet&quot;</span><span class="p">:</span> <span class="s2">&quot;anthropic/claude-sonnet-4-5&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;opus&quot;</span><span class="p">:</span> <span class="s2">&quot;anthropic/claude-opus-4-1&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;inherit&quot;</span><span class="p">:</span> <span class="s2">&quot;openai/gpt-4o-mini&quot;</span><span class="p">,</span>
+    <span class="s2">"haiku"</span><span class="p">:</span> <span class="s2">"anthropic/claude-3-5-haiku-latest"</span><span class="p">,</span>
+    <span class="s2">"sonnet"</span><span class="p">:</span> <span class="s2">"anthropic/claude-sonnet-4-5"</span><span class="p">,</span>
+    <span class="s2">"opus"</span><span class="p">:</span> <span class="s2">"anthropic/claude-opus-4-1"</span><span class="p">,</span>
+    <span class="s2">"inherit"</span><span class="p">:</span> <span class="s2">"openai/gpt-4o-mini"</span><span class="p">,</span>
 <span class="p">}</span>
 <span class="c1">#: Used when the definition pins no model and none maps.</span>
-<span class="n">DEFAULT_MODEL</span> <span class="o">=</span> <span class="s2">&quot;openai/gpt-4o-mini&quot;</span>
+<span class="n">DEFAULT_MODEL</span> <span class="o">=</span> <span class="s2">"openai/gpt-4o-mini"</span>
 
 
 <div class="viewcode-block" id="RunnableLLMAgent">
 <a class="viewcode-back" href="../../module_docs/coact/realize_litellm.html#coact.RunnableLLMAgent">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RunnableLLMAgent</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;An ``aw.AgenticStep``-compatible runnable backed by LiteLLM (any provider).</span>
+<span class="w">    </span><span class="sd">"""An ``aw.AgenticStep``-compatible runnable backed by LiteLLM (any provider).</span>
 
 <span class="sd">    The return contract is realized two ways at once (belt-and-suspenders, since</span>
 <span class="sd">    provider support for structured output varies): the JSON Schema is passed as</span>
-<span class="sd">    LiteLLM&#39;s ``response_format`` *and* embedded as an instruction in the system</span>
+<span class="sd">    LiteLLM's ``response_format`` *and* embedded as an instruction in the system</span>
 <span class="sd">    message. ``completion`` is injectable so the agent runs in tests with no API</span>
 <span class="sd">    key; LiteLLM is imported lazily only on the default path.</span>
 
 <span class="sd">    &gt;&gt;&gt; from coact import AgentDefinition, ReturnContract</span>
-<span class="sd">    &gt;&gt;&gt; ad = AgentDefinition(name=&#39;x&#39;, description=&#39;d&#39;, prompt=&#39;You are X.&#39;, model=&#39;sonnet&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; ad = AgentDefinition(name='x', description='d', prompt='You are X.', model='sonnet')</span>
 <span class="sd">    &gt;&gt;&gt; RunnableLLMAgent(ad).resolve_model()</span>
-<span class="sd">    &#39;anthropic/claude-sonnet-4-5&#39;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    'anthropic/claude-sonnet-4-5'</span>
+<span class="sd">    """</span>
 
     <span class="n">agent_def</span><span class="p">:</span> <span class="n">AgentDefinition</span>
     <span class="n">model_map</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">DEFAULT_MODEL_MAP</span><span class="p">))</span>
@@ -169,19 +169,19 @@
     <span class="n">use_response_format</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># Defensive copy: a caller&#39;s dict (passed directly, bypassing realize_litellm)</span>
+        <span class="c1"># Defensive copy: a caller's dict (passed directly, bypassing realize_litellm)</span>
         <span class="c1"># must not be aliased into the agent — nor mutated by it.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_map</span><span class="p">)</span>
 
 <div class="viewcode-block" id="RunnableLLMAgent.resolve_model">
 <a class="viewcode-back" href="../../module_docs/coact/realize_litellm.html#coact.RunnableLLMAgent.resolve_model">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">resolve_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Map the definition&#39;s model selector to a LiteLLM model string.</span>
+<span class="w">        </span><span class="sd">"""Map the definition's model selector to a LiteLLM model string.</span>
 
 <span class="sd">        A mapped selector wins; an explicit LiteLLM string in ``model`` is used</span>
 <span class="sd">        verbatim; otherwise ``default_model``. The lookup covers any hashable</span>
 <span class="sd">        selector (so a ``model_map`` entry always applies if present).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">model</span>
         <span class="k">if</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span><span class="p">[</span><span class="n">model</span><span class="p">]</span>
@@ -191,32 +191,32 @@
 <div class="viewcode-block" id="RunnableLLMAgent.build_messages">
 <a class="viewcode-back" href="../../module_docs/coact/realize_litellm.html#coact.RunnableLLMAgent.build_messages">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build the chat messages: persona (+ return-contract instruction) then input.&quot;&quot;&quot;</span>
-        <span class="n">system</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">prompt</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Build the chat messages: persona (+ return-contract instruction) then input."""</span>
+        <span class="n">system</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">prompt</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s2">""</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">schema</span><span class="p">:</span>
-            <span class="n">system</span> <span class="o">=</span> <span class="p">(</span><span class="n">system</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">render_json_return_instruction</span><span class="p">(</span><span class="n">schema</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">system</span> <span class="o">=</span> <span class="p">(</span><span class="n">system</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n\n</span><span class="s2">"</span> <span class="o">+</span> <span class="n">render_json_return_instruction</span><span class="p">(</span><span class="n">schema</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">user</span> <span class="o">=</span> <span class="n">input_data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">_to_user_text</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
         <span class="n">messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">system</span><span class="p">:</span>
-            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">system</span><span class="p">})</span>
-        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">user</span><span class="p">})</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"system"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">system</span><span class="p">})</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">user</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">messages</span></div>
 
 
 <div class="viewcode-block" id="RunnableLLMAgent.build_kwargs">
 <a class="viewcode-back" href="../../module_docs/coact/realize_litellm.html#coact.RunnableLLMAgent.build_kwargs">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build the ``litellm.completion`` kwargs (model, messages, response_format).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Build the ``litellm.completion`` kwargs (model, messages, response_format)."""</span>
         <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve_model</span><span class="p">(),</span>
-            <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_messages</span><span class="p">(</span><span class="n">input_data</span><span class="p">),</span>
+            <span class="s2">"model"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve_model</span><span class="p">(),</span>
+            <span class="s2">"messages"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_messages</span><span class="p">(</span><span class="n">input_data</span><span class="p">),</span>
         <span class="p">}</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">schema</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_response_format</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;response_format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;json_schema&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;json_schema&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;return_contract&quot;</span><span class="p">,</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">schema</span><span class="p">},</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"response_format"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"json_schema"</span><span class="p">,</span>
+                <span class="s2">"json_schema"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"return_contract"</span><span class="p">,</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">schema</span><span class="p">},</span>
             <span class="p">}</span>
         <span class="k">return</span> <span class="n">kwargs</span></div>
 
@@ -226,18 +226,18 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the agent over ``input_data``; return ``(artifact, info)`` (aw protocol).</span>
+<span class="w">        </span><span class="sd">"""Run the agent over ``input_data``; return ``(artifact, info)`` (aw protocol).</span>
 
 <span class="sd">        ``context`` is accepted for ``aw.AgenticStep`` compatibility and ignored by</span>
 <span class="sd">        this backend. If a provider rejects the structured ``response_format``, the</span>
 <span class="sd">        call is retried once **without** it — the schema is still requested via the</span>
 <span class="sd">        system-prompt instruction (the belt-and-suspenders fallback made functional).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">completion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">completion</span>
         <span class="k">if</span> <span class="n">completion</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Only the real path needs litellm; an injected completion does not.</span>
             <span class="n">check_requirements</span><span class="p">(</span>
-                <span class="p">{</span><span class="s2">&quot;litellm&quot;</span><span class="p">:</span> <span class="s2">&quot;litellm&quot;</span><span class="p">},</span> <span class="n">feature</span><span class="o">=</span><span class="s2">&quot;realize(backend=&#39;litellm&#39;)&quot;</span>
+                <span class="p">{</span><span class="s2">"litellm"</span><span class="p">:</span> <span class="s2">"litellm"</span><span class="p">},</span> <span class="n">feature</span><span class="o">=</span><span class="s2">"realize(backend='litellm')"</span>
             <span class="p">)</span>
             <span class="n">completion</span> <span class="o">=</span> <span class="n">_default_litellm_completion</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_kwargs</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
@@ -247,29 +247,29 @@
         <span class="n">has_schema</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">schema</span><span class="p">())</span>
         <span class="n">artifact</span> <span class="o">=</span> <span class="n">_extract_litellm_artifact</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">has_schema</span><span class="o">=</span><span class="n">has_schema</span><span class="p">)</span>
         <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;agent&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-            <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="s2">&quot;litellm&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;structured&quot;</span><span class="p">:</span> <span class="n">has_schema</span><span class="p">,</span>
-            <span class="s2">&quot;response_format_used&quot;</span><span class="p">:</span> <span class="n">response_format_used</span><span class="p">,</span>
-            <span class="s2">&quot;raw&quot;</span><span class="p">:</span> <span class="n">raw</span><span class="p">,</span>
+            <span class="s2">"agent"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">"model"</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">"model"</span><span class="p">],</span>
+            <span class="s2">"backend"</span><span class="p">:</span> <span class="s2">"litellm"</span><span class="p">,</span>
+            <span class="s2">"structured"</span><span class="p">:</span> <span class="n">has_schema</span><span class="p">,</span>
+            <span class="s2">"response_format_used"</span><span class="p">:</span> <span class="n">response_format_used</span><span class="p">,</span>
+            <span class="s2">"raw"</span><span class="p">:</span> <span class="n">raw</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="c1"># Surface (don&#39;t bury) the error that forced the no-response_format retry,</span>
-        <span class="c1"># so a caller can tell &quot;provider rejected structured output&quot; from a real</span>
+        <span class="c1"># Surface (don't bury) the error that forced the no-response_format retry,</span>
+        <span class="c1"># so a caller can tell "provider rejected structured output" from a real</span>
         <span class="c1"># network/auth failure that we happened to recover from on the retry.</span>
         <span class="k">if</span> <span class="n">fallback_error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">info</span><span class="p">[</span><span class="s2">&quot;response_format_error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">fallback_error</span><span class="p">)</span>
+            <span class="n">info</span><span class="p">[</span><span class="s2">"response_format_error"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">fallback_error</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">artifact</span><span class="p">,</span> <span class="n">info</span></div>
 </div>
 
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_to_user_text</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render a non-string ``input_data`` as the user message — JSON when possible.</span>
+<span class="w">    </span><span class="sd">"""Render a non-string ``input_data`` as the user message — JSON when possible.</span>
 
-<span class="sd">    JSON beats ``repr`` for a schema-aware model (``{&quot;k&quot;: &quot;v&quot;}`` not ``{&#39;k&#39;: &#39;v&#39;}``);</span>
+<span class="sd">    JSON beats ``repr`` for a schema-aware model (``{"k": "v"}`` not ``{'k': 'v'}``);</span>
 <span class="sd">    falls back to ``repr`` for anything not JSON-serializable.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
     <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
@@ -279,35 +279,35 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_complete_with_fallback</span><span class="p">(</span>
     <span class="n">completion</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">Exception</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Call ``completion``; if ``response_format`` is rejected, retry once without it.</span>
+<span class="w">    </span><span class="sd">"""Call ``completion``; if ``response_format`` is rejected, retry once without it.</span>
 
 <span class="sd">    Returns ``(response, response_format_used, fallback_error)``. The schema is</span>
 <span class="sd">    still requested via the system-prompt instruction, so dropping</span>
-<span class="sd">    ``response_format`` on a provider that doesn&#39;t support it degrades gracefully</span>
+<span class="sd">    ``response_format`` on a provider that doesn't support it degrades gracefully</span>
 <span class="sd">    instead of hard-failing. The ``except`` is deliberately broad — providers</span>
-<span class="sd">    signal &quot;structured output unsupported&quot; with wildly different exception types —</span>
+<span class="sd">    signal "structured output unsupported" with wildly different exception types —</span>
 <span class="sd">    but the caught error is **returned** (not swallowed) so ``execute`` can record</span>
-<span class="sd">    it in ``info[&#39;response_format_error&#39;]``: a transient network/auth failure on</span>
+<span class="sd">    it in ``info['response_format_error']``: a transient network/auth failure on</span>
 <span class="sd">    the first call that the retry happens to mask stays observable.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="s2">&quot;response_format&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="s2">"response_format"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">completion</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">completion</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-        <span class="n">retry</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">&quot;response_format&quot;</span><span class="p">}</span>
+        <span class="n">retry</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">"response_format"</span><span class="p">}</span>
         <span class="k">return</span> <span class="n">completion</span><span class="p">(</span><span class="o">**</span><span class="n">retry</span><span class="p">),</span> <span class="kc">False</span><span class="p">,</span> <span class="n">error</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_default_litellm_completion</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Call the real ``litellm.completion`` (imported lazily).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Call the real ``litellm.completion`` (imported lazily)."""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">litellm</span><span class="w"> </span><span class="kn">import</span> <span class="n">completion</span>
 
     <span class="k">return</span> <span class="n">completion</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_extract_litellm_artifact</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">has_schema</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pull the assistant content from an OpenAI-style response; JSON-parse if structured.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Pull the assistant content from an OpenAI-style response; JSON-parse if structured."""</span>
     <span class="n">content</span> <span class="o">=</span> <span class="n">_litellm_content</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">raw</span>
@@ -319,48 +319,48 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_litellm_content</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract ``choices[0].message.content`` from a LiteLLM ModelResponse or dict.&quot;&quot;&quot;</span>
-    <span class="n">choices</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="s2">&quot;choices&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">"""Extract ``choices[0].message.content`` from a LiteLLM ModelResponse or dict."""</span>
+    <span class="n">choices</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="s2">"choices"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">choices</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="n">choices</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;choices&quot;</span><span class="p">)</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"choices"</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">choices</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="n">first</span> <span class="o">=</span> <span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">message</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="s2">"message"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="n">first</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;message&quot;</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="n">first</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"message"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">content</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="n">content</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"content"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">content</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_try_json</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Best-effort parse of JSON content, tolerating a ```` ```json ```` fenced block.</span>
+<span class="w">    </span><span class="sd">"""Best-effort parse of JSON content, tolerating a ```` ```json ```` fenced block.</span>
 
-<span class="sd">    Tries, in order: the raw string; the fenced block&#39;s body (handling both a</span>
+<span class="sd">    Tries, in order: the raw string; the fenced block's body (handling both a</span>
 <span class="sd">    newline after the language tag and the malformed no-newline form); and finally</span>
 <span class="sd">    the *first top-level* depth-balanced ``{...}`` / ``[...]`` span embedded in</span>
 <span class="sd">    prose. Returns ``None`` on non-strings or when nothing parses.</span>
 
 <span class="sd">    The span step uses :func:`coact.util.first_balanced_span`, not a naive</span>
 <span class="sd">    ``find``/``rfind`` pair: the latter mismatched openers/closers, so</span>
-<span class="sd">    ``&#39;{found: [1,2,3]}&#39;`` (an invalid object) wrongly yielded the nested</span>
+<span class="sd">    ``'{found: [1,2,3]}'`` (an invalid object) wrongly yielded the nested</span>
 <span class="sd">    ``[1,2,3]``, and a trailing stray ``}`` made a valid object unparseable.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="n">stripped</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
     <span class="n">candidates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">stripped</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;```&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"```"</span><span class="p">):</span>
         <span class="n">body</span> <span class="o">=</span> <span class="n">stripped</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
-        <span class="n">body</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;```&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># drop the closing fence</span>
-        <span class="k">if</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">body</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">"```"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># drop the closing fence</span>
+        <span class="k">if</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="ow">in</span> <span class="n">body</span><span class="p">:</span>
             <span class="c1"># the first line is the (optional) language tag; the rest is the payload</span>
-            <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># no-newline form, e.g. ```json{...}</span>
 
     <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
@@ -373,7 +373,7 @@
     <span class="c1"># fragment from an unparseable span would violate the return contract.</span>
     <span class="n">best_start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">best_span</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">for</span> <span class="n">opener</span><span class="p">,</span> <span class="n">closer</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="s2">&quot;]&quot;</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">opener</span><span class="p">,</span> <span class="n">closer</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"{"</span><span class="p">,</span> <span class="s2">"}"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"["</span><span class="p">,</span> <span class="s2">"]"</span><span class="p">)):</span>
         <span class="n">span</span> <span class="o">=</span> <span class="n">first_balanced_span</span><span class="p">(</span><span class="n">stripped</span><span class="p">,</span> <span class="n">opener</span><span class="p">,</span> <span class="n">closer</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">span</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">continue</span>
@@ -399,16 +399,16 @@
     <span class="n">use_response_format</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">policy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletionPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RunnableLLMAgent</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Realize one agent as a provider-agnostic :class:`RunnableLLMAgent` (via LiteLLM).</span>
+<span class="w">    </span><span class="sd">"""Realize one agent as a provider-agnostic :class:`RunnableLLMAgent` (via LiteLLM).</span>
 
 <span class="sd">    ``model_map`` overrides how coact model selectors (``sonnet``/``opus``/``haiku``)</span>
 <span class="sd">    map to LiteLLM model strings — point them at any provider to prove portability.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">agents</span> <span class="o">=</span> <span class="n">coerce_agents</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;backend=&#39;litellm&#39; realizes exactly one agent; got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
-            <span class="s2">&quot;Realize each separately (topology is out of scope — DECISIONS D8).&quot;</span>
+            <span class="sa">f</span><span class="s2">"backend='litellm' realizes exactly one agent; got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">agents</span><span class="p">)</span><span class="si">}</span><span class="s2">. "</span>
+            <span class="s2">"Realize each separately (topology is out of scope — DECISIONS D8)."</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">RunnableLLMAgent</span><span class="p">(</span>
         <span class="n">agent_def</span><span class="o">=</span><span class="n">agents</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
@@ -420,7 +420,7 @@
 
 
 
-<span class="n">backends</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;litellm&quot;</span><span class="p">,</span> <span class="n">realize_litellm</span><span class="p">)</span>
+<span class="n">backends</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"litellm"</span><span class="p">,</span> <span class="n">realize_litellm</span><span class="p">)</span>
 </pre></div>
 
            </div>

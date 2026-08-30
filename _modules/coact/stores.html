@@ -98,15 +98,15 @@
            <div itemprop="articleBody">
              
   <h1>Source code for coact.stores</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Mapping facades over agent definitions on disk.</span>
+<span></span><span class="sd">"""Mapping facades over agent definitions on disk.</span>
 
-<span class="sd">COACT_SPEC §8 (&quot;prefer Mapping/MutableMapping facades — a skills store, an</span>
-<span class="sd">agents store&quot;) mirroring ``skill.stores.LocalSkillStore``. :class:`AgentStore`</span>
+<span class="sd">COACT_SPEC §8 ("prefer Mapping/MutableMapping facades — a skills store, an</span>
+<span class="sd">agents store") mirroring ``skill.stores.LocalSkillStore``. :class:`AgentStore`</span>
 <span class="sd">is a ``MutableMapping[str, AgentDefinition]`` over a ``.claude/agents/``</span>
 <span class="sd">directory (one ``&lt;name&gt;.md`` per agent). Because it is a plain mapping, it drops</span>
-<span class="sd">straight into ``py2mcp.mk_mcp_from_store`` to expose a project&#39;s agents as CRUD</span>
+<span class="sd">straight into ``py2mcp.mk_mcp_from_store`` to expose a project's agents as CRUD</span>
 <span class="sd">over MCP, and into ``coact.analysis.inventory``.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -123,50 +123,50 @@
 <div class="viewcode-block" id="agents_dir">
 <a class="viewcode-back" href="../../module_docs/coact/stores.html#coact.agents_dir">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">agents_dir</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span> <span class="n">scope</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;project&quot;</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">scope</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"project"</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve the ``.claude/agents`` directory for the given scope.</span>
+<span class="w">    </span><span class="sd">"""Resolve the ``.claude/agents`` directory for the given scope.</span>
 
-<span class="sd">    ``scope=&#39;project&#39;`` resolves against the detected project root (or</span>
-<span class="sd">    ``project_dir``); ``scope=&#39;global&#39;`` resolves against ``~/.claude``.</span>
+<span class="sd">    ``scope='project'`` resolves against the detected project root (or</span>
+<span class="sd">    ``project_dir``); ``scope='global'`` resolves against ``~/.claude``.</span>
 
-<span class="sd">    &gt;&gt;&gt; agents_dir(scope=&#39;global&#39;).as_posix().endswith(&#39;.claude/agents&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; agents_dir(scope='global').as_posix().endswith('.claude/agents')</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">scope</span> <span class="o">==</span> <span class="s2">&quot;global&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.claude&quot;</span> <span class="o">/</span> <span class="s2">&quot;agents&quot;</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">scope</span> <span class="o">==</span> <span class="s2">"global"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".claude"</span> <span class="o">/</span> <span class="s2">"agents"</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">project_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">find_project_root</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;.claude&quot;</span> <span class="o">/</span> <span class="s2">&quot;agents&quot;</span></div>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="o">/</span> <span class="s2">".claude"</span> <span class="o">/</span> <span class="s2">"agents"</span></div>
 
 
 
 <div class="viewcode-block" id="AgentStore">
 <a class="viewcode-back" href="../../module_docs/coact/stores.html#coact.AgentStore">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AgentStore</span><span class="p">(</span><span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">AgentDefinition</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A ``MutableMapping[str, AgentDefinition]`` over a ``.claude/agents/`` dir.</span>
+<span class="w">    </span><span class="sd">"""A ``MutableMapping[str, AgentDefinition]`` over a ``.claude/agents/`` dir.</span>
 
 <span class="sd">    Keys are agent names; each agent is one ``&lt;name&gt;.md`` file.</span>
 
 <span class="sd">    &gt;&gt;&gt; import tempfile</span>
 <span class="sd">    &gt;&gt;&gt; from coact.base import AgentDefinition</span>
 <span class="sd">    &gt;&gt;&gt; store = AgentStore(root=tempfile.mkdtemp())</span>
-<span class="sd">    &gt;&gt;&gt; store[&#39;ux&#39;] = AgentDefinition(name=&#39;ux&#39;, description=&#39;Analyze.&#39;, prompt=&#39;You are...&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; store['ux'] = AgentDefinition(name='ux', description='Analyze.', prompt='You are...')</span>
 <span class="sd">    &gt;&gt;&gt; list(store)</span>
-<span class="sd">    [&#39;ux&#39;]</span>
-<span class="sd">    &gt;&gt;&gt; store[&#39;ux&#39;].description</span>
-<span class="sd">    &#39;Analyze.&#39;</span>
-<span class="sd">    &gt;&gt;&gt; del store[&#39;ux&#39;]</span>
+<span class="sd">    ['ux']</span>
+<span class="sd">    &gt;&gt;&gt; store['ux'].description</span>
+<span class="sd">    'Analyze.'</span>
+<span class="sd">    &gt;&gt;&gt; del store['ux']</span>
 <span class="sd">    &gt;&gt;&gt; len(store)</span>
 <span class="sd">    0</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">root</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">scope</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;project&quot;</span><span class="p">,</span>
+        <span class="n">scope</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"project"</span><span class="p">,</span>
         <span class="n">project_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="p">(</span>
@@ -199,7 +199,7 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="k">return</span>
-        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.md&quot;</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.md"</span><span class="p">)):</span>
             <span class="k">yield</span> <span class="n">child</span><span class="o">.</span><span class="n">stem</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -214,7 +214,7 @@
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(root=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="si">!r}</span><span class="s2">)&quot;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(root=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="si">!r}</span><span class="s2">)"</span></div>
 
 </pre></div>
 

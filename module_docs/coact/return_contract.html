@@ -167,12 +167,12 @@ wrapper (a silent-collapse hazard).</p></li>
 <li><p>Any non-object schema (array / scalar) → wrapped under a <code class="docutils literal notranslate"><span class="pre">result</span></code> key, with
 that key returned so extraction can unwrap it.</p></li>
 </ul>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">as_object_schema</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="p">{}}})[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">as_object_schema</span><span class="p">({</span><span class="s1">'type'</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">,</span> <span class="s1">'properties'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'a'</span><span class="p">:</span> <span class="p">{}}})[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">as_object_schema</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">})</span>  <span class="c1"># free-form object: passed through, not wrapped</span>
-<span class="go">({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {}}, None)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">as_object_schema</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;array&#39;</span><span class="p">,</span> <span class="s1">&#39;items&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">}})</span>
-<span class="go">({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {&#39;result&#39;: {&#39;type&#39;: &#39;array&#39;, &#39;items&#39;: {&#39;type&#39;: &#39;string&#39;}}}, &#39;required&#39;: [&#39;result&#39;]}, &#39;result&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">as_object_schema</span><span class="p">({</span><span class="s1">'type'</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">})</span>  <span class="c1"># free-form object: passed through, not wrapped</span>
+<span class="go">({'type': 'object', 'properties': {}}, None)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">as_object_schema</span><span class="p">({</span><span class="s1">'type'</span><span class="p">:</span> <span class="s1">'array'</span><span class="p">,</span> <span class="s1">'items'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'type'</span><span class="p">:</span> <span class="s1">'string'</span><span class="p">}})</span>
+<span class="go">({'type': 'object', 'properties': {'result': {'type': 'array', 'items': {'type': 'string'}}}, 'required': ['result']}, 'result')</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -181,10 +181,10 @@ that key returned so extraction can unwrap it.</p></li>
 <dt class="sig sig-object py" id="coact.return_contract.auto_return_mode">
 <span class="sig-prename descclassname"><span class="pre">coact.return_contract.</span></span><span class="sig-name descname"><span class="pre">auto_return_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">option_field_names</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/coact/return_contract.html#auto_return_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.return_contract.auto_return_mode" title="Link to this definition"></a></dt>
 <dd><p>Pick the return mode in <code class="docutils literal notranslate"><span class="pre">auto</span></code>: native <code class="docutils literal notranslate"><span class="pre">output_format</span></code> if the SDK has it.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">auto_return_mode</span><span class="p">({</span><span class="s1">&#39;system_prompt&#39;</span><span class="p">,</span> <span class="s1">&#39;output_format&#39;</span><span class="p">})</span>
-<span class="go">&#39;output_format&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">auto_return_mode</span><span class="p">({</span><span class="s1">&#39;system_prompt&#39;</span><span class="p">})</span>  <span class="c1"># older SDK without the field</span>
-<span class="go">&#39;tool&#39;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">auto_return_mode</span><span class="p">({</span><span class="s1">'system_prompt'</span><span class="p">,</span> <span class="s1">'output_format'</span><span class="p">})</span>
+<span class="go">'output_format'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">auto_return_mode</span><span class="p">({</span><span class="s1">'system_prompt'</span><span class="p">})</span>  <span class="c1"># older SDK without the field</span>
+<span class="go">'tool'</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -206,11 +206,11 @@ non-object return type), the single <code class="docutils literal notranslate"><
 (<code class="docutils literal notranslate"><span class="pre">…__coact_return__return_result</span></code>). Deliberately does <strong>not</strong> match a bare
 <code class="docutils literal notranslate"><span class="pre">return_result</span></code> or a <code class="docutils literal notranslate"><span class="pre">return_result</span></code> on a <em>different</em> MCP server, so a
 user’s own same-named tool is never mistaken for the return contract.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">is_return_tool</span><span class="p">(</span><span class="s1">&#39;mcp__coact_return__return_result&#39;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">is_return_tool</span><span class="p">(</span><span class="s1">'mcp__coact_return__return_result'</span><span class="p">)</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">is_return_tool</span><span class="p">(</span><span class="s1">&#39;mcp__other_server__return_result&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_return_tool</span><span class="p">(</span><span class="s1">'mcp__other_server__return_result'</span><span class="p">)</span>
 <span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">is_return_tool</span><span class="p">(</span><span class="s1">&#39;Read&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_return_tool</span><span class="p">(</span><span class="s1">'Read'</span><span class="p">)</span>
 <span class="go">False</span>
 </pre></div>
 </div>

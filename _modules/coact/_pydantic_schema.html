@@ -98,9 +98,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for coact._pydantic_schema</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Synthesize a pydantic model class from a coact JSON-Schema return contract.</span>
+<span></span><span class="sd">"""Synthesize a pydantic model class from a coact JSON-Schema return contract.</span>
 
-<span class="sd">Needed only where a realization backend&#39;s structured-output API wants a *type*</span>
+<span class="sd">Needed only where a realization backend's structured-output API wants a *type*</span>
 <span class="sd">rather than a JSON-Schema dict — currently just the ``crewai`` backend, whose</span>
 <span class="sd">``Agent.kickoff(response_format=&lt;class&gt;)`` is class-only. The ``langgraph``</span>
 <span class="sd">backend passes the canonical JSON-Schema dict straight into</span>
@@ -112,7 +112,7 @@
 <span class="sd">to the portable in-prompt return-contract instruction (DECISIONS D6) instead of</span>
 <span class="sd">fabricating a lossy model. Pydantic is imported **lazily** (it ships with crewai</span>
 <span class="sd">on the real path), so importing this module is free and does not pull pydantic.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -120,28 +120,28 @@
 
 <span class="c1">#: JSON-Schema type -&gt; Python type for pydantic field annotations (unknown -&gt; Any).</span>
 <span class="n">_JSON_TO_PY</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;string&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="s2">&quot;integer&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="s2">&quot;boolean&quot;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-    <span class="s2">&quot;array&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-    <span class="s2">&quot;object&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="s2">"string"</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s2">"integer"</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="s2">"number"</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="s2">"boolean"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="s2">"array"</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="s2">"object"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
 <span class="p">}</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_is_flat_property</span><span class="p">(</span><span class="n">prop</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;True when a property schema maps to one Python type with no nesting.</span>
+<span class="w">    </span><span class="sd">"""True when a property schema maps to one Python type with no nesting.</span>
 
 <span class="sd">    Rejects composition (``$ref``/``anyOf``/``oneOf``/``allOf`` — which coact will</span>
 <span class="sd">    not fake-flatten) and a nested object that declares its own ``properties``</span>
 <span class="sd">    (that would require a sub-model). A nested object *without* ``properties`` is</span>
 <span class="sd">    fine (it maps to ``dict``).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">&amp;</span> <span class="p">{</span><span class="s2">&quot;$ref&quot;</span><span class="p">,</span> <span class="s2">&quot;anyOf&quot;</span><span class="p">,</span> <span class="s2">&quot;oneOf&quot;</span><span class="p">,</span> <span class="s2">&quot;allOf&quot;</span><span class="p">}:</span>
+    <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">&amp;</span> <span class="p">{</span><span class="s2">"$ref"</span><span class="p">,</span> <span class="s2">"anyOf"</span><span class="p">,</span> <span class="s2">"oneOf"</span><span class="p">,</span> <span class="s2">"allOf"</span><span class="p">}:</span>
         <span class="k">return</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span> <span class="ow">and</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"object"</span> <span class="ow">and</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"properties"</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">False</span>
     <span class="k">return</span> <span class="kc">True</span>
 
@@ -149,11 +149,11 @@
 <div class="viewcode-block" id="json_schema_to_model">
 <a class="viewcode-back" href="../../module_docs/coact/_pydantic_schema.html#coact._pydantic_schema.json_schema_to_model">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">json_schema_to_model</span><span class="p">(</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ReturnContract&quot;</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"ReturnContract"</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">type</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flat JSON-Schema object -&gt; a pydantic ``BaseModel`` subclass, else ``None``.</span>
+<span class="w">    </span><span class="sd">"""Flat JSON-Schema object -&gt; a pydantic ``BaseModel`` subclass, else ``None``.</span>
 
-<span class="sd">    Handles ``{&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {...}, &quot;required&quot;: [...]}`` whose</span>
+<span class="sd">    Handles ``{"type": "object", "properties": {...}, "required": [...]}`` whose</span>
 <span class="sd">    property types are scalars/array/object (``string``-&gt;``str``,</span>
 <span class="sd">    ``integer``-&gt;``int``, ``number``-&gt;``float``, ``boolean``-&gt;``bool``,</span>
 <span class="sd">    ``array``-&gt;``list``, ``object``-&gt;``dict``, unknown-&gt;``Any``). A property absent</span>
@@ -162,30 +162,30 @@
 <span class="sd">    ``$ref``/``anyOf``/``oneOf``/nested-object-with-properties property) returns</span>
 <span class="sd">    ``None`` so the caller relies on the prompt instruction. Never raises.</span>
 
-<span class="sd">    &gt;&gt;&gt; json_schema_to_model({&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}}) is None</span>
+<span class="sd">    &gt;&gt;&gt; json_schema_to_model({"type": "array", "items": {"type": "string"}}) is None</span>
 <span class="sd">    True</span>
 <span class="sd">    &gt;&gt;&gt; json_schema_to_model({}) is None</span>
 <span class="sd">    True</span>
-<span class="sd">    &gt;&gt;&gt; json_schema_to_model({&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {}}) is None</span>
+<span class="sd">    &gt;&gt;&gt; json_schema_to_model({"type": "object", "properties": {}}) is None</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="p">(</span>
         <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-        <span class="ow">or</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;object&quot;</span>
-        <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">),</span> <span class="nb">dict</span><span class="p">)</span>
-        <span class="ow">or</span> <span class="ow">not</span> <span class="n">schema</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">]</span>
+        <span class="ow">or</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"object"</span>
+        <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"properties"</span><span class="p">),</span> <span class="nb">dict</span><span class="p">)</span>
+        <span class="ow">or</span> <span class="ow">not</span> <span class="n">schema</span><span class="p">[</span><span class="s2">"properties"</span><span class="p">]</span>
     <span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">schema</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">]</span>
+    <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">schema</span><span class="p">[</span><span class="s2">"properties"</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">_is_flat_property</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">properties</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">required</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;required&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"required"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_model</span>
 
         <span class="n">fields</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">prop_name</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">properties</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">py_type</span> <span class="o">=</span> <span class="n">_JSON_TO_PY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">),</span> <span class="n">Any</span><span class="p">)</span>
+            <span class="n">py_type</span> <span class="o">=</span> <span class="n">_JSON_TO_PY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type"</span><span class="p">),</span> <span class="n">Any</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">prop_name</span> <span class="ow">in</span> <span class="n">required</span><span class="p">:</span>
                 <span class="n">fields</span><span class="p">[</span><span class="n">prop_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">py_type</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>

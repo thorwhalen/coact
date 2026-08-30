@@ -140,10 +140,10 @@ sit behind a TLS-terminating reverse proxy.</p>
 The OAuth parameters describe the <strong>managed IdP</strong> that issues tokens and <em>this</em>
 server’s public identity; when omitted, placeholder values + a loud warning are
 emitted so the scaffold is still useful (fill them in before going public).</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">publish_remote</span><span class="p">([</span><span class="s1">&#39;os.path:basename&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;paths&#39;</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">publish_remote</span><span class="p">([</span><span class="s1">'os.path:basename'</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">'paths'</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">dry_run</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">files</span><span class="p">)</span>
-<span class="go">(True, [&#39;DEPLOY.md&#39;, &#39;Dockerfile&#39;, &#39;requirements.txt&#39;, &#39;server/app.py&#39;,</span>
-<span class="go">        &#39;server/connector_config.json&#39;])</span>
+<span class="go">(True, ['DEPLOY.md', 'Dockerfile', 'requirements.txt', 'server/app.py',</span>
+<span class="go">        'server/connector_config.json'])</span>
 </pre></div>
 </div>
 </dd></dl>

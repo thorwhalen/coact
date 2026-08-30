@@ -98,15 +98,15 @@
            <div itemprop="articleBody">
              
   <h1>Source code for coact.nl_ingress</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;NL-description → IntegrationSpec — the **opt-in LLM ingress** for PUBLISH.</span>
+<span></span><span class="sd">"""NL-description → IntegrationSpec — the **opt-in LLM ingress** for PUBLISH.</span>
 
 <span class="sd">:func:`coact.integration.integration_spec_from` is the *mechanical* ingress: it</span>
-<span class="sd">turns ``&#39;module:function&#39;`` refs / callables / skills into an</span>
+<span class="sd">turns ``'module:function'`` refs / callables / skills into an</span>
 <span class="sd">:class:`~coact.integration.IntegrationSpec` with **zero** LLM (DECISIONS D10).</span>
 <span class="sd">This module is the *opt-in* LLM path — it refines a natural-language description</span>
 <span class="sd">of a desired integration into a **draft** ``IntegrationSpec`` (name, description,</span>
 <span class="sd">proposed tools with input JSON schemas), routing generation through ``aix``</span>
-<span class="sd">(provider-agnostic, per the route-through-aix policy) via ``oa``&#39;s</span>
+<span class="sd">(provider-agnostic, per the route-through-aix policy) via ``oa``'s</span>
 <span class="sd">prompt-as-function machinery.</span>
 
 <span class="sd">D10 is upheld two ways: (1) nothing on a mechanical path imports this module, and</span>
@@ -116,10 +116,10 @@
 
 <span class="sd">The result is a *draft*: each tool is *proposed* (no importable handler) unless</span>
 <span class="sd">the description named existing code. Binding proposed tools to real</span>
-<span class="sd">``module:function`` handlers — or supplying them — is the user&#39;s next step before</span>
+<span class="sd">``module:function`` handlers — or supplying them — is the user's next step before</span>
 <span class="sd">a runnable ``.mcpb`` can be built (coact writes the design; the user owns the</span>
 <span class="sd">code, mirroring the D8/D13 scaffold philosophy).</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -133,9 +133,9 @@
 <span class="n">LLMPromptFunc</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
 
 <span class="c1">#: The default integration-authoring prompt. A single ``{description}`` placeholder</span>
-<span class="c1">#: (no other ``{}`` — the JSON shape is described in prose so ``oa``&#39;s</span>
+<span class="c1">#: (no other ``{}`` — the JSON shape is described in prose so ``oa``'s</span>
 <span class="c1">#: ``str.format`` embodier sees exactly one field).</span>
-<span class="n">_INTEGRATION_AUTHORING_TEMPLATE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="n">_INTEGRATION_AUTHORING_TEMPLATE</span> <span class="o">=</span> <span class="s2">"""</span><span class="se">\</span>
 <span class="s2">You are an expert architect of AI-chatbot integrations (MCP servers).</span>
 
 <span class="s2">Turn the natural-language description below into a structured plan for an</span>
@@ -143,19 +143,19 @@
 
 <span class="s2">Respond with ONLY a single JSON object (no prose, no markdown fences). The JSON</span>
 <span class="s2">object must have exactly these keys:</span>
-<span class="s2">- &quot;name&quot;: a short kebab-case name for the integration (string).</span>
-<span class="s2">- &quot;description&quot;: one sentence summarizing what the integration does (string).</span>
-<span class="s2">- &quot;tools&quot;: an array of tool objects. Each tool object has:</span>
-<span class="s2">    - &quot;name&quot;: a snake_case verb_noun tool name (for example get_weather), string.</span>
-<span class="s2">    - &quot;description&quot;: what the tool does, when to use it, and key boundaries or</span>
+<span class="s2">- "name": a short kebab-case name for the integration (string).</span>
+<span class="s2">- "description": one sentence summarizing what the integration does (string).</span>
+<span class="s2">- "tools": an array of tool objects. Each tool object has:</span>
+<span class="s2">    - "name": a snake_case verb_noun tool name (for example get_weather), string.</span>
+<span class="s2">    - "description": what the tool does, when to use it, and key boundaries or</span>
 <span class="s2">      examples. Tool naming and description quality dominate reliability — make</span>
 <span class="s2">      each one precise and unambiguous (string).</span>
-<span class="s2">    - &quot;input_schema&quot;: a JSON Schema (draft 2020-12) describing the tool&#39;s input —</span>
+<span class="s2">    - "input_schema": a JSON Schema (draft 2020-12) describing the tool's input —</span>
 <span class="s2">      type object, a properties map, and a required list where appropriate.</span>
-<span class="s2">    - &quot;handler&quot;: a &quot;module:function&quot; reference ONLY if the description explicitly</span>
+<span class="s2">    - "handler": a "module:function" reference ONLY if the description explicitly</span>
 <span class="s2">      names existing importable code for this tool; otherwise null.</span>
-<span class="s2">- &quot;resources&quot;: an array of short names for readable data resources (or empty).</span>
-<span class="s2">- &quot;prompts&quot;: an array of short names for templated workflows (or empty).</span>
+<span class="s2">- "resources": an array of short names for readable data resources (or empty).</span>
+<span class="s2">- "prompts": an array of short names for templated workflows (or empty).</span>
 
 <span class="s2">Design guidance:</span>
 <span class="s2">- Prefer a few well-named, task-aligned tools over many overlapping ones.</span>
@@ -163,14 +163,14 @@
 
 <span class="s2">Natural-language description of the desired integration:</span>
 <span class="si">{description}</span>
-<span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">"""</span>
 
 <span class="c1">#: Per-target authoring-prompt library. coact owns these templates as the SSOT</span>
 <span class="c1">#: (one entry per publish target — extend as targets land). ``pyrompt`` is the</span>
 <span class="c1">#: recommended place to *manage and iterate* on authoring prompts; load one there</span>
 <span class="c1">#: and pass it via ``prompt_template=`` to override the default used here.</span>
 <span class="n">DFLT_AUTHORING_PROMPTS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;integration&quot;</span><span class="p">:</span> <span class="n">_INTEGRATION_AUTHORING_TEMPLATE</span><span class="p">,</span>
+    <span class="s2">"integration"</span><span class="p">:</span> <span class="n">_INTEGRATION_AUTHORING_TEMPLATE</span><span class="p">,</span>
 <span class="p">}</span>
 
 
@@ -182,15 +182,15 @@
     <span class="n">llm</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0.1.0&quot;</span><span class="p">,</span>
+    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"0.1.0"</span><span class="p">,</span>
     <span class="n">author</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">prompt_template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">infer_tool_schemas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntegrationSpec</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Refine a natural-language ``description`` into a **draft** IntegrationSpec.</span>
+<span class="w">    </span><span class="sd">"""Refine a natural-language ``description`` into a **draft** IntegrationSpec.</span>
 
 <span class="sd">    The opt-in LLM ingress (DECISIONS D10): generation is routed through ``aix``</span>
-<span class="sd">    (provider-agnostic) by default, via ``oa``&#39;s prompt-as-function machinery.</span>
+<span class="sd">    (provider-agnostic) by default, via ``oa``'s prompt-as-function machinery.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        description: What the integration should do, in plain language.</span>
@@ -216,40 +216,40 @@
 <span class="sd">    Example (offline, with an injected backend):</span>
 
 <span class="sd">    &gt;&gt;&gt; reply = (</span>
-<span class="sd">    ...     &#39;{&quot;name&quot;: &quot;wx&quot;, &quot;description&quot;: &quot;weather&quot;,&#39;</span>
-<span class="sd">    ...     &#39; &quot;tools&quot;: [{&quot;name&quot;: &quot;get_weather&quot;, &quot;description&quot;: &quot;lookup&quot;,&#39;</span>
-<span class="sd">    ...     &#39; &quot;input_schema&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;city&quot;:&#39;</span>
-<span class="sd">    ...     &#39; {&quot;type&quot;: &quot;string&quot;}}}, &quot;handler&quot;: null}]}&#39;</span>
+<span class="sd">    ...     '{"name": "wx", "description": "weather",'</span>
+<span class="sd">    ...     ' "tools": [{"name": "get_weather", "description": "lookup",'</span>
+<span class="sd">    ...     ' "input_schema": {"type": "object", "properties": {"city":'</span>
+<span class="sd">    ...     ' {"type": "string"}}}, "handler": null}]}'</span>
 <span class="sd">    ... )</span>
-<span class="sd">    &gt;&gt;&gt; spec = integration_spec_from_description(&quot;a weather tool&quot;, llm=lambda p, **k: reply)</span>
+<span class="sd">    &gt;&gt;&gt; spec = integration_spec_from_description("a weather tool", llm=lambda p, **k: reply)</span>
 <span class="sd">    &gt;&gt;&gt; spec.name, [t.name for t in spec.tool_specs], spec.runnable_refs()</span>
-<span class="sd">    (&#39;wx&#39;, [&#39;get_weather&#39;], [])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    ('wx', ['get_weather'], [])</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">description</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;description must be a non-empty string&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"description must be a non-empty string"</span><span class="p">)</span>
     <span class="c1"># `oa` is used on every path; `aix` only backs the default (None / model-name)</span>
     <span class="c1"># path — an injected callable needs neither aix installed nor a provider call.</span>
-    <span class="n">reqs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;oa&quot;</span><span class="p">:</span> <span class="s2">&quot;oa&quot;</span><span class="p">}</span>
+    <span class="n">reqs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"oa"</span><span class="p">:</span> <span class="s2">"oa"</span><span class="p">}</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">llm</span><span class="p">):</span>
-        <span class="n">reqs</span><span class="p">[</span><span class="s2">&quot;aix&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;aix&quot;</span>
-    <span class="n">check_requirements</span><span class="p">(</span><span class="n">reqs</span><span class="p">,</span> <span class="n">feature</span><span class="o">=</span><span class="s2">&quot;nl-ingress (NL -&gt; IntegrationSpec)&quot;</span><span class="p">)</span>
+        <span class="n">reqs</span><span class="p">[</span><span class="s2">"aix"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"aix"</span>
+    <span class="n">check_requirements</span><span class="p">(</span><span class="n">reqs</span><span class="p">,</span> <span class="n">feature</span><span class="o">=</span><span class="s2">"nl-ingress (NL -&gt; IntegrationSpec)"</span><span class="p">)</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">oa.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">prompt_function</span>  <span class="c1"># lazy: D10 — no LLM dep on import</span>
 
     <span class="n">prompt_func</span><span class="p">,</span> <span class="n">eff_model</span> <span class="o">=</span> <span class="n">_resolve_backend</span><span class="p">(</span><span class="n">llm</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
-    <span class="n">template</span> <span class="o">=</span> <span class="n">prompt_template</span> <span class="ow">or</span> <span class="n">DFLT_AUTHORING_PROMPTS</span><span class="p">[</span><span class="s2">&quot;integration&quot;</span><span class="p">]</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">prompt_template</span> <span class="ow">or</span> <span class="n">DFLT_AUTHORING_PROMPTS</span><span class="p">[</span><span class="s2">"integration"</span><span class="p">]</span>
 
     <span class="n">extract</span> <span class="o">=</span> <span class="n">prompt_function</span><span class="p">(</span>
         <span class="n">template</span><span class="p">,</span>
         <span class="n">prompt_func</span><span class="o">=</span><span class="n">prompt_func</span><span class="p">,</span>
-        <span class="n">prompt_func_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">eff_model</span><span class="p">},</span>
+        <span class="n">prompt_func_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"model"</span><span class="p">:</span> <span class="n">eff_model</span><span class="p">},</span>
     <span class="p">)</span>
     <span class="n">raw</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">_parse_json_object</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;NL ingress could not parse a JSON IntegrationSpec from the LLM reply. &quot;</span>
-            <span class="s2">&quot;Try a more specific description or a different model (llm=...).&quot;</span>
+            <span class="s2">"NL ingress could not parse a JSON IntegrationSpec from the LLM reply. "</span>
+            <span class="s2">"Try a more specific description or a different model (llm=...)."</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">_spec_from_extracted</span><span class="p">(</span>
         <span class="n">data</span><span class="p">,</span>
@@ -266,7 +266,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_backend</span><span class="p">(</span>
     <span class="n">llm</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">LLMPromptFunc</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve ``(prompt_func, model)`` — default to ``aix.chat``; honor injection.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Resolve ``(prompt_func, model)`` — default to ``aix.chat``; honor injection."""</span>
     <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">llm</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">llm</span><span class="p">,</span> <span class="n">model</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">llm</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># a model name</span>
@@ -275,7 +275,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_aix_chat</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">LLMPromptFunc</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The ``aix.chat`` callable (lazy import — keeps coact provider-free at import).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The ``aix.chat`` callable (lazy import — keeps coact provider-free at import)."""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">aix</span><span class="w"> </span><span class="kn">import</span> <span class="n">chat</span>
 
     <span class="k">return</span> <span class="n">chat</span>
@@ -291,32 +291,32 @@
     <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">infer_tool_schemas</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntegrationSpec</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Coerce the LLM&#39;s (untrusted) extracted dict into a draft :class:`IntegrationSpec`.</span>
+<span class="w">    </span><span class="sd">"""Coerce the LLM's (untrusted) extracted dict into a draft :class:`IntegrationSpec`.</span>
 
 <span class="sd">    Every field is coerced defensively: the model may return a number/list/object</span>
 <span class="sd">    where a string was asked for, so ``.strip()``/``to_kebab_case`` never see a</span>
 <span class="sd">    non-string, and a bare-string ``resources``/``prompts`` is wrapped (not</span>
 <span class="sd">    iterated character-by-character).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">spec_name</span> <span class="o">=</span> <span class="n">to_kebab_case</span><span class="p">(</span><span class="n">name</span> <span class="ow">or</span> <span class="n">_as_str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">&quot;integration&quot;</span><span class="p">)</span>
-    <span class="n">description</span> <span class="o">=</span> <span class="n">_as_str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<span class="sd">    """</span>
+    <span class="n">spec_name</span> <span class="o">=</span> <span class="n">to_kebab_case</span><span class="p">(</span><span class="n">name</span> <span class="ow">or</span> <span class="n">_as_str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">"integration"</span><span class="p">)</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="n">_as_str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"description"</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
     <span class="n">tool_specs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ToolSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]:</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"tools"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">continue</span>
-        <span class="n">tname</span> <span class="o">=</span> <span class="n">_as_str</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">tname</span> <span class="o">=</span> <span class="n">_as_str</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">tname</span><span class="p">:</span>
             <span class="k">continue</span>
-        <span class="n">tdesc</span> <span class="o">=</span> <span class="n">_as_str</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="n">schema</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;input_schema&quot;</span><span class="p">)</span>
+        <span class="n">tdesc</span> <span class="o">=</span> <span class="n">_as_str</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"description"</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"input_schema"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="n">schema</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">handler</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;handler&quot;</span><span class="p">)</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"handler"</span><span class="p">)</span>
         <span class="n">handler</span> <span class="o">=</span> <span class="n">handler</span> <span class="k">if</span> <span class="n">_looks_like_ref</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">infer_tool_schemas</span><span class="p">:</span>
-            <span class="n">hint</span> <span class="o">=</span> <span class="n">_as_str</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;input_description&quot;</span><span class="p">))</span> <span class="ow">or</span> <span class="n">tdesc</span>
+            <span class="n">hint</span> <span class="o">=</span> <span class="n">_as_str</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"input_description"</span><span class="p">))</span> <span class="ow">or</span> <span class="n">tdesc</span>
             <span class="k">if</span> <span class="n">hint</span><span class="p">:</span>
                 <span class="n">schema</span> <span class="o">=</span> <span class="n">_infer_tool_schema</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="n">prompt_func</span><span class="o">=</span><span class="n">prompt_func</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
         <span class="n">tool_specs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -327,8 +327,8 @@
         <span class="k">if</span> <span class="n">handler</span><span class="p">:</span>
             <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
 
-    <span class="n">resources</span> <span class="o">=</span> <span class="n">_as_str_list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resources&quot;</span><span class="p">))</span>
-    <span class="n">prompts</span> <span class="o">=</span> <span class="n">_as_str_list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prompts&quot;</span><span class="p">))</span>
+    <span class="n">resources</span> <span class="o">=</span> <span class="n">_as_str_list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"resources"</span><span class="p">))</span>
+    <span class="n">prompts</span> <span class="o">=</span> <span class="n">_as_str_list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"prompts"</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">IntegrationSpec</span><span class="p">(</span>
         <span class="n">name</span><span class="o">=</span><span class="n">spec_name</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
@@ -338,19 +338,19 @@
         <span class="n">prompts</span><span class="o">=</span><span class="n">prompts</span><span class="p">,</span>
         <span class="n">tool_specs</span><span class="o">=</span><span class="n">tool_specs</span><span class="p">,</span>
         <span class="n">author</span><span class="o">=</span><span class="n">author</span><span class="p">,</span>
-        <span class="n">source</span><span class="o">=</span><span class="s2">&quot;nl-description&quot;</span><span class="p">,</span>
+        <span class="n">source</span><span class="o">=</span><span class="s2">"nl-description"</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_infer_tool_schema</span><span class="p">(</span>
     <span class="n">input_description</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">prompt_func</span><span class="p">:</span> <span class="n">LLMPromptFunc</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Best-effort input JSON Schema from a tool&#39;s prose description (aix-backed).</span>
+<span class="w">    </span><span class="sd">"""Best-effort input JSON Schema from a tool's prose description (aix-backed).</span>
 
 <span class="sd">    Wraps ``oa.infer_schema_from_verbal_description`` (now backend-injectable);</span>
 <span class="sd">    any failure degrades to ``None`` so a flaky per-tool inference never aborts the</span>
 <span class="sd">    whole draft.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">oa.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">infer_schema_from_verbal_description</span>
 
@@ -361,35 +361,35 @@
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">props</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">)</span>
+    <span class="n">props</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"properties"</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">props</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;object&quot;</span><span class="p">),</span> <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="n">props</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type"</span><span class="p">,</span> <span class="s2">"object"</span><span class="p">),</span> <span class="s2">"properties"</span><span class="p">:</span> <span class="n">props</span><span class="p">}</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_looks_like_ref</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;True if ``value`` looks like an importable ``&#39;module:function&#39;`` ref.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""True if ``value`` looks like an importable ``'module:function'`` ref."""</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-        <span class="ow">and</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">value</span>
-        <span class="ow">and</span> <span class="s2">&quot; &quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="ow">and</span> <span class="ow">not</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="n">value</span>
+        <span class="ow">and</span> <span class="s2">" "</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
     <span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_as_str</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Coerce an LLM-supplied scalar field to a string (untrusted output may not be).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Coerce an LLM-supplied scalar field to a string (untrusted output may not be)."""</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">value</span>
-    <span class="k">return</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">""</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_as_str_list</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Coerce an LLM-supplied field to a list of non-empty strings.</span>
+<span class="w">    </span><span class="sd">"""Coerce an LLM-supplied field to a list of non-empty strings.</span>
 
 <span class="sd">    A bare string is *wrapped* (not iterated character-by-character); a list/tuple</span>
 <span class="sd">    is element-coerced and emptied of blanks; anything else degrades sensibly.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -401,19 +401,19 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_parse_json_object</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tolerantly pull a JSON object out of an LLM reply.</span>
+<span class="w">    </span><span class="sd">"""Tolerantly pull a JSON object out of an LLM reply.</span>
 
 <span class="sd">    Tries, in order, the whole stripped reply, a fenced ```` ```json … ``` ```` body,</span>
 <span class="sd">    then each top-level brace-balanced ``{…}`` span (string-aware, via</span>
 <span class="sd">    :func:`coact.util.first_balanced_span`) — so a reply whose real JSON is preceded</span>
 <span class="sd">    by brace-bearing prose still parses (a single-span parse would wrongly seize the</span>
 <span class="sd">    first, invalid, fragment). Returns ``None`` when no JSON *object* is recoverable.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="n">stripped</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
     <span class="n">candidates</span> <span class="o">=</span> <span class="p">[</span><span class="n">stripped</span><span class="p">]</span>
-    <span class="n">fence</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;```(?:json)?\s*(\{.*?\})\s*```&quot;</span><span class="p">,</span> <span class="n">stripped</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+    <span class="n">fence</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"```(?:json)?\s*(\{.*?\})\s*```"</span><span class="p">,</span> <span class="n">stripped</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">fence</span><span class="p">:</span>
         <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fence</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
     <span class="n">candidates</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_iter_balanced_objects</span><span class="p">(</span><span class="n">stripped</span><span class="p">))</span>
@@ -428,13 +428,13 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_iter_balanced_objects</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Yield each top-level brace-balanced ``{…}`` substring of ``s``, left to right.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Yield each top-level brace-balanced ``{…}`` substring of ``s``, left to right."""</span>
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-        <span class="n">start</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">"{"</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span>
-        <span class="n">span</span> <span class="o">=</span> <span class="n">first_balanced_span</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">start</span><span class="p">:],</span> <span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">)</span>
+        <span class="n">span</span> <span class="o">=</span> <span class="n">first_balanced_span</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">start</span><span class="p">:],</span> <span class="s2">"{"</span><span class="p">,</span> <span class="s2">"}"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">span</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">yield</span> <span class="n">span</span>

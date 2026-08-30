@@ -98,16 +98,16 @@
            <div itemprop="articleBody">
              
   <h1>Source code for coact.return_contract</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Realizing a return contract — the backend-agnostic part of DECISIONS D6.</span>
+<span></span><span class="sd">"""Realizing a return contract — the backend-agnostic part of DECISIONS D6.</span>
 
-<span class="sd">The return contract (an agent&#39;s final-message JSON Schema) reaches a runtime two</span>
+<span class="sd">The return contract (an agent's final-message JSON Schema) reaches a runtime two</span>
 <span class="sd">ways, and the *how* is a cohesive, independently testable subsystem extracted</span>
 <span class="sd">here out of the (large) :mod:`coact.realize`:</span>
 
 <span class="sd">- **tool** — a forced ``return_result`` MCP tool whose ``input_schema`` IS the</span>
 <span class="sd">  schema, plus a system-prompt instruction to call it. The structured result is</span>
 <span class="sd">  recovered from the tool-use block. Used by the ``sdk`` backend (older SDKs, or</span>
-<span class="sd">  when ``output_format`` can&#39;t be honored).</span>
+<span class="sd">  when ``output_format`` can't be honored).</span>
 <span class="sd">- **json** — ask for a single JSON value conforming to the schema in the system</span>
 <span class="sd">  prompt. Used by the provider-agnostic ``litellm`` backend (where structured</span>
 <span class="sd">  ``response_format`` support varies).</span>
@@ -118,7 +118,7 @@
 <span class="sd">and the tool-use extraction. The SDK-specific *wiring* (building the in-process</span>
 <span class="sd">MCP server, ``ClaudeAgentOptions``) stays in :mod:`coact.realize`; the</span>
 <span class="sd">provider-specific response parsing stays in :mod:`coact.realize_litellm`.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -127,43 +127,43 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="c1">#: In-process SDK MCP server + tool names for the forced return path.</span>
-<span class="n">RETURN_TOOL_SERVER</span> <span class="o">=</span> <span class="s2">&quot;coact_return&quot;</span>
-<span class="n">RETURN_TOOL_NAME</span> <span class="o">=</span> <span class="s2">&quot;return_result&quot;</span>
+<span class="n">RETURN_TOOL_SERVER</span> <span class="o">=</span> <span class="s2">"coact_return"</span>
+<span class="n">RETURN_TOOL_NAME</span> <span class="o">=</span> <span class="s2">"return_result"</span>
 <span class="c1">#: How Claude references the tool (``mcp__&lt;server&gt;__&lt;tool&gt;``).</span>
-<span class="n">RETURN_TOOL_FULLNAME</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;mcp__</span><span class="si">{</span><span class="n">RETURN_TOOL_SERVER</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="n">RETURN_TOOL_FULLNAME</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"mcp__</span><span class="si">{</span><span class="n">RETURN_TOOL_SERVER</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">"</span>
 
 
 <div class="viewcode-block" id="ReturnPlan">
 <a class="viewcode-back" href="../../module_docs/coact/return_contract.html#coact.return_contract.ReturnPlan">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ReturnPlan</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;How an agent&#39;s return contract is realized for the SDK (resolved once).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""How an agent's return contract is realized for the SDK (resolved once)."""</span>
 
-    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &quot;none&quot; | &quot;output_format&quot; | &quot;tool&quot;</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># "none" | "output_format" | "tool"</span>
     <span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span>
     <span class="n">unwrap_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">tool_fullname</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
+    <span class="n">tool_fullname</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span></div>
 
 
 
 <div class="viewcode-block" id="auto_return_mode">
 <a class="viewcode-back" href="../../module_docs/coact/return_contract.html#coact.return_contract.auto_return_mode">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">auto_return_mode</span><span class="p">(</span><span class="n">option_field_names</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pick the return mode in ``auto``: native ``output_format`` if the SDK has it.</span>
+<span class="w">    </span><span class="sd">"""Pick the return mode in ``auto``: native ``output_format`` if the SDK has it.</span>
 
-<span class="sd">    &gt;&gt;&gt; auto_return_mode({&#39;system_prompt&#39;, &#39;output_format&#39;})</span>
-<span class="sd">    &#39;output_format&#39;</span>
-<span class="sd">    &gt;&gt;&gt; auto_return_mode({&#39;system_prompt&#39;})  # older SDK without the field</span>
-<span class="sd">    &#39;tool&#39;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;output_format&quot;</span> <span class="k">if</span> <span class="s2">&quot;output_format&quot;</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">option_field_names</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;tool&quot;</span></div>
+<span class="sd">    &gt;&gt;&gt; auto_return_mode({'system_prompt', 'output_format'})</span>
+<span class="sd">    'output_format'</span>
+<span class="sd">    &gt;&gt;&gt; auto_return_mode({'system_prompt'})  # older SDK without the field</span>
+<span class="sd">    'tool'</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="s2">"output_format"</span> <span class="k">if</span> <span class="s2">"output_format"</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">option_field_names</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"tool"</span></div>
 
 
 
 <div class="viewcode-block" id="as_object_schema">
 <a class="viewcode-back" href="../../module_docs/coact/return_contract.html#coact.return_contract.as_object_schema">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">as_object_schema</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Coerce a return schema to a valid object ``inputSchema`` for the return tool.</span>
+<span class="w">    </span><span class="sd">"""Coerce a return schema to a valid object ``inputSchema`` for the return tool.</span>
 
 <span class="sd">    The Agent SDK passes a dict ``input_schema`` through unchanged only when it is</span>
 <span class="sd">    an object schema with **both** ``type: object`` and ``properties``; any other</span>
@@ -173,32 +173,32 @@
 <span class="sd">    - A free-form object schema (``type: object`` but no ``properties``) → given an</span>
 <span class="sd">      empty ``properties`` key so the SDK passes it through verbatim. Crucially it</span>
 <span class="sd">      is **not** wrapped: wrapping a free-form object under ``result`` would make a</span>
-<span class="sd">      model&#39;s own single-key ``{result: ...}`` output indistinguishable from the</span>
+<span class="sd">      model's own single-key ``{result: ...}`` output indistinguishable from the</span>
 <span class="sd">      wrapper (a silent-collapse hazard).</span>
 <span class="sd">    - Any non-object schema (array / scalar) → wrapped under a ``result`` key, with</span>
 <span class="sd">      that key returned so extraction can unwrap it.</span>
 
-<span class="sd">    &gt;&gt;&gt; as_object_schema({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {&#39;a&#39;: {}}})[1] is None</span>
+<span class="sd">    &gt;&gt;&gt; as_object_schema({'type': 'object', 'properties': {'a': {}}})[1] is None</span>
 <span class="sd">    True</span>
-<span class="sd">    &gt;&gt;&gt; as_object_schema({&#39;type&#39;: &#39;object&#39;})  # free-form object: passed through, not wrapped</span>
-<span class="sd">    ({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {}}, None)</span>
-<span class="sd">    &gt;&gt;&gt; as_object_schema({&#39;type&#39;: &#39;array&#39;, &#39;items&#39;: {&#39;type&#39;: &#39;string&#39;}})</span>
-<span class="sd">    ({&#39;type&#39;: &#39;object&#39;, &#39;properties&#39;: {&#39;result&#39;: {&#39;type&#39;: &#39;array&#39;, &#39;items&#39;: {&#39;type&#39;: &#39;string&#39;}}}, &#39;required&#39;: [&#39;result&#39;]}, &#39;result&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s2">&quot;properties&quot;</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">:</span>
+<span class="sd">    &gt;&gt;&gt; as_object_schema({'type': 'object'})  # free-form object: passed through, not wrapped</span>
+<span class="sd">    ({'type': 'object', 'properties': {}}, None)</span>
+<span class="sd">    &gt;&gt;&gt; as_object_schema({'type': 'array', 'items': {'type': 'string'}})</span>
+<span class="sd">    ({'type': 'object', 'properties': {'result': {'type': 'array', 'items': {'type': 'string'}}}, 'required': ['result']}, 'result')</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"object"</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">"properties"</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">schema</span><span class="p">,</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">schema</span><span class="p">,</span> <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{}},</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">schema</span><span class="p">,</span> <span class="s2">"properties"</span><span class="p">:</span> <span class="p">{}},</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="n">schema</span><span class="p">},</span> <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]},</span>
-        <span class="s2">&quot;result&quot;</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"object"</span><span class="p">,</span> <span class="s2">"properties"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"result"</span><span class="p">:</span> <span class="n">schema</span><span class="p">},</span> <span class="s2">"required"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"result"</span><span class="p">]},</span>
+        <span class="s2">"result"</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_schema_fence</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render a JSON Schema as a fenced ``json`` block (shared by both renderers).&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;```json</span><span class="se">\n</span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span><span class="w"> </span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">```&quot;</span>
+<span class="w">    </span><span class="sd">"""Render a JSON Schema as a fenced ``json`` block (shared by both renderers)."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"```json</span><span class="se">\n</span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span><span class="w"> </span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">```"</span>
 
 
 <div class="viewcode-block" id="render_tool_return_instruction">
@@ -206,27 +206,27 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">render_tool_return_instruction</span><span class="p">(</span>
     <span class="n">system_prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj_schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Append the &quot;you MUST call return_result&quot; instruction to a system prompt (sdk).&quot;&quot;&quot;</span>
-    <span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="n">description</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Append the "you MUST call return_result" instruction to a system prompt (sdk)."""</span>
+    <span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">" (</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s2">)"</span> <span class="k">if</span> <span class="n">description</span> <span class="k">else</span> <span class="s2">""</span>
     <span class="n">instruction</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">## Return contract</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;When you have finished, you MUST call the `</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">` tool &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;exactly once with your final result</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">. Its arguments must conform &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;to this JSON Schema:</span><span class="se">\n\n</span><span class="si">{</span><span class="n">_schema_fence</span><span class="p">(</span><span class="n">obj_schema</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;Do not return the result as prose — call `</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">` instead.&quot;</span>
+        <span class="s2">"</span><span class="se">\n\n</span><span class="s2">## Return contract</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"When you have finished, you MUST call the `</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">` tool "</span>
+        <span class="sa">f</span><span class="s2">"exactly once with your final result</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">. Its arguments must conform "</span>
+        <span class="sa">f</span><span class="s2">"to this JSON Schema:</span><span class="se">\n\n</span><span class="si">{</span><span class="n">_schema_fence</span><span class="p">(</span><span class="n">obj_schema</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"Do not return the result as prose — call `</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">` instead."</span>
     <span class="p">)</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">system_prompt</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">instruction</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">system_prompt</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span> <span class="o">+</span> <span class="n">instruction</span></div>
 
 
 
 <div class="viewcode-block" id="render_json_return_instruction">
 <a class="viewcode-back" href="../../module_docs/coact/return_contract.html#coact.return_contract.render_json_return_instruction">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">render_json_return_instruction</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The portable structured-output instruction: ask for JSON conforming to a schema (litellm).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The portable structured-output instruction: ask for JSON conforming to a schema (litellm)."""</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="s2">&quot;## Return contract</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="s2">&quot;Respond with a single JSON value conforming to this JSON Schema. Output &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;JSON only — no prose, no code fences.</span><span class="se">\n\n</span><span class="si">{</span><span class="n">_schema_fence</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="s2">"## Return contract</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="s2">"Respond with a single JSON value conforming to this JSON Schema. Output "</span>
+        <span class="sa">f</span><span class="s2">"JSON only — no prose, no code fences.</span><span class="se">\n\n</span><span class="si">{</span><span class="n">_schema_fence</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span></div>
 
 
@@ -234,22 +234,22 @@
 <div class="viewcode-block" id="is_return_tool">
 <a class="viewcode-back" href="../../module_docs/coact/return_contract.html#coact.return_contract.is_return_tool">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">is_return_tool</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;True if ``name`` denotes coact&#39;s forced return tool (server-scoped).</span>
+<span class="w">    </span><span class="sd">"""True if ``name`` denotes coact's forced return tool (server-scoped).</span>
 
-<span class="sd">    Matches the full MCP name, or any prefix variant scoped to coact&#39;s own server</span>
+<span class="sd">    Matches the full MCP name, or any prefix variant scoped to coact's own server</span>
 <span class="sd">    (``…__coact_return__return_result``). Deliberately does **not** match a bare</span>
 <span class="sd">    ``return_result`` or a ``return_result`` on a *different* MCP server, so a</span>
-<span class="sd">    user&#39;s own same-named tool is never mistaken for the return contract.</span>
+<span class="sd">    user's own same-named tool is never mistaken for the return contract.</span>
 
-<span class="sd">    &gt;&gt;&gt; is_return_tool(&#39;mcp__coact_return__return_result&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; is_return_tool('mcp__coact_return__return_result')</span>
 <span class="sd">    True</span>
-<span class="sd">    &gt;&gt;&gt; is_return_tool(&#39;mcp__other_server__return_result&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; is_return_tool('mcp__other_server__return_result')</span>
 <span class="sd">    False</span>
-<span class="sd">    &gt;&gt;&gt; is_return_tool(&#39;Read&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; is_return_tool('Read')</span>
 <span class="sd">    False</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="n">RETURN_TOOL_FULLNAME</span> <span class="ow">or</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;__</span><span class="si">{</span><span class="n">RETURN_TOOL_SERVER</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"__</span><span class="si">{</span><span class="n">RETURN_TOOL_SERVER</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">RETURN_TOOL_NAME</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span></div>
 
 
@@ -257,20 +257,20 @@
 <div class="viewcode-block" id="extract_return_tool_input">
 <a class="viewcode-back" href="../../module_docs/coact/return_contract.html#coact.return_contract.extract_return_tool_input">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">extract_return_tool_input</span><span class="p">(</span><span class="n">messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">unwrap_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recover the forced ``return_result`` tool-use input from SDK messages, or None.</span>
+<span class="w">    </span><span class="sd">"""Recover the forced ``return_result`` tool-use input from SDK messages, or None.</span>
 
 <span class="sd">    Scans assistant messages for a tool-use block calling the return tool and</span>
 <span class="sd">    returns its ``input`` (the last one wins). When the schema was wrapped (a</span>
 <span class="sd">    non-object return type), the single ``result`` key is unwrapped.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">found</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
-        <span class="n">content</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="k">continue</span>
         <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="n">block_input</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s2">&quot;input&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">block_input</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s2">"input"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">block_input</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">is_return_tool</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
                 <span class="n">found</span> <span class="o">=</span> <span class="n">block_input</span>
     <span class="k">if</span> <span class="n">found</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

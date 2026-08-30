@@ -98,11 +98,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for coact.publish</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;PUBLISH — ship a capability to a chatbot host as a deployable integration.</span>
+<span></span><span class="sd">"""PUBLISH — ship a capability to a chatbot host as a deployable integration.</span>
 
 <span class="sd">The third coact axis, beside COMPLETE and REALIZE. ``publish(source, target=...)``</span>
 <span class="sd">dispatches to a target adapter held in an open-closed</span>
-<span class="sd">:class:`skill.registry.Registry` — exactly the shape of :mod:`coact.realize`&#39;s</span>
+<span class="sd">:class:`skill.registry.Registry` — exactly the shape of :mod:`coact.realize`'s</span>
 <span class="sd">``backends``. Targets self-register on import, so a new host (remote Claude</span>
 <span class="sd">connector, ChatGPT app, Gemini, ...) is added by writing a module that calls</span>
 <span class="sd">``targets.register(...)`` — **no edit to this file** (open-closed, DECISIONS D17).</span>
@@ -111,7 +111,7 @@
 <span class="sd">ones — the target-neutral design from ``misc/docs/CHATBOT_INTEGRATION_LANDSCAPE.md``.</span>
 <span class="sd">The canonical artifact is an MCP server (built by ``py2mcp``); each target differs</span>
 <span class="sd">only in packaging + where it runs (§9.1/§9.3 of that doc).</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -124,50 +124,50 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">coact.integration</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationSource</span>
 
 <span class="c1">#: Registry of publish targets (``publish(source, target=&lt;name&gt;)``).</span>
-<span class="n">targets</span><span class="p">:</span> <span class="n">Registry</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;publish_targets&quot;</span><span class="p">)</span>
+<span class="n">targets</span><span class="p">:</span> <span class="n">Registry</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">"publish_targets"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="PublishResult">
 <a class="viewcode-back" href="../../module_docs/coact/publish.html#coact.PublishResult">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PublishResult</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The outcome of :func:`publish` — what was (or *would be*) produced.</span>
+<span class="w">    </span><span class="sd">"""The outcome of :func:`publish` — what was (or *would be*) produced.</span>
 
-<span class="sd">    ``dry_run`` mirrors ``realize(backend=&#39;host&#39;, dry_run=True)``: in a dry run</span>
+<span class="sd">    ``dry_run`` mirrors ``realize(backend='host', dry_run=True)``: in a dry run</span>
 <span class="sd">    ``artifact`` is ``None`` and ``files`` holds the would-write bundle members</span>
 <span class="sd">    (relpath → short preview), so you can look before you leap.</span>
 
-<span class="sd">    &gt;&gt;&gt; PublishResult(target=&#39;claude-local-mcpb&#39;, dry_run=True).render().splitlines()[0]</span>
-<span class="sd">    &quot;Would publish (target=&#39;claude-local-mcpb&#39;, dry-run)&quot;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; PublishResult(target='claude-local-mcpb', dry_run=True).render().splitlines()[0]</span>
+<span class="sd">    "Would publish (target='claude-local-mcpb', dry-run)"</span>
+<span class="sd">    """</span>
 
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">artifact</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">files</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-    <span class="n">instructions</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">instructions</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">warnings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PublishResult.render">
 <a class="viewcode-back" href="../../module_docs/coact/publish.html#coact.PublishResult.render">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;A terminal-friendly summary (used by the CLI).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""A terminal-friendly summary (used by the CLI)."""</span>
         <span class="n">head</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Would publish (target=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="si">!r}</span><span class="s2">, dry-run)&quot;</span>
+            <span class="sa">f</span><span class="s2">"Would publish (target=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="si">!r}</span><span class="s2">, dry-run)"</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dry_run</span>
-            <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;Published (target=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="si">!r}</span><span class="s2">)&quot;</span>
+            <span class="k">else</span> <span class="sa">f</span><span class="s2">"Published (target=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="si">!r}</span><span class="s2">)"</span>
         <span class="p">)</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">head</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">artifact</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  artifact: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">artifact</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">verb</span> <span class="o">=</span> <span class="s2">&quot;would write&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dry_run</span> <span class="k">else</span> <span class="s2">&quot;wrote&quot;</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  artifact: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">artifact</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">verb</span> <span class="o">=</span> <span class="s2">"would write"</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dry_run</span> <span class="k">else</span> <span class="s2">"wrote"</span>
         <span class="k">for</span> <span class="n">rel</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">):</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">verb</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">verb</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">warnings</span><span class="p">:</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ! </span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  ! </span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instructions</span><span class="p">:</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instructions</span><span class="p">])</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+            <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">""</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instructions</span><span class="p">])</span>
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
 </div>
 
 
@@ -177,23 +177,23 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">publish</span><span class="p">(</span>
     <span class="n">source</span><span class="p">:</span> <span class="n">IntegrationSource</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;claude-local-mcpb&quot;</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"claude-local-mcpb"</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PublishResult</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Publish a capability to a chatbot host via the named target.</span>
+<span class="w">    </span><span class="sd">"""Publish a capability to a chatbot host via the named target.</span>
 
 <span class="sd">    ``source`` is anything :func:`coact.integration.integration_spec_from`</span>
-<span class="sd">    accepts: ``&#39;module:function&#39;`` refs, live callables, a skill carrying a</span>
+<span class="sd">    accepts: ``'module:function'`` refs, live callables, a skill carrying a</span>
 <span class="sd">    ``coact: mcp:`` block, or a prebuilt :class:`~coact.integration.IntegrationSpec`.</span>
 <span class="sd">    Target-specific options (``dest``, ``name``, ``author``, ...) pass through as</span>
 <span class="sd">    keyword arguments.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">impl</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">impl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">available</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">targets</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">&quot;(none registered)&quot;</span>
+        <span class="n">available</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">targets</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">"(none registered)"</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Unknown publish target: </span><span class="si">{</span><span class="n">target</span><span class="si">!r}</span><span class="s2">. Available: </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"Unknown publish target: </span><span class="si">{</span><span class="n">target</span><span class="si">!r}</span><span class="s2">. Available: </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">impl</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
@@ -202,11 +202,11 @@
 <div class="viewcode-block" id="publish_targets">
 <a class="viewcode-back" href="../../module_docs/coact/publish.html#coact.publish_targets">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">publish_targets</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The names of all registered publish targets.</span>
+<span class="w">    </span><span class="sd">"""The names of all registered publish targets.</span>
 
 <span class="sd">    &gt;&gt;&gt; isinstance(publish_targets(), list)</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span></div>
 
 </pre></div>

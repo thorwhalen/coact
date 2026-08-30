@@ -124,12 +124,12 @@ write <em>or</em> read. Names must be a bare filename stem. Raises <code class="
 an empty, non-string, or path-bearing name — the check lives at the
 filesystem boundary so in-memory <a class="reference internal" href="base.html#coact.base.AgentDefinition" title="coact.base.AgentDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">AgentDefinition</span></code></a>s stay
 unconstrained.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">agent_filename</span><span class="p">(</span><span class="s1">&#39;ux-analyst&#39;</span><span class="p">)</span>
-<span class="go">&#39;ux-analyst.md&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">agent_filename</span><span class="p">(</span><span class="s1">&#39;../escape&#39;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">agent_filename</span><span class="p">(</span><span class="s1">'ux-analyst'</span><span class="p">)</span>
+<span class="go">'ux-analyst.md'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">agent_filename</span><span class="p">(</span><span class="s1">'../escape'</span><span class="p">)</span>
 <span class="gt">Traceback (most recent call last):</span>
 <span class="w">    </span><span class="o">...</span>
-<span class="gr">ValueError</span>: <span class="n">unsafe agent name &#39;../escape&#39;: ...</span>
+<span class="gr">ValueError</span>: <span class="n">unsafe agent name '../escape': ...</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -143,7 +143,7 @@ it (e.g. <code class="docutils literal notranslate"><span class="pre">{'claude_a
 <code class="docutils literal notranslate"><span class="pre">ImportError</span></code> listing the exact <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> line for whatever is
 missing — and, when some requirements <em>are</em> present, which ones — the
 package-UX convention for optional backends (informative, actionable errors).</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">check_requirements</span><span class="p">({</span><span class="s1">&#39;json&#39;</span><span class="p">:</span> <span class="s1">&#39;json&#39;</span><span class="p">},</span> <span class="n">feature</span><span class="o">=</span><span class="s1">&#39;noop&#39;</span><span class="p">)</span>  <span class="c1"># importable -&gt; no raise</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">check_requirements</span><span class="p">({</span><span class="s1">'json'</span><span class="p">:</span> <span class="s1">'json'</span><span class="p">},</span> <span class="n">feature</span><span class="o">=</span><span class="s1">'noop'</span><span class="p">)</span>  <span class="c1"># importable -&gt; no raise</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -157,11 +157,11 @@ followed by prose that itself contains brackets is not over-captured (a
 greedy <code class="docutils literal notranslate"><span class="pre">opener.*closer</span></code> would run to the <em>last</em> <code class="docutils literal notranslate"><span class="pre">closer</span></code> and fail to
 parse). Returns <code class="docutils literal notranslate"><span class="pre">None</span></code> when no balanced span starts in <code class="docutils literal notranslate"><span class="pre">s</span></code>. Shared by the
 LLM-reply JSON extractors (<a class="reference internal" href="llm.html#module-coact.llm" title="coact.llm"><code class="xref py py-mod docutils literal notranslate"><span class="pre">coact.llm</span></code></a>, <a class="reference internal" href="realize_litellm.html#module-coact.realize_litellm" title="coact.realize_litellm"><code class="xref py py-mod docutils literal notranslate"><span class="pre">coact.realize_litellm</span></code></a>).</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">first_balanced_span</span><span class="p">(</span><span class="s1">&#39;Result: {&quot;a&quot;: 1}. Note: </span><span class="si">{braces}</span><span class="s1">.&#39;</span><span class="p">)</span>
-<span class="go">&#39;{&quot;a&quot;: 1}&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">first_balanced_span</span><span class="p">(</span><span class="s1">&#39;see [1, [2, 3]] end&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
-<span class="go">&#39;[1, [2, 3]]&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">first_balanced_span</span><span class="p">(</span><span class="s1">&#39;no brackets here&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">first_balanced_span</span><span class="p">(</span><span class="s1">'Result: {"a": 1}. Note: </span><span class="si">{braces}</span><span class="s1">.'</span><span class="p">)</span>
+<span class="go">'{"a": 1}'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">first_balanced_span</span><span class="p">(</span><span class="s1">'see [1, [2, 3]] end'</span><span class="p">,</span> <span class="s1">'['</span><span class="p">,</span> <span class="s1">']'</span><span class="p">)</span>
+<span class="go">'[1, [2, 3]]'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">first_balanced_span</span><span class="p">(</span><span class="s1">'no brackets here'</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
 <span class="go">True</span>
 </pre></div>
 </div>
@@ -173,9 +173,9 @@ LLM-reply JSON extractors (<a class="reference internal" href="llm.html#module-c
 <dd><p>Resolve a <code class="docutils literal notranslate"><span class="pre">'module.path:attr'</span></code> or <code class="docutils literal notranslate"><span class="pre">'module.path.attr'</span></code> reference.</p>
 <p>Prefer the <code class="docutils literal notranslate"><span class="pre">module:attr</span></code> form (unambiguous). Falls back to splitting on the
 last dot for the dotted form.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">import_object</span><span class="p">(</span><span class="s1">&#39;json:dumps&#39;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">import_object</span><span class="p">(</span><span class="s1">'json:dumps'</span><span class="p">)</span>
 <span class="go">&lt;function dumps at ...&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">import_object</span><span class="p">(</span><span class="s1">&#39;os.path.join&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">import_object</span><span class="p">(</span><span class="s1">'os.path.join'</span><span class="p">)</span>
 <span class="go">&lt;function join at ...&gt;</span>
 </pre></div>
 </div>
@@ -190,12 +190,12 @@ separator or <code class="docutils literal notranslate"><span class="pre">..</sp
 Raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> on an empty, non-string, or path-bearing name. <code class="docutils literal notranslate"><span class="pre">kind</span></code>
 customizes the error wording for the caller’s domain. Shared by
 <a class="reference internal" href="#coact.util.agent_filename" title="coact.util.agent_filename"><code class="xref py py-func docutils literal notranslate"><span class="pre">agent_filename()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">.md</span></code> agents) and the publish axis (<code class="docutils literal notranslate"><span class="pre">.mcpb</span></code> bundles).</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">safe_filename</span><span class="p">(</span><span class="s1">&#39;paths&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.mcpb&#39;</span><span class="p">)</span>
-<span class="go">&#39;paths.mcpb&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">safe_filename</span><span class="p">(</span><span class="s1">&#39;../x&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.mcpb&#39;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">safe_filename</span><span class="p">(</span><span class="s1">'paths'</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">'.mcpb'</span><span class="p">)</span>
+<span class="go">'paths.mcpb'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">safe_filename</span><span class="p">(</span><span class="s1">'../x'</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">'.mcpb'</span><span class="p">)</span>
 <span class="gt">Traceback (most recent call last):</span>
 <span class="w">    </span><span class="o">...</span>
-<span class="gr">ValueError</span>: <span class="n">unsafe name &#39;../x&#39;: ...</span>
+<span class="gr">ValueError</span>: <span class="n">unsafe name '../x': ...</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -204,12 +204,12 @@ customizes the error wording for the caller’s domain. Shared by
 <dt class="sig sig-object py" id="coact.util.to_kebab_case">
 <span class="sig-prename descclassname"><span class="pre">coact.util.</span></span><span class="sig-name descname"><span class="pre">to_kebab_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/coact/util.html#to_kebab_case"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.util.to_kebab_case" title="Link to this definition"></a></dt>
 <dd><p>Convert CamelCase / snake_case / spaces to kebab-case.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">to_kebab_case</span><span class="p">(</span><span class="s1">&#39;UxAnalyst&#39;</span><span class="p">)</span>
-<span class="go">&#39;ux-analyst&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">to_kebab_case</span><span class="p">(</span><span class="s1">&#39;ux_analyst&#39;</span><span class="p">)</span>
-<span class="go">&#39;ux-analyst&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">to_kebab_case</span><span class="p">(</span><span class="s1">&#39;already-kebab&#39;</span><span class="p">)</span>
-<span class="go">&#39;already-kebab&#39;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">to_kebab_case</span><span class="p">(</span><span class="s1">'UxAnalyst'</span><span class="p">)</span>
+<span class="go">'ux-analyst'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">to_kebab_case</span><span class="p">(</span><span class="s1">'ux_analyst'</span><span class="p">)</span>
+<span class="go">'ux-analyst'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">to_kebab_case</span><span class="p">(</span><span class="s1">'already-kebab'</span><span class="p">)</span>
+<span class="go">'already-kebab'</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -218,10 +218,10 @@ customizes the error wording for the caller’s domain. Shared by
 <dt class="sig sig-object py" id="coact.util.to_snake_case">
 <span class="sig-prename descclassname"><span class="pre">coact.util.</span></span><span class="sig-name descname"><span class="pre">to_snake_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/coact/util.html#to_snake_case"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coact.util.to_snake_case" title="Link to this definition"></a></dt>
 <dd><p>Convert CamelCase / kebab-case / spaces to snake_case.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">to_snake_case</span><span class="p">(</span><span class="s1">&#39;UxAnalyst&#39;</span><span class="p">)</span>
-<span class="go">&#39;ux_analyst&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">to_snake_case</span><span class="p">(</span><span class="s1">&#39;ux-analyst&#39;</span><span class="p">)</span>
-<span class="go">&#39;ux_analyst&#39;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">to_snake_case</span><span class="p">(</span><span class="s1">'UxAnalyst'</span><span class="p">)</span>
+<span class="go">'ux_analyst'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">to_snake_case</span><span class="p">(</span><span class="s1">'ux-analyst'</span><span class="p">)</span>
+<span class="go">'ux_analyst'</span>
 </pre></div>
 </div>
 </dd></dl>

@@ -98,13 +98,13 @@
            <div itemprop="articleBody">
              
   <h1>Source code for coact.complete</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;COMPLETE — lift a ``.claude/skills/`` skill into a ``.claude/agents/`` definition.</span>
+<span></span><span class="sd">"""COMPLETE — lift a ``.claude/skills/`` skill into a ``.claude/agents/`` definition.</span>
 
-<span class="sd">COACT_SPEC §5. Given a skill, synthesize the §3.2 &quot;extras envelope&quot; (persona,</span>
+<span class="sd">COACT_SPEC §5. Given a skill, synthesize the §3.2 "extras envelope" (persona,</span>
 <span class="sd">return contract, tool allowlist, model, memory, …) and produce an</span>
 <span class="sd">:class:`~coact.base.AgentDefinition` that **references** the skill (never copies</span>
 <span class="sd">it — §3.3). This is the mechanical, **no-LLM** path (DECISIONS D10): it reads the</span>
-<span class="sd">author&#39;s ``coact:`` block plus an injected :class:`~coact.policy.CompletionPolicy`</span>
+<span class="sd">author's ``coact:`` block plus an injected :class:`~coact.policy.CompletionPolicy`</span>
 <span class="sd">and *reports what it guessed* via :class:`~coact.base.AgentPlan` provenance — it</span>
 <span class="sd">never decides silently.</span>
 
@@ -112,8 +112,8 @@
 
 <span class="sd">- :func:`plan_completion` — returns an :class:`AgentPlan` (the proposed agent +</span>
 <span class="sd">  per-field provenance + warnings) **without** writing anything.</span>
-<span class="sd">- :func:`complete` — returns the :class:`AgentDefinition` (the plan&#39;s agent).</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">- :func:`complete` — returns the :class:`AgentDefinition` (the plan's agent).</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -146,7 +146,7 @@
     <span class="n">policy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletionPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">llm</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AgentPlan</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plan the skill→agent completion, recording the provenance of every field.</span>
+<span class="w">    </span><span class="sd">"""Plan the skill→agent completion, recording the provenance of every field.</span>
 
 <span class="sd">    Accepts a :class:`~skill.base.Skill`, a path to a skill directory / SKILL.md,</span>
 <span class="sd">    or a skill key/name resolvable in the local store or project skills. Pass an</span>
@@ -154,15 +154,15 @@
 <span class="sd">    model name) to *draft* a richer persona — the mechanical path needs none.</span>
 
 <span class="sd">    &gt;&gt;&gt; from skill.base import Skill, SkillMeta</span>
-<span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name=&#39;auditor&#39;, description=&#39;Audit a bundle for issues.&#39;), body=&#39;steps&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name='auditor', description='Audit a bundle for issues.'), body='steps')</span>
 <span class="sd">    &gt;&gt;&gt; plan = plan_completion(s)</span>
 <span class="sd">    &gt;&gt;&gt; plan.agent.name</span>
-<span class="sd">    &#39;auditor&#39;</span>
+<span class="sd">    'auditor'</span>
 <span class="sd">    &gt;&gt;&gt; plan.agent.model  # read-only description with default tools -&gt; haiku</span>
-<span class="sd">    &#39;haiku&#39;</span>
-<span class="sd">    &gt;&gt;&gt; any(p.field == &#39;prompt&#39; for p in plan.provenance)</span>
+<span class="sd">    'haiku'</span>
+<span class="sd">    &gt;&gt;&gt; any(p.field == 'prompt' for p in plan.provenance)</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">policy</span> <span class="o">=</span> <span class="n">policy</span> <span class="ow">or</span> <span class="n">default_policy</span>
     <span class="n">skill</span> <span class="o">=</span> <span class="n">resolve_skill</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
     <span class="n">coact_meta</span> <span class="o">=</span> <span class="n">parse_coact_meta</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span>
@@ -170,58 +170,58 @@
     <span class="n">warnings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span>
-    <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;skill&quot;</span><span class="p">,</span> <span class="s2">&quot;skill name&quot;</span><span class="p">))</span>
+    <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">"skill"</span><span class="p">,</span> <span class="s2">"skill name"</span><span class="p">))</span>
 
     <span class="n">description</span> <span class="o">=</span> <span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">description</span>
     <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
         <span class="n">FieldProvenance</span><span class="p">(</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="s2">&quot;skill&quot;</span><span class="p">,</span> <span class="s2">&quot;reused as delegation trigger&quot;</span>
+            <span class="s2">"description"</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="s2">"skill"</span><span class="p">,</span> <span class="s2">"reused as delegation trigger"</span>
         <span class="p">)</span>
     <span class="p">)</span>
 
     <span class="c1"># tools (declared-or-heuristic + report) then narrow with denylist.</span>
     <span class="n">tools</span><span class="p">,</span> <span class="n">tools_reason</span> <span class="o">=</span> <span class="n">policy</span><span class="o">.</span><span class="n">infer_tools</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">coact_meta</span><span class="p">)</span>
-    <span class="n">tools_source</span> <span class="o">=</span> <span class="s2">&quot;coact-frontmatter&quot;</span> <span class="k">if</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">tools</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;inferred&quot;</span>
-    <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="p">,</span> <span class="n">tools_source</span><span class="p">,</span> <span class="n">tools_reason</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">tools_source</span> <span class="o">==</span> <span class="s2">&quot;inferred&quot;</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;tools not declared; </span><span class="si">{</span><span class="n">tools_reason</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">tools_source</span> <span class="o">=</span> <span class="s2">"coact-frontmatter"</span> <span class="k">if</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">tools</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"inferred"</span>
+    <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">"tools"</span><span class="p">,</span> <span class="n">tools</span><span class="p">,</span> <span class="n">tools_source</span><span class="p">,</span> <span class="n">tools_reason</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">tools_source</span> <span class="o">==</span> <span class="s2">"inferred"</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"tools not declared; </span><span class="si">{</span><span class="n">tools_reason</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="n">disallowed</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">coact_meta</span><span class="o">.</span><span class="n">disallowed_tools</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">disallowed</span><span class="p">:</span>
         <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">&quot;disallowed_tools&quot;</span><span class="p">,</span> <span class="n">disallowed</span><span class="p">,</span> <span class="s2">&quot;coact-frontmatter&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">"disallowed_tools"</span><span class="p">,</span> <span class="n">disallowed</span><span class="p">,</span> <span class="s2">"coact-frontmatter"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
         <span class="p">)</span>
 
     <span class="c1"># skills: source skill + explicit extra references (mechanical graph).</span>
     <span class="n">skills</span> <span class="o">=</span> <span class="n">_unique</span><span class="p">([</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">coact_meta</span><span class="o">.</span><span class="n">skills</span><span class="p">])</span>
-    <span class="n">skills_src</span> <span class="o">=</span> <span class="s2">&quot;coact-frontmatter&quot;</span> <span class="k">if</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">skills</span> <span class="k">else</span> <span class="s2">&quot;skill&quot;</span>
+    <span class="n">skills_src</span> <span class="o">=</span> <span class="s2">"coact-frontmatter"</span> <span class="k">if</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">skills</span> <span class="k">else</span> <span class="s2">"skill"</span>
     <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-        <span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">&quot;skills&quot;</span><span class="p">,</span> <span class="n">skills</span><span class="p">,</span> <span class="n">skills_src</span><span class="p">,</span> <span class="s2">&quot;source skill + declared refs&quot;</span><span class="p">)</span>
+        <span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">"skills"</span><span class="p">,</span> <span class="n">skills</span><span class="p">,</span> <span class="n">skills_src</span><span class="p">,</span> <span class="s2">"source skill + declared refs"</span><span class="p">)</span>
     <span class="p">)</span>
 
     <span class="c1"># model routing from effective tools / description / skill count.</span>
     <span class="k">if</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-        <span class="n">model</span><span class="p">,</span> <span class="n">model_reason</span><span class="p">,</span> <span class="n">model_src</span> <span class="o">=</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;pinned&quot;</span><span class="p">,</span> <span class="s2">&quot;coact-frontmatter&quot;</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">model_reason</span><span class="p">,</span> <span class="n">model_src</span> <span class="o">=</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s2">"pinned"</span><span class="p">,</span> <span class="s2">"coact-frontmatter"</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">model</span><span class="p">,</span> <span class="n">model_reason</span> <span class="o">=</span> <span class="n">policy</span><span class="o">.</span><span class="n">choose_model</span><span class="p">(</span>
             <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span> <span class="n">n_skills</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">skills</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">model_src</span> <span class="o">=</span> <span class="s2">&quot;policy&quot;</span>
-    <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">model_src</span><span class="p">,</span> <span class="n">model_reason</span><span class="p">))</span>
+        <span class="n">model_src</span> <span class="o">=</span> <span class="s2">"policy"</span>
+    <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">"model"</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">model_src</span><span class="p">,</span> <span class="n">model_reason</span><span class="p">))</span>
 
     <span class="c1"># memory (opt-in).</span>
     <span class="k">if</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">memory</span><span class="p">:</span>
-        <span class="n">memory</span><span class="p">,</span> <span class="n">mem_reason</span><span class="p">,</span> <span class="n">mem_src</span> <span class="o">=</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">memory</span><span class="p">,</span> <span class="s2">&quot;pinned&quot;</span><span class="p">,</span> <span class="s2">&quot;coact-frontmatter&quot;</span>
+        <span class="n">memory</span><span class="p">,</span> <span class="n">mem_reason</span><span class="p">,</span> <span class="n">mem_src</span> <span class="o">=</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">memory</span><span class="p">,</span> <span class="s2">"pinned"</span><span class="p">,</span> <span class="s2">"coact-frontmatter"</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">memory</span><span class="p">,</span> <span class="n">mem_reason</span> <span class="o">=</span> <span class="n">policy</span><span class="o">.</span><span class="n">choose_memory</span><span class="p">()</span>
-        <span class="n">mem_src</span> <span class="o">=</span> <span class="s2">&quot;policy&quot;</span> <span class="k">if</span> <span class="n">memory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;default&quot;</span>
+        <span class="n">mem_src</span> <span class="o">=</span> <span class="s2">"policy"</span> <span class="k">if</span> <span class="n">memory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"default"</span>
     <span class="k">if</span> <span class="n">memory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">&quot;memory&quot;</span><span class="p">,</span> <span class="n">memory</span><span class="p">,</span> <span class="n">mem_src</span><span class="p">,</span> <span class="n">mem_reason</span><span class="p">))</span>
+        <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">"memory"</span><span class="p">,</span> <span class="n">memory</span><span class="p">,</span> <span class="n">mem_src</span><span class="p">,</span> <span class="n">mem_reason</span><span class="p">))</span>
 
     <span class="n">permission_mode</span> <span class="o">=</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">permission_mode</span>
     <span class="k">if</span> <span class="n">permission_mode</span><span class="p">:</span>
         <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">&quot;permission_mode&quot;</span><span class="p">,</span> <span class="n">permission_mode</span><span class="p">,</span> <span class="s2">&quot;coact-frontmatter&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">"permission_mode"</span><span class="p">,</span> <span class="n">permission_mode</span><span class="p">,</span> <span class="s2">"coact-frontmatter"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
         <span class="p">)</span>
 
     <span class="c1"># return contract (author-pinned else template) — the most important extra.</span>
@@ -233,12 +233,12 @@
             <span class="n">return_contract</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">return_contract</span><span class="p">,</span> <span class="n">json_schema</span><span class="o">=</span><span class="n">resolved</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;return schema_ref </span><span class="si">{</span><span class="n">return_contract</span><span class="o">.</span><span class="n">ref</span><span class="si">!r}</span><span class="s2"> could not be resolved &quot;</span>
-                <span class="s2">&quot;to a JSON Schema; the contract carries only the reference.&quot;</span>
+                <span class="sa">f</span><span class="s2">"return schema_ref </span><span class="si">{</span><span class="n">return_contract</span><span class="o">.</span><span class="n">ref</span><span class="si">!r}</span><span class="s2"> could not be resolved "</span>
+                <span class="s2">"to a JSON Schema; the contract carries only the reference."</span>
             <span class="p">)</span>
     <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
         <span class="n">FieldProvenance</span><span class="p">(</span>
-            <span class="s2">&quot;returns&quot;</span><span class="p">,</span>
+            <span class="s2">"returns"</span><span class="p">,</span>
             <span class="n">return_contract</span><span class="o">.</span><span class="n">ref</span> <span class="ow">or</span> <span class="n">return_contract</span><span class="o">.</span><span class="n">json_schema</span><span class="p">,</span>
             <span class="n">rc_src</span><span class="p">,</span>
             <span class="n">return_contract</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
@@ -247,7 +247,7 @@
 
     <span class="c1"># persona (author-pinned else template).</span>
     <span class="k">if</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">persona</span><span class="p">:</span>
-        <span class="n">persona</span><span class="p">,</span> <span class="n">persona_src</span> <span class="o">=</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">persona</span><span class="p">,</span> <span class="s2">&quot;coact-frontmatter&quot;</span>
+        <span class="n">persona</span><span class="p">,</span> <span class="n">persona_src</span> <span class="o">=</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">persona</span><span class="p">,</span> <span class="s2">"coact-frontmatter"</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">persona</span><span class="p">,</span> <span class="n">persona_src</span> <span class="o">=</span> <span class="n">synthesize_persona</span><span class="p">(</span>
             <span class="n">skill</span><span class="p">,</span>
@@ -257,19 +257,19 @@
             <span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-        <span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">&quot;prompt&quot;</span><span class="p">,</span> <span class="n">persona</span><span class="p">,</span> <span class="n">persona_src</span><span class="p">,</span> <span class="s2">&quot;system prompt / persona&quot;</span><span class="p">)</span>
+        <span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">"prompt"</span><span class="p">,</span> <span class="n">persona</span><span class="p">,</span> <span class="n">persona_src</span><span class="p">,</span> <span class="s2">"system prompt / persona"</span><span class="p">)</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">consumes</span><span class="p">:</span>
         <span class="n">prov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">&quot;consumes&quot;</span><span class="p">,</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">consumes</span><span class="p">,</span> <span class="s2">&quot;coact-frontmatter&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">FieldProvenance</span><span class="p">(</span><span class="s2">"consumes"</span><span class="p">,</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">consumes</span><span class="p">,</span> <span class="s2">"coact-frontmatter"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">mcp</span><span class="p">:</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;functions&quot;</span><span class="p">,</span> <span class="p">[])</span> <span class="ow">or</span> <span class="p">[])</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">mcp</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"functions"</span><span class="p">,</span> <span class="p">[])</span> <span class="ow">or</span> <span class="p">[])</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">coact_meta</span><span class="o">.</span><span class="n">mcp</span><span class="p">)</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> python tool(s) declared in coact: mcp — exposed at realize-time &quot;</span>
-            <span class="s2">&quot;(backend=&#39;mcp&#39;), not embedded in the definition.&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> python tool(s) declared in coact: mcp — exposed at realize-time "</span>
+            <span class="s2">"(backend='mcp'), not embedded in the definition."</span>
         <span class="p">)</span>
 
     <span class="n">agent</span> <span class="o">=</span> <span class="n">AgentDefinition</span><span class="p">(</span>
@@ -298,14 +298,14 @@
     <span class="n">policy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletionPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">llm</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AgentDefinition</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Complete a skill into an :class:`AgentDefinition` (the plan&#39;s agent).</span>
+<span class="w">    </span><span class="sd">"""Complete a skill into an :class:`AgentDefinition` (the plan's agent).</span>
 
 <span class="sd">    &gt;&gt;&gt; from skill.base import Skill, SkillMeta</span>
-<span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name=&#39;ux&#39;, description=&#39;Analyze bundles.&#39;), body=&#39;steps&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name='ux', description='Analyze bundles.'), body='steps')</span>
 <span class="sd">    &gt;&gt;&gt; ad = complete(s)</span>
-<span class="sd">    &gt;&gt;&gt; ad.name, ad.skills, (&#39;Return contract&#39; in ad.prompt)</span>
-<span class="sd">    (&#39;ux&#39;, [&#39;ux&#39;], True)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; ad.name, ad.skills, ('Return contract' in ad.prompt)</span>
+<span class="sd">    ('ux', ['ux'], True)</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">plan_completion</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">,</span> <span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">)</span><span class="o">.</span><span class="n">agent</span></div>
 
 
@@ -318,18 +318,18 @@
 <div class="viewcode-block" id="resolve_skill">
 <a class="viewcode-back" href="../../module_docs/coact/complete.html#coact.resolve_skill">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">resolve_skill</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="n">SkillSource</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Skill</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve a Skill from an object, a path, or a key/name.</span>
+<span class="w">    </span><span class="sd">"""Resolve a Skill from an object, a path, or a key/name.</span>
 
 <span class="sd">    Resolution order for strings: filesystem path → local store key → project</span>
 <span class="sd">    ``.claude/skills/&lt;name&gt;``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">Skill</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">source</span>
 
     <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;SKILL.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">"SKILL.md"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">Skill</span><span class="o">.</span><span class="n">from_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;SKILL.md&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"SKILL.md"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Skill</span><span class="o">.</span><span class="n">from_path</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
 
     <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
@@ -340,20 +340,20 @@
     <span class="c1"># project .claude/skills/&lt;name&gt;</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">find_project_root</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">candidate</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;.claude&quot;</span> <span class="o">/</span> <span class="s2">&quot;skills&quot;</span> <span class="o">/</span> <span class="n">key</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">candidate</span> <span class="o">/</span> <span class="s2">&quot;SKILL.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="o">/</span> <span class="s2">".claude"</span> <span class="o">/</span> <span class="s2">"skills"</span> <span class="o">/</span> <span class="n">key</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">candidate</span> <span class="o">/</span> <span class="s2">"SKILL.md"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="k">return</span> <span class="n">Skill</span><span class="o">.</span><span class="n">from_path</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
 
     <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Could not resolve skill </span><span class="si">{</span><span class="n">source</span><span class="si">!r}</span><span class="s2">: not a skill directory, a local &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;store key, or a project skill. Looked in the local store and &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;.claude/skills/.&quot;</span>
+        <span class="sa">f</span><span class="s2">"Could not resolve skill </span><span class="si">{</span><span class="n">source</span><span class="si">!r}</span><span class="s2">: not a skill directory, a local "</span>
+        <span class="sa">f</span><span class="s2">"store key, or a project skill. Looked in the local store and "</span>
+        <span class="sa">f</span><span class="s2">".claude/skills/."</span>
     <span class="p">)</span></div>
 
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_skill_key</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Best-effort canonical key/name for provenance (``source_skill``).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Best-effort canonical key/name for provenance (``source_skill``)."""</span>
     <span class="k">if</span> <span class="n">skill</span><span class="o">.</span><span class="n">source_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">skill</span><span class="o">.</span><span class="n">source_path</span><span class="o">.</span><span class="n">name</span>
     <span class="k">return</span> <span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="kc">None</span>

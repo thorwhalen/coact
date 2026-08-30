@@ -98,12 +98,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for coact.util</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Pure helpers for coact with no internal coact imports.</span>
+<span></span><span class="sd">"""Pure helpers for coact with no internal coact imports.</span>
 
 <span class="sd">Small, reusable string/name utilities and a thin ``check_requirements`` helper</span>
 <span class="sd">for the optional-dependency backends (Agent SDK, py2mcp/FastMCP, an LLM</span>
 <span class="sd">provider). Kept dependency-free so every other coact module can import it.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -116,76 +116,76 @@
 <div class="viewcode-block" id="to_kebab_case">
 <a class="viewcode-back" href="../../module_docs/coact/util.html#coact.util.to_kebab_case">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">to_kebab_case</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert CamelCase / snake_case / spaces to kebab-case.</span>
+<span class="w">    </span><span class="sd">"""Convert CamelCase / snake_case / spaces to kebab-case.</span>
 
-<span class="sd">    &gt;&gt;&gt; to_kebab_case(&#39;UxAnalyst&#39;)</span>
-<span class="sd">    &#39;ux-analyst&#39;</span>
-<span class="sd">    &gt;&gt;&gt; to_kebab_case(&#39;ux_analyst&#39;)</span>
-<span class="sd">    &#39;ux-analyst&#39;</span>
-<span class="sd">    &gt;&gt;&gt; to_kebab_case(&#39;already-kebab&#39;)</span>
-<span class="sd">    &#39;already-kebab&#39;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(?&lt;=[a-z0-9])([A-Z])&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;-\1&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[\s_]+&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span></div>
+<span class="sd">    &gt;&gt;&gt; to_kebab_case('UxAnalyst')</span>
+<span class="sd">    'ux-analyst'</span>
+<span class="sd">    &gt;&gt;&gt; to_kebab_case('ux_analyst')</span>
+<span class="sd">    'ux-analyst'</span>
+<span class="sd">    &gt;&gt;&gt; to_kebab_case('already-kebab')</span>
+<span class="sd">    'already-kebab'</span>
+<span class="sd">    """</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?&lt;=[a-z0-9])([A-Z])"</span><span class="p">,</span> <span class="sa">r</span><span class="s2">"-\1"</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[\s_]+"</span><span class="p">,</span> <span class="s2">"-"</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"-"</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="to_snake_case">
 <a class="viewcode-back" href="../../module_docs/coact/util.html#coact.util.to_snake_case">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">to_snake_case</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert CamelCase / kebab-case / spaces to snake_case.</span>
+<span class="w">    </span><span class="sd">"""Convert CamelCase / kebab-case / spaces to snake_case.</span>
 
-<span class="sd">    &gt;&gt;&gt; to_snake_case(&#39;UxAnalyst&#39;)</span>
-<span class="sd">    &#39;ux_analyst&#39;</span>
-<span class="sd">    &gt;&gt;&gt; to_snake_case(&#39;ux-analyst&#39;)</span>
-<span class="sd">    &#39;ux_analyst&#39;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(?&lt;=[a-z0-9])([A-Z])&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;_\1&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[\s-]+&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span></div>
+<span class="sd">    &gt;&gt;&gt; to_snake_case('UxAnalyst')</span>
+<span class="sd">    'ux_analyst'</span>
+<span class="sd">    &gt;&gt;&gt; to_snake_case('ux-analyst')</span>
+<span class="sd">    'ux_analyst'</span>
+<span class="sd">    """</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?&lt;=[a-z0-9])([A-Z])"</span><span class="p">,</span> <span class="sa">r</span><span class="s2">"_\1"</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[\s-]+"</span><span class="p">,</span> <span class="s2">"_"</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="safe_filename">
 <a class="viewcode-back" href="../../module_docs/coact/util.html#coact.util.safe_filename">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">safe_filename</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return ``f&quot;{name}{suffix}&quot;`` after rejecting unsafe, path-bearing names.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">safe_filename</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"name"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return ``f"{name}{suffix}"`` after rejecting unsafe, path-bearing names.</span>
 
 <span class="sd">    Names that become files must be bare filename stems; one carrying a path</span>
 <span class="sd">    separator or ``..`` could escape its directory (CWE-22) on write *or* read.</span>
 <span class="sd">    Raises ``ValueError`` on an empty, non-string, or path-bearing name. ``kind``</span>
-<span class="sd">    customizes the error wording for the caller&#39;s domain. Shared by</span>
+<span class="sd">    customizes the error wording for the caller's domain. Shared by</span>
 <span class="sd">    :func:`agent_filename` (``.md`` agents) and the publish axis (``.mcpb`` bundles).</span>
 
-<span class="sd">    &gt;&gt;&gt; safe_filename(&#39;paths&#39;, suffix=&#39;.mcpb&#39;)</span>
-<span class="sd">    &#39;paths.mcpb&#39;</span>
-<span class="sd">    &gt;&gt;&gt; safe_filename(&#39;../x&#39;, suffix=&#39;.mcpb&#39;)  # doctest: +ELLIPSIS</span>
+<span class="sd">    &gt;&gt;&gt; safe_filename('paths', suffix='.mcpb')</span>
+<span class="sd">    'paths.mcpb'</span>
+<span class="sd">    &gt;&gt;&gt; safe_filename('../x', suffix='.mcpb')  # doctest: +ELLIPSIS</span>
 <span class="sd">    Traceback (most recent call last):</span>
 <span class="sd">        ...</span>
-<span class="sd">    ValueError: unsafe name &#39;../x&#39;: ...</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    ValueError: unsafe name '../x': ...</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2"> must be a non-empty string, got </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2"> must be a non-empty string, got </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
     <span class="n">unsafe</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;..&quot;</span><span class="p">)</span>
+        <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="s2">".."</span><span class="p">)</span>
         <span class="ow">or</span> <span class="n">name</span> <span class="o">!=</span> <span class="n">Path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
-        <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">sep</span> <span class="ow">in</span> <span class="n">name</span> <span class="k">for</span> <span class="n">sep</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">))</span>
-        <span class="ow">or</span> <span class="s2">&quot;</span><span class="se">\x00</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">name</span>
+        <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">sep</span> <span class="ow">in</span> <span class="n">name</span> <span class="k">for</span> <span class="n">sep</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">))</span>
+        <span class="ow">or</span> <span class="s2">"</span><span class="se">\x00</span><span class="s2">"</span> <span class="ow">in</span> <span class="n">name</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">unsafe</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;unsafe </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">: must be a bare filename stem &quot;</span>
-            <span class="s2">&quot;(no &#39;/&#39;, &#39;</span><span class="se">\\</span><span class="s2">&#39;, &#39;..&#39;, or path separators)&quot;</span>
+            <span class="sa">f</span><span class="s2">"unsafe </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">: must be a bare filename stem "</span>
+            <span class="s2">"(no '/', '</span><span class="se">\\</span><span class="s2">', '..', or path separators)"</span>
         <span class="p">)</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span></div>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">"</span></div>
 
 
 
 <div class="viewcode-block" id="agent_filename">
 <a class="viewcode-back" href="../../module_docs/coact/util.html#coact.util.agent_filename">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">agent_filename</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the safe ``&lt;name&gt;.md`` filename for an agent, rejecting unsafe names.</span>
+<span class="w">    </span><span class="sd">"""Return the safe ``&lt;name&gt;.md`` filename for an agent, rejecting unsafe names.</span>
 
 <span class="sd">    Agent names become files under ``.claude/agents/``; a name carrying a path</span>
 <span class="sd">    separator or ``..`` could escape that directory (CWE-22 path traversal) on</span>
@@ -194,21 +194,21 @@
 <span class="sd">    filesystem boundary so in-memory :class:`~coact.base.AgentDefinition`\\ s stay</span>
 <span class="sd">    unconstrained.</span>
 
-<span class="sd">    &gt;&gt;&gt; agent_filename(&#39;ux-analyst&#39;)</span>
-<span class="sd">    &#39;ux-analyst.md&#39;</span>
-<span class="sd">    &gt;&gt;&gt; agent_filename(&#39;../escape&#39;)  # doctest: +ELLIPSIS</span>
+<span class="sd">    &gt;&gt;&gt; agent_filename('ux-analyst')</span>
+<span class="sd">    'ux-analyst.md'</span>
+<span class="sd">    &gt;&gt;&gt; agent_filename('../escape')  # doctest: +ELLIPSIS</span>
 <span class="sd">    Traceback (most recent call last):</span>
 <span class="sd">        ...</span>
-<span class="sd">    ValueError: unsafe agent name &#39;../escape&#39;: ...</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">safe_filename</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.md&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;agent name&quot;</span><span class="p">)</span></div>
+<span class="sd">    ValueError: unsafe agent name '../escape': ...</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">safe_filename</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">".md"</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"agent name"</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="first_balanced_span">
 <a class="viewcode-back" href="../../module_docs/coact/util.html#coact.util.first_balanced_span">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">first_balanced_span</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">opener</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="n">closer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;}&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the first depth-balanced ``opener…closer`` substring of ``s``.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">first_balanced_span</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">opener</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"{"</span><span class="p">,</span> <span class="n">closer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"}"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Return the first depth-balanced ``opener…closer`` substring of ``s``.</span>
 
 <span class="sd">    Brackets inside double-quoted JSON strings are ignored, so a valid value</span>
 <span class="sd">    followed by prose that itself contains brackets is not over-captured (a</span>
@@ -216,13 +216,13 @@
 <span class="sd">    parse). Returns ``None`` when no balanced span starts in ``s``. Shared by the</span>
 <span class="sd">    LLM-reply JSON extractors (:mod:`coact.llm`, :mod:`coact.realize_litellm`).</span>
 
-<span class="sd">    &gt;&gt;&gt; first_balanced_span(&#39;Result: {&quot;a&quot;: 1}. Note: {braces}.&#39;)</span>
-<span class="sd">    &#39;{&quot;a&quot;: 1}&#39;</span>
-<span class="sd">    &gt;&gt;&gt; first_balanced_span(&#39;see [1, [2, 3]] end&#39;, &#39;[&#39;, &#39;]&#39;)</span>
-<span class="sd">    &#39;[1, [2, 3]]&#39;</span>
-<span class="sd">    &gt;&gt;&gt; first_balanced_span(&#39;no brackets here&#39;) is None</span>
+<span class="sd">    &gt;&gt;&gt; first_balanced_span('Result: {"a": 1}. Note: {braces}.')</span>
+<span class="sd">    '{"a": 1}'</span>
+<span class="sd">    &gt;&gt;&gt; first_balanced_span('see [1, [2, 3]] end', '[', ']')</span>
+<span class="sd">    '[1, [2, 3]]'</span>
+<span class="sd">    &gt;&gt;&gt; first_balanced_span('no brackets here') is None</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">start</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">opener</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -234,11 +234,11 @@
         <span class="k">if</span> <span class="n">in_str</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">escaped</span><span class="p">:</span>
                 <span class="n">escaped</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">elif</span> <span class="n">ch</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">ch</span> <span class="o">==</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">:</span>
                 <span class="n">escaped</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">elif</span> <span class="n">ch</span> <span class="o">==</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">ch</span> <span class="o">==</span> <span class="s1">'"'</span><span class="p">:</span>
                 <span class="n">in_str</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">elif</span> <span class="n">ch</span> <span class="o">==</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">ch</span> <span class="o">==</span> <span class="s1">'"'</span><span class="p">:</span>
             <span class="n">in_str</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="n">ch</span> <span class="o">==</span> <span class="n">opener</span><span class="p">:</span>
             <span class="n">depth</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -253,28 +253,28 @@
 <div class="viewcode-block" id="import_object">
 <a class="viewcode-back" href="../../module_docs/coact/util.html#coact.util.import_object">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">import_object</span><span class="p">(</span><span class="n">ref</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve a ``&#39;module.path:attr&#39;`` or ``&#39;module.path.attr&#39;`` reference.</span>
+<span class="w">    </span><span class="sd">"""Resolve a ``'module.path:attr'`` or ``'module.path.attr'`` reference.</span>
 
 <span class="sd">    Prefer the ``module:attr`` form (unambiguous). Falls back to splitting on the</span>
 <span class="sd">    last dot for the dotted form.</span>
 
-<span class="sd">    &gt;&gt;&gt; import_object(&#39;json:dumps&#39;)  # doctest: +ELLIPSIS</span>
+<span class="sd">    &gt;&gt;&gt; import_object('json:dumps')  # doctest: +ELLIPSIS</span>
 <span class="sd">    &lt;function dumps at ...&gt;</span>
-<span class="sd">    &gt;&gt;&gt; import_object(&#39;os.path.join&#39;)  # doctest: +ELLIPSIS</span>
+<span class="sd">    &gt;&gt;&gt; import_object('os.path.join')  # doctest: +ELLIPSIS</span>
 <span class="sd">    &lt;function join at ...&gt;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">ref</span><span class="p">:</span>
-        <span class="n">module_name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">attr</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="n">ref</span><span class="p">:</span>
+        <span class="n">module_name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">attr</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">module_name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">attr</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">module_name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">attr</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">module_name</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">attr</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Invalid object reference </span><span class="si">{</span><span class="n">ref</span><span class="si">!r}</span><span class="s2">; expected &#39;module:attr&#39; &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;or &#39;module.path.attr&#39;.&quot;</span>
+            <span class="sa">f</span><span class="s2">"Invalid object reference </span><span class="si">{</span><span class="n">ref</span><span class="si">!r}</span><span class="s2">; expected 'module:attr' "</span>
+            <span class="sa">f</span><span class="s2">"or 'module.path.attr'."</span>
         <span class="p">)</span>
     <span class="n">module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
     <span class="n">obj</span> <span class="o">=</span> <span class="n">module</span>
-    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">attr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">attr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">):</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">part</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">obj</span></div>
 
@@ -287,16 +287,16 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">feature</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Verify optional dependencies are importable, else raise an actionable error.</span>
+<span class="w">    </span><span class="sd">"""Verify optional dependencies are importable, else raise an actionable error.</span>
 
 <span class="sd">    ``modules`` maps an importable module name to the pip target that provides</span>
-<span class="sd">    it (e.g. ``{&#39;claude_agent_sdk&#39;: &#39;claude-agent-sdk&#39;}``). Raises</span>
+<span class="sd">    it (e.g. ``{'claude_agent_sdk': 'claude-agent-sdk'}``). Raises</span>
 <span class="sd">    ``ImportError`` listing the exact ``pip install`` line for whatever is</span>
 <span class="sd">    missing — and, when some requirements *are* present, which ones — the</span>
 <span class="sd">    package-UX convention for optional backends (informative, actionable errors).</span>
 
-<span class="sd">    &gt;&gt;&gt; check_requirements({&#39;json&#39;: &#39;json&#39;}, feature=&#39;noop&#39;)  # importable -&gt; no raise</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; check_requirements({'json': 'json'}, feature='noop')  # importable -&gt; no raise</span>
+<span class="sd">    """</span>
     <span class="n">missing</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">present</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">pip_target</span> <span class="ow">in</span> <span class="n">modules</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -306,11 +306,11 @@
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="n">missing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pip_target</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
-        <span class="n">already</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; (already present: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">present</span><span class="p">))</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="n">present</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">already</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">" (already present: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">present</span><span class="p">))</span><span class="si">}</span><span class="s2">)"</span> <span class="k">if</span> <span class="n">present</span> <span class="k">else</span> <span class="s2">""</span>
         <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;The </span><span class="si">{</span><span class="n">feature</span><span class="si">!r}</span><span class="s2"> feature needs optional dependencies that are not &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;installed</span><span class="si">{</span><span class="n">already</span><span class="si">}</span><span class="s2">. Install them with:</span><span class="se">\n\n</span><span class="s2">    &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;pip install </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">missing</span><span class="p">)))</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"The </span><span class="si">{</span><span class="n">feature</span><span class="si">!r}</span><span class="s2"> feature needs optional dependencies that are not "</span>
+            <span class="sa">f</span><span class="s2">"installed</span><span class="si">{</span><span class="n">already</span><span class="si">}</span><span class="s2">. Install them with:</span><span class="se">\n\n</span><span class="s2">    "</span>
+            <span class="sa">f</span><span class="s2">"pip install </span><span class="si">{</span><span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">missing</span><span class="p">)))</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
         <span class="p">)</span></div>
 
 </pre></div>

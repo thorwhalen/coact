@@ -123,9 +123,9 @@ warn and fall back rather than crash — no hard pydantic dependency, no LLM
 TypedDicts (structural <code class="docutils literal notranslate"><span class="pre">{type:</span> <span class="pre">object,</span> <span class="pre">properties:</span> <span class="pre">{...}}</span></code>). Provider- and
 pydantic-agnostic: returns <code class="docutils literal notranslate"><span class="pre">None</span></code> on any failure so callers can warn and
 fall back rather than crash (DECISIONS D6/D10).</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">resolve_schema_ref</span><span class="p">(</span><span class="s1">&#39;coact.base:ReturnContract&#39;</span><span class="p">)[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
-<span class="go">&#39;object&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">resolve_schema_ref</span><span class="p">(</span><span class="s1">&#39;definitely.not:Real&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">resolve_schema_ref</span><span class="p">(</span><span class="s1">'coact.base:ReturnContract'</span><span class="p">)[</span><span class="s1">'type'</span><span class="p">]</span>
+<span class="go">'object'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resolve_schema_ref</span><span class="p">(</span><span class="s1">'definitely.not:Real'</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
 <span class="go">True</span>
 </pre></div>
 </div>

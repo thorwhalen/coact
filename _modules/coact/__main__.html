@@ -99,9 +99,9 @@
              
   <h1>Source code for coact.__main__</h1><div class="highlight"><pre>
 <span></span><span class="c1"># PYTHON_ARGCOMPLETE_OK</span>
-<span class="sd">&quot;&quot;&quot;CLI entry point for coact — the verbs are both Python functions and subcommands.</span>
+<span class="sd">"""CLI entry point for coact — the verbs are both Python functions and subcommands.</span>
 
-<span class="sd">Mirrors ``skill``&#39;s dispatch-to-interface pattern (CLI wrappers call the same</span>
+<span class="sd">Mirrors ``skill``'s dispatch-to-interface pattern (CLI wrappers call the same</span>
 <span class="sd">core functions and format for the terminal), so the two packages feel like one</span>
 <span class="sd">toolkit. The verbs are ``plan``, ``complete``, ``emit``, ``realize``, ``diff``,</span>
 <span class="sd">``estimate``, ``inventory``, ``back``, ``scaffold``, ``publish``, and</span>
@@ -118,8 +118,8 @@
 <span class="sd">    python -m coact back .claude/agents/ux-analyst.md</span>
 <span class="sd">    python -m coact scaffold .claude/agents/a.md .claude/agents/b.md</span>
 <span class="sd">    python -m coact publish my.module:my_func --dry-run</span>
-<span class="sd">    python -m coact describe &quot;a tool that looks up the weather for a city&quot;</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    python -m coact describe "a tool that looks up the weather for a city"</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -140,7 +140,7 @@
 <div class="viewcode-block" id="plan">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.plan">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">plan</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Dry-run the skill→agent completion: show each field + its provenance.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Dry-run the skill→agent completion: show each field + its provenance."""</span>
     <span class="k">return</span> <span class="n">_plan</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">()</span></div>
 
 
@@ -148,22 +148,22 @@
 <div class="viewcode-block" id="complete">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.complete">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">plan</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Complete a skill into an agent definition (print the .md, or write to --dest).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Complete a skill into an agent definition (print the .md, or write to --dest)."""</span>
     <span class="k">if</span> <span class="n">plan</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_plan</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
     <span class="n">agent</span> <span class="o">=</span> <span class="n">_complete</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">dest</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Wrote </span><span class="si">{</span><span class="n">_emit</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;claude-agents-md&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="k">return</span> <span class="n">_emit</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="s2">&quot;claude-agents-md&quot;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Wrote </span><span class="si">{</span><span class="n">_emit</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span><span class="w"> </span><span class="s1">'claude-agents-md'</span><span class="p">,</span><span class="w"> </span><span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">return</span> <span class="n">_emit</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="s2">"claude-agents-md"</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="emit">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.emit">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">emit</span><span class="p">(</span>
-    <span class="n">skill</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;claude-agents-md&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">skill</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"claude-agents-md"</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Complete a skill and emit it to a target (claude-agents-md, sdk-agent-dict, ...).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Complete a skill and emit it to a target (claude-agents-md, sdk-agent-dict, ...)."""</span>
     <span class="n">agent</span> <span class="o">=</span> <span class="n">_complete</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">_emit</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
@@ -175,41 +175,41 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">realize</span><span class="p">(</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;host&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"host"</span><span class="p">,</span>
     <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">scope</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;project&quot;</span><span class="p">,</span>
+    <span class="n">scope</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"project"</span><span class="p">,</span>
     <span class="n">skills_source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Realize an agent/skill via a backend (host materializes files; sdk/mcp build runnables).</span>
+<span class="w">    </span><span class="sd">"""Realize an agent/skill via a backend (host materializes files; sdk/mcp build runnables).</span>
 
 <span class="sd">    ``--dry-run`` (host only) previews the files that *would* be written/linked</span>
 <span class="sd">    without touching the filesystem.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;host&quot;</span><span class="p">:</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">"host"</span><span class="p">:</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">_realize</span><span class="p">(</span>
             <span class="n">target</span><span class="p">,</span>
-            <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;host&quot;</span><span class="p">,</span>
+            <span class="n">backend</span><span class="o">=</span><span class="s2">"host"</span><span class="p">,</span>
             <span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">,</span>
             <span class="n">scope</span><span class="o">=</span><span class="n">scope</span><span class="p">,</span>
             <span class="n">skills_source</span><span class="o">=</span><span class="n">skills_source</span><span class="p">,</span>
             <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">head</span> <span class="o">=</span> <span class="s2">&quot;Would realize (host, dry-run)&quot;</span> <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">dry_run</span> <span class="k">else</span> <span class="s2">&quot;Realized (host)&quot;</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">head</span><span class="si">}</span><span class="s2"> into </span><span class="si">{</span><span class="n">res</span><span class="o">.</span><span class="n">agents_dir</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">]</span>
-        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;  agent: </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">agents</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;  skill: </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">skills</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;  ! </span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">warnings</span><span class="p">]</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;sdk&quot;</span><span class="p">:</span>
-        <span class="n">runnable</span> <span class="o">=</span> <span class="n">_realize</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;sdk&quot;</span><span class="p">)</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="s2">"Would realize (host, dry-run)"</span> <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">dry_run</span> <span class="k">else</span> <span class="s2">"Realized (host)"</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">head</span><span class="si">}</span><span class="s2"> into </span><span class="si">{</span><span class="n">res</span><span class="o">.</span><span class="n">agents_dir</span><span class="si">}</span><span class="s2">:"</span><span class="p">]</span>
+        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"  agent: </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">agents</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"  skill: </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">skills</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"  ! </span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">warnings</span><span class="p">]</span>
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">"sdk"</span><span class="p">:</span>
+        <span class="n">runnable</span> <span class="o">=</span> <span class="n">_realize</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">"sdk"</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Realized (sdk) RunnableAgent for </span><span class="si">{</span><span class="n">runnable</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> &quot;</span>
-            <span class="s2">&quot;(aw.AgenticStep-compatible: .execute(input, context) -&gt; (artifact, info)).&quot;</span>
+            <span class="sa">f</span><span class="s2">"Realized (sdk) RunnableAgent for </span><span class="si">{</span><span class="n">runnable</span><span class="o">.</span><span class="n">agent_def</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> "</span>
+            <span class="s2">"(aw.AgenticStep-compatible: .execute(input, context) -&gt; (artifact, info))."</span>
         <span class="p">)</span>
-    <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;mcp&quot;</span><span class="p">:</span>
-        <span class="n">server</span> <span class="o">=</span> <span class="n">_realize</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;mcp&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Realized (mcp) server </span><span class="si">{</span><span class="n">server</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">. Call .run() to serve it.&quot;</span>
+    <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">"mcp"</span><span class="p">:</span>
+        <span class="n">server</span> <span class="o">=</span> <span class="n">_realize</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">"mcp"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Realized (mcp) server </span><span class="si">{</span><span class="n">server</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">. Call .run() to serve it."</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">_realize</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">))</span></div>
 
 
@@ -217,7 +217,7 @@
 <div class="viewcode-block" id="diff">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.diff">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">diff</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">agent</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Show what extras an agent adds over its source skill (the §3.2 table).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Show what extras an agent adds over its source skill (the §3.2 table)."""</span>
     <span class="k">return</span> <span class="n">_diff</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">agent</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">()</span></div>
 
 
@@ -225,18 +225,18 @@
 <div class="viewcode-block" id="estimate">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.estimate">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="o">*</span><span class="n">agents</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Surface the fan-out token multiplier for an agent set (the cost gate).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Surface the fan-out token multiplier for an agent set (the cost gate)."""</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">agents</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;Pass one or more agent .md files or skill sources.&quot;</span>
+        <span class="k">return</span> <span class="s2">"Pass one or more agent .md files or skill sources."</span>
     <span class="k">return</span> <span class="n">_estimate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">agents</span><span class="p">))</span><span class="o">.</span><span class="n">render</span><span class="p">()</span></div>
 
 
 
 <div class="viewcode-block" id="inventory">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.inventory">[docs]</a>
-<span class="nd">@argh</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="s2">&quot;project&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;?&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Project root (default: current dir)&quot;</span><span class="p">)</span>
+<span class="nd">@argh</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="s2">"project"</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">"?"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"."</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Project root (default: current dir)"</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">inventory</span><span class="p">(</span><span class="n">project</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumerate a project&#39;s skills, derived agents, and MCP-exposed tools.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Enumerate a project's skills, derived agents, and MCP-exposed tools."""</span>
     <span class="k">return</span> <span class="n">_inventory</span><span class="p">(</span><span class="n">project</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">()</span></div>
 
 
@@ -244,21 +244,21 @@
 <div class="viewcode-block" id="back">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.back">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">back</span><span class="p">(</span><span class="n">agent</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Best-effort, LOSSY agent→skill extraction (prints a SKILL.md stub).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Best-effort, LOSSY agent→skill extraction (prints a SKILL.md stub)."""</span>
     <span class="k">return</span> <span class="n">_back</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span></div>
 
 
 
 <div class="viewcode-block" id="scaffold">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.scaffold">[docs]</a>
-<span class="nd">@argh</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="s2">&quot;agents&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Agent .md files / skill sources to wire&quot;</span><span class="p">)</span>
+<span class="nd">@argh</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="s2">"agents"</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">"+"</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Agent .md files / skill sources to wire"</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">scaffold</span><span class="p">(</span>
-    <span class="n">agents</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">agents_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.claude/agents&quot;</span>
+    <span class="n">agents</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">agents_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">".claude/agents"</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Emit a STARTER multi-agent fleet shim you own (sequential; D8 — not a topology engine).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Emit a STARTER multi-agent fleet shim you own (sequential; D8 — not a topology engine)."""</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">_scaffold_fleet</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">agents</span><span class="p">),</span> <span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">,</span> <span class="n">agents_dir</span><span class="o">=</span><span class="n">agents_dir</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">dest</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Wrote starter fleet shim: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Wrote starter fleet shim: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 
 
@@ -266,12 +266,12 @@
 <div class="viewcode-block" id="publish">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.publish">[docs]</a>
 <span class="nd">@argh</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span>
-    <span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Tool refs (&#39;module:function&#39;), a skill dir/SKILL.md, or both&quot;</span>
+    <span class="s2">"source"</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">"+"</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Tool refs ('module:function'), a skill dir/SKILL.md, or both"</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">publish</span><span class="p">(</span>
     <span class="n">source</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;claude-local-mcpb&quot;</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"claude-local-mcpb"</span><span class="p">,</span>
     <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">author</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -279,25 +279,25 @@
     <span class="n">connector_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">idp_issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Publish a capability to a chatbot host (default: a local Claude Desktop .mcpb bundle).</span>
+<span class="w">    </span><span class="sd">"""Publish a capability to a chatbot host (default: a local Claude Desktop .mcpb bundle).</span>
 
 <span class="sd">    ``--target claude-remote-connector`` instead scaffolds a REMOTE connector</span>
 <span class="sd">    (Streamable-HTTP MCP server + OAuth 2.1); ``--connector-url`` (its public URL)</span>
 <span class="sd">    and ``--idp-issuer`` (your managed identity provider) configure OAuth — omit</span>
 <span class="sd">    them to scaffold with fill-in placeholders. ``--dry-run`` previews without writing.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">src</span> <span class="o">=</span> <span class="n">source</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">source</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">extra</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">connector_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">idp_issuer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">target</span> <span class="o">!=</span> <span class="s2">&quot;claude-remote-connector&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="o">!=</span> <span class="s2">"claude-remote-connector"</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span>
-                <span class="s2">&quot;--connector-url/--idp-issuer apply only to &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;--target claude-remote-connector, not </span><span class="si">{</span><span class="n">target</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+                <span class="s2">"--connector-url/--idp-issuer apply only to "</span>
+                <span class="sa">f</span><span class="s2">"--target claude-remote-connector, not </span><span class="si">{</span><span class="n">target</span><span class="si">!r}</span><span class="s2">."</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">connector_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">extra</span><span class="p">[</span><span class="s2">&quot;connector_url&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">connector_url</span>
+            <span class="n">extra</span><span class="p">[</span><span class="s2">"connector_url"</span><span class="p">]</span> <span class="o">=</span> <span class="n">connector_url</span>
         <span class="k">if</span> <span class="n">idp_issuer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">extra</span><span class="p">[</span><span class="s2">&quot;idp_issuer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">idp_issuer</span>
+            <span class="n">extra</span><span class="p">[</span><span class="s2">"idp_issuer"</span><span class="p">]</span> <span class="o">=</span> <span class="n">idp_issuer</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">_publish</span><span class="p">(</span>
         <span class="n">src</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="n">author</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span> <span class="o">**</span><span class="n">extra</span>
     <span class="p">)</span>
@@ -314,13 +314,13 @@
     <span class="n">llm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">author</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Refine an NL description into a draft IntegrationSpec (opt-in LLM, aix-backed).</span>
+<span class="w">    </span><span class="sd">"""Refine an NL description into a draft IntegrationSpec (opt-in LLM, aix-backed).</span>
 
 <span class="sd">    The result is a *design draft*: proposed tools (with inferred input schemas).</span>
 <span class="sd">    Bind each tool to a ``module:function`` handler — or include such refs in the</span>
 <span class="sd">    description — then ``coact publish`` it. ``--llm`` is a model name (e.g.</span>
 <span class="sd">    ``gpt-4o``); the backend defaults to ``aix`` (multi-provider).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">coact.nl_ingress</span><span class="w"> </span><span class="kn">import</span> <span class="n">integration_spec_from_description</span>
 
     <span class="n">spec</span> <span class="o">=</span> <span class="n">integration_spec_from_description</span><span class="p">(</span>
@@ -333,7 +333,7 @@
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../module_docs/coact/__main__.html#coact.__main__.main">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Dispatch the coact CLI.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Dispatch the coact CLI."""</span>
     <span class="n">argh</span><span class="o">.</span><span class="n">dispatch_commands</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="n">plan</span><span class="p">,</span>
@@ -352,7 +352,7 @@
 
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 

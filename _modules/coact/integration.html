@@ -98,12 +98,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for coact.integration</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;IntegrationSpec — the target-neutral SSOT for a *published* integration.</span>
+<span></span><span class="sd">"""IntegrationSpec — the target-neutral SSOT for a *published* integration.</span>
 
-<span class="sd">coact&#39;s COMPLETE/REALIZE axes turn skills into agent definitions and run them.</span>
+<span class="sd">coact's COMPLETE/REALIZE axes turn skills into agent definitions and run them.</span>
 <span class="sd">The **PUBLISH** axis (this module + :mod:`coact.publish`) is orthogonal: it takes</span>
-<span class="sd">a *capability* — a set of Python tools given as ``&#39;module:function&#39;`` refs, live</span>
-<span class="sd">callables, or a skill&#39;s ``coact: mcp:`` block — and ships it to a chatbot host as</span>
+<span class="sd">a *capability* — a set of Python tools given as ``'module:function'`` refs, live</span>
+<span class="sd">callables, or a skill's ``coact: mcp:`` block — and ships it to a chatbot host as</span>
 <span class="sd">a deployable integration (a Claude Desktop ``.mcpb`` bundle today; remote</span>
 <span class="sd">connectors / skills / plugins / other hosts later).</span>
 
@@ -114,7 +114,7 @@
 <span class="sd">artifact is an MCP server, built by ``py2mcp`` — coact owns the spec, the</span>
 <span class="sd">packaging, and the target registry, **not** the MCP plumbing (mirrors the ``mcp``</span>
 <span class="sd">realize backend, DECISIONS §6.1.3 / D17).</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -128,7 +128,7 @@
 <span class="c1">#: What :func:`integration_spec_from` accepts: a built spec, a ``module:function``</span>
 <span class="c1">#: ref, a skill source (path/``Skill``), a live callable, or an iterable of those.</span>
 <span class="n">IntegrationSource</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span>
-    <span class="s2">&quot;IntegrationSpec&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+    <span class="s2">"IntegrationSpec"</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
 <span class="p">]</span>
 
 
@@ -136,33 +136,33 @@
 <a class="viewcode-back" href="../../module_docs/coact/integration.html#coact.ToolSpec">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ToolSpec</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A richer, target-neutral description of one tool in an :class:`IntegrationSpec`.</span>
+<span class="w">    </span><span class="sd">"""A richer, target-neutral description of one tool in an :class:`IntegrationSpec`.</span>
 
-<span class="sd">    The *mechanical* ingress represents tools as bare ``&#39;module:function&#39;`` ref</span>
+<span class="sd">    The *mechanical* ingress represents tools as bare ``'module:function'`` ref</span>
 <span class="sd">    strings (``IntegrationSpec.tools``). The *NL* ingress (:mod:`coact.nl_ingress`)</span>
 <span class="sd">    and the landscape-doc §9.1 model need more — a name, a description, an input</span>
 <span class="sd">    JSON Schema, and an **optional** handler ref:</span>
 
 <span class="sd">    - A ToolSpec **with** a ``handler`` is *bound* (runnable): its ref joins the</span>
-<span class="sd">      spec&#39;s runnable set and the published server can import and call it.</span>
+<span class="sd">      spec's runnable set and the published server can import and call it.</span>
 <span class="sd">    - A ToolSpec **without** a handler is a *proposed* tool — a design draft to</span>
 <span class="sd">      bind to real code (or supply a ref for) before it can run.</span>
 
-<span class="sd">    &gt;&gt;&gt; ToolSpec(name=&#39;get_weather&#39;, handler=&#39;wx.api:current&#39;).is_bound()</span>
+<span class="sd">    &gt;&gt;&gt; ToolSpec(name='get_weather', handler='wx.api:current').is_bound()</span>
 <span class="sd">    True</span>
-<span class="sd">    &gt;&gt;&gt; ToolSpec(name=&#39;get_weather&#39;).is_bound()</span>
+<span class="sd">    &gt;&gt;&gt; ToolSpec(name='get_weather').is_bound()</span>
 <span class="sd">    False</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">input_schema</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">handler</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># &#39;module:function&#39; ref, or None if unbound</span>
+    <span class="n">handler</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># 'module:function' ref, or None if unbound</span>
 
 <div class="viewcode-block" id="ToolSpec.is_bound">
 <a class="viewcode-back" href="../../module_docs/coact/integration.html#coact.ToolSpec.is_bound">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_bound</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;True when a ``module:function`` handler backs this tool (so it can run).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""True when a ``module:function`` handler backs this tool (so it can run)."""</span>
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="p">)</span></div>
 </div>
 
@@ -172,54 +172,54 @@
 <a class="viewcode-back" href="../../module_docs/coact/integration.html#coact.IntegrationSpec">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">IntegrationSpec</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Target-neutral description of an integration to publish.</span>
+<span class="w">    </span><span class="sd">"""Target-neutral description of an integration to publish.</span>
 
-<span class="sd">    The connectivity core maps onto MCP&#39;s three primitives. Tools come in two</span>
-<span class="sd">    shapes that coexist: bare ``&#39;module:function&#39;`` refs in ``tools`` (the</span>
+<span class="sd">    The connectivity core maps onto MCP's three primitives. Tools come in two</span>
+<span class="sd">    shapes that coexist: bare ``'module:function'`` refs in ``tools`` (the</span>
 <span class="sd">    mechanical/code ingress) and richer :class:`ToolSpec` descriptors in</span>
 <span class="sd">    ``tool_specs`` (the NL ingress, landscape-doc §9.1). ``resources``/``prompts``</span>
 <span class="sd">    and the ``auth``/``deployment`` hints are declared now (open-closed) for the</span>
 <span class="sd">    remote connector and other targets to come.</span>
 
-<span class="sd">    &gt;&gt;&gt; spec = IntegrationSpec(name=&#39;paths&#39;, tools=[&#39;os.path:basename&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; spec = IntegrationSpec(name='paths', tools=['os.path:basename'])</span>
 <span class="sd">    &gt;&gt;&gt; spec.name, spec.tools, spec.deployment</span>
-<span class="sd">    (&#39;paths&#39;, [&#39;os.path:basename&#39;], &#39;local-stdio&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; IntegrationSpec(name=&#39;empty&#39;).is_empty()</span>
+<span class="sd">    ('paths', ['os.path:basename'], 'local-stdio')</span>
+<span class="sd">    &gt;&gt;&gt; IntegrationSpec(name='empty').is_empty()</span>
 <span class="sd">    True</span>
-<span class="sd">    &gt;&gt;&gt; draft = IntegrationSpec(name=&#39;wx&#39;, tool_specs=[ToolSpec(name=&#39;get&#39;)])</span>
+<span class="sd">    &gt;&gt;&gt; draft = IntegrationSpec(name='wx', tool_specs=[ToolSpec(name='get')])</span>
 <span class="sd">    &gt;&gt;&gt; draft.is_empty(), draft.runnable_refs()</span>
 <span class="sd">    (False, [])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0.1.0&quot;</span>
-    <span class="n">tools</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># &#39;module:function&#39; refs (MCP tools)</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"0.1.0"</span>
+    <span class="n">tools</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># 'module:function' refs (MCP tools)</span>
     <span class="n">resources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># reserved (MCP resources)</span>
     <span class="n">prompts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># reserved (MCP prompts)</span>
     <span class="n">tool_specs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ToolSpec</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># richer tool descriptors</span>
     <span class="n">instructions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># reserved (SKILL.md procedural knowledge)</span>
-    <span class="n">auth</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>  <span class="c1"># &#39;none&#39; | &#39;env&#39; | &#39;oauth2.1&#39; (reserved for remote targets)</span>
-    <span class="n">deployment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;local-stdio&quot;</span>  <span class="c1"># &#39;local-stdio&#39; | &#39;remote-http&#39; (reserved)</span>
+    <span class="n">auth</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"none"</span>  <span class="c1"># 'none' | 'env' | 'oauth2.1' (reserved for remote targets)</span>
+    <span class="n">deployment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"local-stdio"</span>  <span class="c1"># 'local-stdio' | 'remote-http' (reserved)</span>
     <span class="n">author</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># provenance: the skill/module it came from</span>
 
 <div class="viewcode-block" id="IntegrationSpec.is_empty">
 <a class="viewcode-back" href="../../module_docs/coact/integration.html#coact.IntegrationSpec.is_empty">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;True when there is nothing to publish (no tools/tool_specs/resources/prompts).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""True when there is nothing to publish (no tools/tool_specs/resources/prompts)."""</span>
         <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tools</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">tool_specs</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">resources</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompts</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="IntegrationSpec.runnable_refs">
 <a class="viewcode-back" href="../../module_docs/coact/integration.html#coact.IntegrationSpec.runnable_refs">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">runnable_refs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The importable ``&#39;module:function&#39;`` refs that back *runnable* tools.</span>
+<span class="w">        </span><span class="sd">"""The importable ``'module:function'`` refs that back *runnable* tools.</span>
 
 <span class="sd">        Bare refs in ``tools`` plus the ``handler`` of every *bound* ToolSpec,</span>
 <span class="sd">        de-duplicated preserving order. A draft whose tools are all *proposed*</span>
 <span class="sd">        (unbound) returns ``[]`` — it has nothing a server can actually run yet.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">refs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tool_specs</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">handler</span> <span class="ow">and</span> <span class="n">ts</span><span class="o">.</span><span class="n">handler</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">refs</span><span class="p">:</span>
@@ -230,32 +230,32 @@
 <div class="viewcode-block" id="IntegrationSpec.render">
 <a class="viewcode-back" href="../../module_docs/coact/integration.html#coact.IntegrationSpec.render">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;A terminal-friendly summary of the (possibly draft) integration.&quot;&quot;&quot;</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;IntegrationSpec: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (v</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">]</span>
+<span class="w">        </span><span class="sd">"""A terminal-friendly summary of the (possibly draft) integration."""</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"IntegrationSpec: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (v</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s2">)"</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  deployment: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">deployment</span><span class="si">}</span><span class="s2">   auth: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">auth</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  deployment: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">deployment</span><span class="si">}</span><span class="s2">   auth: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">auth</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">runnable</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runnable_refs</span><span class="p">())</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">tool_specs</span><span class="p">:</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  tools:&quot;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"  tools:"</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="p">:</span>
-                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    - </span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="s2">  [ref]&quot;</span><span class="p">)</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    - </span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="s2">  [ref]"</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tool_specs</span><span class="p">:</span>
-                <span class="n">tag</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;bound -&gt; </span><span class="si">{</span><span class="n">ts</span><span class="o">.</span><span class="n">handler</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">is_bound</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;proposed (no handler)&quot;</span>
-                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    - </span><span class="si">{</span><span class="n">ts</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">  [</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+                <span class="n">tag</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"bound -&gt; </span><span class="si">{</span><span class="n">ts</span><span class="o">.</span><span class="n">handler</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">is_bound</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"proposed (no handler)"</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    - </span><span class="si">{</span><span class="n">ts</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">  [</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]"</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
-                    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;        </span><span class="si">{</span><span class="n">ts</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"        </span><span class="si">{</span><span class="n">ts</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resources</span><span class="p">:</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  resources: &quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resources</span><span class="p">))</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"  resources: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resources</span><span class="p">))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompts</span><span class="p">:</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  prompts: &quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prompts</span><span class="p">))</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"  prompts: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prompts</span><span class="p">))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tool_specs</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">runnable</span><span class="p">:</span>
             <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="s2">&quot;  NOTE: design draft — no tool is bound to importable code. Bind &quot;</span>
-                <span class="s2">&quot;each tool to a &#39;module:function&#39; handler (or supply refs) before &quot;</span>
-                <span class="s2">&quot;building a runnable .mcpb.&quot;</span>
+                <span class="s2">"  NOTE: design draft — no tool is bound to importable code. Bind "</span>
+                <span class="s2">"each tool to a 'module:function' handler (or supply refs) before "</span>
+                <span class="s2">"building a runnable .mcpb."</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
 </div>
 
 
@@ -266,23 +266,23 @@
     <span class="n">source</span><span class="p">:</span> <span class="n">IntegrationSource</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0.1.0&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"0.1.0"</span><span class="p">,</span>
     <span class="n">author</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntegrationSpec</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Coerce a capability source into an :class:`IntegrationSpec`.</span>
+<span class="w">    </span><span class="sd">"""Coerce a capability source into an :class:`IntegrationSpec`.</span>
 
 <span class="sd">    Accepts (and flattens lists of): a prebuilt :class:`IntegrationSpec`, a</span>
-<span class="sd">    ``&#39;module:function&#39;`` ref string, a live callable (its</span>
+<span class="sd">    ``'module:function'`` ref string, a live callable (its</span>
 <span class="sd">    ``__module__:__qualname__`` becomes the ref), or a skill source carrying a</span>
 <span class="sd">    ``coact: mcp:`` block. The resulting ``name`` is kebab-cased so it is a safe,</span>
 <span class="sd">    machine-readable bundle identifier.</span>
 
-<span class="sd">    &gt;&gt;&gt; integration_spec_from([&#39;os.path:basename&#39;], name=&#39;paths&#39;).tools</span>
-<span class="sd">    [&#39;os.path:basename&#39;]</span>
-<span class="sd">    &gt;&gt;&gt; integration_spec_from(&#39;os.path:basename&#39;, name=&#39;My Tools&#39;).name</span>
-<span class="sd">    &#39;my-tools&#39;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; integration_spec_from(['os.path:basename'], name='paths').tools</span>
+<span class="sd">    ['os.path:basename']</span>
+<span class="sd">    &gt;&gt;&gt; integration_spec_from('os.path:basename', name='My Tools').name</span>
+<span class="sd">    'my-tools'</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">IntegrationSpec</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">source</span>
 
@@ -297,7 +297,7 @@
 
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">IntegrationSpec</span><span class="p">):</span>
-            <span class="c1"># Carry the spec&#39;s richer connectivity, not just its bare refs — else a</span>
+            <span class="c1"># Carry the spec's richer connectivity, not just its bare refs — else a</span>
             <span class="c1"># draft from `integration_spec_from_description` (whose runnable tools</span>
             <span class="c1"># live in tool_specs[].handler) would silently lose every handler.</span>
             <span class="n">refs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span>
@@ -311,7 +311,7 @@
             <span class="n">derived_name</span> <span class="o">=</span> <span class="n">derived_name</span> <span class="ow">or</span> <span class="n">sk_name</span>
         <span class="k">elif</span> <span class="nb">callable</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
             <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_ref_from_callable</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
-            <span class="n">derived_name</span> <span class="o">=</span> <span class="n">derived_name</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">derived_name</span> <span class="o">=</span> <span class="n">derived_name</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_looks_like_ref</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
             <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">))</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
@@ -324,19 +324,19 @@
 
     <span class="k">if</span> <span class="n">unrecognized</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Unrecognized publish source(s): &quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">unrecognized</span><span class="p">)</span>
-            <span class="o">+</span> <span class="s2">&quot;. Expected a &#39;module:function&#39; ref (note the colon), an existing &quot;</span>
-            <span class="s2">&quot;skill directory / SKILL.md, or a live callable.&quot;</span>
+            <span class="s2">"Unrecognized publish source(s): "</span>
+            <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">unrecognized</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">". Expected a 'module:function' ref (note the colon), an existing "</span>
+            <span class="s2">"skill directory / SKILL.md, or a live callable."</span>
         <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">refs</span> <span class="ow">or</span> <span class="n">spec_tool_specs</span> <span class="ow">or</span> <span class="n">spec_resources</span> <span class="ow">or</span> <span class="n">spec_prompts</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;No tools found to publish. Provide &#39;module:function&#39; refs, live &quot;</span>
-            <span class="s2">&quot;callables, or a skill carrying a `coact: mcp:` block (module + functions).&quot;</span>
+            <span class="s2">"No tools found to publish. Provide 'module:function' refs, live "</span>
+            <span class="s2">"callables, or a skill carrying a `coact: mcp:` block (module + functions)."</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">IntegrationSpec</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="n">to_kebab_case</span><span class="p">(</span><span class="n">derived_name</span> <span class="ow">or</span> <span class="s2">&quot;integration&quot;</span><span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">to_kebab_case</span><span class="p">(</span><span class="n">derived_name</span> <span class="ow">or</span> <span class="s2">"integration"</span><span class="p">),</span>
         <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
         <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
         <span class="n">tools</span><span class="o">=</span><span class="n">refs</span><span class="p">,</span>
@@ -350,30 +350,30 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_ref_from_callable</span><span class="p">(</span><span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive a ``&#39;module:qualname&#39;`` ref from a live callable.</span>
+<span class="w">    </span><span class="sd">"""Derive a ``'module:qualname'`` ref from a live callable.</span>
 
 <span class="sd">    Rejects ``__main__``-defined functions: a published server re-imports tools</span>
 <span class="sd">    by reference, so they must live in an importable module.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fn</span><span class="si">!r}</span><span class="s2"> is a bound method; pass the underlying function or a &quot;</span>
-            <span class="s2">&quot;&#39;module:function&#39; ref — a bound method can&#39;t be re-imported by reference.&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">fn</span><span class="si">!r}</span><span class="s2"> is a bound method; pass the underlying function or a "</span>
+            <span class="s2">"'module:function' ref — a bound method can't be re-imported by reference."</span>
         <span class="p">)</span>
-    <span class="n">module</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;__module__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="n">qual</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;__qualname__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">"__module__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">qual</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">"__qualname__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">module</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">qual</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cannot derive a &#39;module:function&#39; ref from </span><span class="si">{</span><span class="n">fn</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"cannot derive a 'module:function' ref from </span><span class="si">{</span><span class="n">fn</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">qual</span><span class="si">!r}</span><span class="s2"> is defined in __main__; move it into an importable module &quot;</span>
-            <span class="s2">&quot;so the published server can import it by reference.&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">qual</span><span class="si">!r}</span><span class="s2"> is defined in __main__; move it into an importable module "</span>
+            <span class="s2">"so the published server can import it by reference."</span>
         <span class="p">)</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">qual</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">qual</span><span class="si">}</span><span class="s2">"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_is_skill_obj</span><span class="p">(</span><span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;True if ``item`` is a :class:`skill.base.Skill` (checked before ``callable``).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""True if ``item`` is a :class:`skill.base.Skill` (checked before ``callable``)."""</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">skill.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Skill</span>
 
@@ -383,21 +383,21 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_looks_like_ref</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A ``&#39;module:function&#39;`` ref, as opposed to a filesystem skill source.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">s</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+<span class="w">    </span><span class="sd">"""A ``'module:function'`` ref, as opposed to a filesystem skill source."""</span>
+    <span class="k">return</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="n">s</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_refs_and_name_from_skill</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Collect ``&#39;module:function&#39;`` refs (and a name) from a skill&#39;s coact: mcp block.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Collect ``'module:function'`` refs (and a name) from a skill's coact: mcp block."""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">coact.frontmatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_coact_meta</span>
 
     <span class="n">refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">parse_coact_meta</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="o">.</span><span class="n">mcp</span><span class="p">:</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;module&quot;</span><span class="p">)</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"module"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">module</span><span class="p">:</span>
             <span class="k">continue</span>
-        <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;functions&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]:</span>
-            <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"functions"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
