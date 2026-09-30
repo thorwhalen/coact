@@ -1,6 +1,6 @@
 ---
 name: ai-assistant-architect
-description: Use this skill whenever the user wants to add, audit, refactor, or maintain an embedded AI assistant (chat + agentic) inside their own application. Triggers include phrases like "add an AI assistant to my app", "wire up a chatbot", "embed Claude/GPT into my UI", "make my app operable by AI", "audit my AI assistant integration", "what should I add next for my AI assistant", or any task that touches multiple of {chat UI, system prompts, skills, MCP tools, agent runtime, command dispatch → MCP, multi-tenancy, observability, billing} together. This is the entry-point skill — it audits the codebase, identifies the layer in question, and routes to the focused sub-skills (ai-assistant-chat-ui, ai-assistant-prompts-skills, ai-assistant-command-mcp, ai-assistant-agent-runtime).
+description: Use this skill whenever the user wants to add, audit, refactor, or maintain an embedded AI assistant (chat + agentic) inside their own application. Triggers include phrases like "add an AI assistant to my app", "wire up a chatbot", "embed Claude/GPT into my UI", "make my app operable by AI", "audit my AI assistant integration", "what should I add next for my AI assistant", "let users bring their own AI API keys", or any task that touches multiple of {chat UI, system prompts, skills, MCP tools, agent runtime, command dispatch → MCP, multi-tenancy, observability, billing} together. This is the entry-point skill — it audits the codebase, identifies the layer in question, and routes to the focused sub-skills (ai-assistant-chat-ui, ai-assistant-prompts-skills, ai-assistant-command-mcp, ai-assistant-agent-runtime).
 last-updated: 2026-05-18
 maintained-by: Thor Whalen
 freshness-note: Validate this skill quarterly. Layers move fast — assistant-ui, AI SDK, Pydantic AI, FastMCP, and the Anthropic Skills spec have weekly releases. Check the per-layer skills' last-updated dates.
@@ -105,6 +105,7 @@ Always default to Path A unless the user objects or the app is genuinely tiny.
 | Add/refactor system prompts; user-editable prompts; skill files; prompt versioning; auto-skill selection | `ai-assistant-prompts-skills` |
 | Add/refactor MCP server; expose commands to AI; tool annotations; per-user tool scoping; multi-provider tool formats | `ai-assistant-command-mcp` |
 | Add/refactor agent loop; durable execution; long-running agents; sub-agents/handoffs; resume across sessions | `ai-assistant-agent-runtime` |
+| Let users bring their own AI API keys (BYO keys, several AI platforms); where the assistant's settings live | Not a layer: a **user-facing seam** of the assistant. The assistant owns the settings schema and reads it through one `settings` argument, so the host app can use the assistant's own section, mount it in the app's settings, or both. Read `~/.claude/skills/architecture-first/references/extract-a-concern.md` (the BYO-keys worked example) |
 | User unsure; multi-layer task; "make my app AI-operable" with no constraints | This skill (architect) — produce a phased plan, then invoke sub-skills in sequence |
 
 ## Decision shortcuts (when speed matters)
