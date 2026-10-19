@@ -1,0 +1,18 @@
+coact.scaffold
+==============
+
+.. automodule:: coact.scaffold
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      DEFAULT_SHIM_NAME
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      scaffold_fleet
+   

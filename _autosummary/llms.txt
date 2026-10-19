@@ -1,0 +1,26 @@
+# coact
+
+> Reuse your AI stuff across the agent stack: COMPLETE skills into agent definitions and REALIZE them into running agents (glue over skill, aw, py2mcp).
+
+
+## Pages in this subsection
+
+- [coact](coact.html.md): coact — reuse your AI stuff across the layers of the modern agent stack.
+- [coact.analysis](coact.analysis.html.md): Analysis utilities — small tools to &#42;see and move between&#42; the layers.
+- [coact.base](coact.base.html.md): Core data model for coact — the single in-memory representation of an agent.
+- [coact.emit](coact.emit.html.md): Emitters: one &#96;AgentDefinition&#96; → many serializations.
+- [coact.frontmatter](coact.frontmatter.html.md): The additive &#96;coact:&#96; SKILL.md frontmatter convention and its validator.
+- [coact.integration](coact.integration.html.md): IntegrationSpec — the target-neutral SSOT for a &#42;published&#42; integration.
+- [coact.llm](coact.llm.html.md): Provider-agnostic LLM facade — thin, injected, never a hard dependency.
+- [coact.nl_ingress](coact.nl_ingress.html.md): NL-description → IntegrationSpec — the &#42;&#42;opt-in LLM ingress&#42;&#42; for PUBLISH.
+- [coact.policy](coact.policy.html.md): Completion policy — the injectable model / memory / tool choices COMPLETE stamps.
+- [coact.return_contract](coact.return_contract.html.md): Realizing a return contract — the backend-agnostic part of DECISIONS D6.
+- [coact.scaffold](coact.scaffold.html.md): Scaffold a &#42;starter&#42; multi-agent shim — the one topology-adjacent thing coact emits.
+- [coact.schema](coact.schema.html.md): JSON Schema resolution — turn a &#96;module:Name&#96; ref into a canonical schema.
+- [coact.stores](coact.stores.html.md): Mapping facades over agent definitions on disk.
+- [coact.synthesis](coact.synthesis.html.md): Persona &amp; return-contract synthesis — the two real “extras” of a skill→agent lift.
+- [coact.util](coact.util.html.md): Pure helpers for coact with no internal coact imports.
+
+## Optional
+
+- [Top-level llms.txt](../llms.txt): Complete documentation index.

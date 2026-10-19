@@ -1,4 +1,0 @@
-coact.complete
-==============
-.. automodule:: coact.complete
-   :members:

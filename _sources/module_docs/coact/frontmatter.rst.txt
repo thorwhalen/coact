@@ -1,4 +1,0 @@
-coact.frontmatter
-=================
-.. automodule:: coact.frontmatter
-   :members:

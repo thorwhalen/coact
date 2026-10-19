@@ -1,0 +1,30 @@
+coact.return\_contract
+======================
+
+.. automodule:: coact.return_contract
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      RETURN_TOOL_SERVER
+      RETURN_TOOL_FULLNAME
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      as_object_schema
+      auto_return_mode
+      extract_return_tool_input
+      is_return_tool
+      render_json_return_instruction
+      render_tool_return_instruction
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ReturnPlan
+   

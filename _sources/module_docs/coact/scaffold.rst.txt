@@ -1,4 +1,0 @@
-coact.scaffold
-==============
-.. automodule:: coact.scaffold
-   :members:

@@ -1,0 +1,18 @@
+coact.stores
+============
+
+.. automodule:: coact.stores
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      agents_dir
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      AgentStore
+   

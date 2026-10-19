@@ -1,0 +1,18 @@
+coact.nl\_ingress
+=================
+
+.. automodule:: coact.nl_ingress
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      DFLT_AUTHORING_PROMPTS
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      integration_spec_from_description
+   

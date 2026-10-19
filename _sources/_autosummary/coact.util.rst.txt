@@ -1,0 +1,18 @@
+coact.util
+==========
+
+.. automodule:: coact.util
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      agent_filename
+      check_requirements
+      first_balanced_span
+      import_object
+      safe_filename
+      to_kebab_case
+      to_snake_case
+   

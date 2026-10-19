@@ -1,0 +1,26 @@
+coact.frontmatter
+=================
+
+.. automodule:: coact.frontmatter
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      COACT_KEY
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      parse_coact_meta
+      register_validator
+      validate_coact_block
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      CoactMeta
+   

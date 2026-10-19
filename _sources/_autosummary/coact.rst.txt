@@ -1,0 +1,83 @@
+﻿coact
+=====
+
+.. automodule:: coact
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      complete
+      plan_completion
+      realize
+      realize_host
+      realize_sdk
+      realize_mcp
+      realize_litellm
+      realize_langgraph
+      realize_crewai
+      integration_spec_from
+      integration_spec_from_description
+      publish
+      publish_targets
+      publish_mcpb
+      publish_remote
+      scaffold_fleet
+      synthesize_persona
+      synthesize_return_contract
+      resolve_llm
+      structured
+      emit_agent
+      to_claude_agent_md
+      from_claude_agent_md
+      to_aw_agent_spec
+      diff
+      estimate
+      inventory
+      back
+      parse_coact_meta
+      validate_coact_block
+      register_validator
+      agents_dir
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      AgentDefinition
+      AgentPlan
+      FieldProvenance
+      ReturnContract
+      CompletionPolicy
+      RealizedHost
+      RunnableAgent
+      RunnableLLMAgent
+      RunnableLLMGraphAgent
+      RunnableCrewAIAgent
+      IntegrationSpec
+      ToolSpec
+      PublishResult
+      CoactMeta
+      AgentStore
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   analysis
+   base
+   emit
+   frontmatter
+   integration
+   llm
+   nl_ingress
+   policy
+   return_contract
+   scaffold
+   schema
+   stores
+   synthesis
+   util

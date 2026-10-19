@@ -1,4 +1,0 @@
-coact.publish_remote
-====================
-.. automodule:: coact.publish_remote
-   :members:

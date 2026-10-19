@@ -1,4 +1,0 @@
-coact.return_contract
-=====================
-.. automodule:: coact.return_contract
-   :members:

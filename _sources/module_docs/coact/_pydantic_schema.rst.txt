@@ -1,4 +1,0 @@
-coact._pydantic_schema
-======================
-.. automodule:: coact._pydantic_schema
-   :members:

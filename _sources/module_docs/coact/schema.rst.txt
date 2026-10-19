@@ -1,4 +1,0 @@
-coact.schema
-============
-.. automodule:: coact.schema
-   :members:

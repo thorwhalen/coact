@@ -1,0 +1,18 @@
+coact.policy
+============
+
+.. automodule:: coact.policy
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      default_policy
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      CompletionPolicy
+   

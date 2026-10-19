@@ -1,0 +1,25 @@
+coact.integration
+=================
+
+.. automodule:: coact.integration
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      IntegrationSource
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      integration_spec_from
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      IntegrationSpec
+      ToolSpec
+   

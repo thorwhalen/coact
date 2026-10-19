@@ -1,0 +1,23 @@
+coact.base
+==========
+
+.. automodule:: coact.base
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      ModelName
+      MemoryScope
+      ProvenanceSource
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      AgentDefinition
+      AgentPlan
+      FieldProvenance
+      ReturnContract
+   

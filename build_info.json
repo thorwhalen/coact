@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "built_at": "2026-10-19T00:49:25Z",
+  "package": {
+    "name": "coact",
+    "version": "0.0.4",
+    "display_name": "coact",
+    "source": "pyproject.toml"
+  },
+  "git": {
+    "available": true,
+    "commit": "3a0e428a077669a3b2c1a1a8e142ddf1e344725a",
+    "short_commit": "3a0e428",
+    "branch": "main",
+    "tags": [],
+    "dirty": false,
+    "remote_url": "https://github.com/thorwhalen/coact",
+    "commit_url": "https://github.com/thorwhalen/coact/commit/3a0e428a077669a3b2c1a1a8e142ddf1e344725a",
+    "error": null
+  },
+  "ci": {
+    "provider": "github",
+    "repository": "thorwhalen/coact",
+    "sha": "3a0e428a077669a3b2c1a1a8e142ddf1e344725a",
+    "sha_in_history": true,
+    "ref": "refs/heads/main",
+    "ref_name": "main",
+    "run_id": "39182393308",
+    "run_url": "https://github.com/thorwhalen/coact/actions/runs/39182393308",
+    "server_url": "https://github.com"
+  },
+  "tools": {
+    "epythet": "0.2.17",
+    "sphinx": "9.1.0",
+    "docutils": "0.22.4",
+    "python": "3.12.15"
+  },
+  "config": {
+    "theme": "auto",
+    "html_theme": "sphinxawesome_theme",
+    "accent": "#20691f",
+    "mode": "auto",
+    "api_generator": "autosummary",
+    "ignore": [
+      "tests/",
+      "scrap/",
+      "examples/"
+    ],
+    "agent_outputs": true,
+    "aggregates": [
+      "md"
+    ],
+    "ai_artifacts": true,
+    "provenance": true,
+    "docs_dir": "docsrc"
+  },
+  "site": {
+    "modules_documented": 15,
+    "objects_documented": 188
+  },
+  "pypi": {
+    "checked": true,
+    "latest": "0.0.4",
+    "relation": "same",
+    "error": null
+  },
+  "reproduce": "git clone https://github.com/thorwhalen/coact && cd coact\ngit checkout 3a0e428a077669a3b2c1a1a8e142ddf1e344725a\npip install \"epythet==0.2.17\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "warnings": [],
+  "alignment": {
+    "aligned": true,
+    "notes": []
+  }
+}

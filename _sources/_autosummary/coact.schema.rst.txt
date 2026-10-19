@@ -1,0 +1,12 @@
+coact.schema
+============
+
+.. automodule:: coact.schema
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      resolve_schema_ref
+   

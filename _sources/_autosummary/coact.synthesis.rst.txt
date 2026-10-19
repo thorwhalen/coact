@@ -1,0 +1,20 @@
+coact.synthesis
+===============
+
+.. automodule:: coact.synthesis
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      DEFAULT_RETURN_SCHEMA
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      render_return_contract_section
+      synthesize_persona
+      synthesize_return_contract
+   

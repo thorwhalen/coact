@@ -1,4 +1,0 @@
-coact.synthesis
-===============
-.. automodule:: coact.synthesis
-   :members:

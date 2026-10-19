@@ -1,4 +1,0 @@
-coact.emit
-==========
-.. automodule:: coact.emit
-   :members:

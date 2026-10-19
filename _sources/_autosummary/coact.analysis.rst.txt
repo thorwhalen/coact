@@ -1,0 +1,23 @@
+coact.analysis
+==============
+
+.. automodule:: coact.analysis
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      back
+      diff
+      estimate
+      inventory
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      AgentDiff
+      Estimate
+      Inventory
+   

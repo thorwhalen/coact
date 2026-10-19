@@ -1,0 +1,34 @@
+# coact
+
+> Reuse your AI stuff across the agent stack: COMPLETE skills into agent definitions and REALIZE them into running agents (glue over skill, aw, py2mcp).
+
+
+## Pages
+
+- [coact](index.html.md): &#42;&#42;Reuse your “AI stuff” across the layers of the modern agent stack.&#42;&#42; &#96;coact&#96;
+- [API reference](api.html.md): | &#96;coact&#96;   | coact — reuse your AI stuff across the layers of the modern agent stack.   |
+- [coact](_autosummary/coact.html.md): coact — reuse your AI stuff across the layers of the modern agent stack.
+- [coact.analysis](_autosummary/coact.analysis.html.md): Analysis utilities — small tools to &#42;see and move between&#42; the layers.
+- [coact.base](_autosummary/coact.base.html.md): Core data model for coact — the single in-memory representation of an agent.
+- [coact.emit](_autosummary/coact.emit.html.md): Emitters: one &#96;AgentDefinition&#96; → many serializations.
+- [coact.frontmatter](_autosummary/coact.frontmatter.html.md): The additive &#96;coact:&#96; SKILL.md frontmatter convention and its validator.
+- [coact.integration](_autosummary/coact.integration.html.md): IntegrationSpec — the target-neutral SSOT for a &#42;published&#42; integration.
+- [coact.llm](_autosummary/coact.llm.html.md): Provider-agnostic LLM facade — thin, injected, never a hard dependency.
+- [coact.nl_ingress](_autosummary/coact.nl_ingress.html.md): NL-description → IntegrationSpec — the &#42;&#42;opt-in LLM ingress&#42;&#42; for PUBLISH.
+- [coact.policy](_autosummary/coact.policy.html.md): Completion policy — the injectable model / memory / tool choices COMPLETE stamps.
+- [coact.return_contract](_autosummary/coact.return_contract.html.md): Realizing a return contract — the backend-agnostic part of DECISIONS D6.
+- [coact.scaffold](_autosummary/coact.scaffold.html.md): Scaffold a &#42;starter&#42; multi-agent shim — the one topology-adjacent thing coact emits.
+- [coact.schema](_autosummary/coact.schema.html.md): JSON Schema resolution — turn a &#96;module:Name&#96; ref into a canonical schema.
+- [coact.stores](_autosummary/coact.stores.html.md): Mapping facades over agent definitions on disk.
+- [coact.synthesis](_autosummary/coact.synthesis.html.md): Persona &amp; return-contract synthesis — the two real “extras” of a skill→agent lift.
+- [coact.util](_autosummary/coact.util.html.md): Pure helpers for coact with no internal coact imports.
+- [For AI agents](ai-agents.html.md): &#96;coact&#96; ships artifacts for coding agents alongside its code. This page lists
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-19 00:49 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
+
+## Optional
+
+- [coact.md](coact.md): Complete documentation in a single file.
+
+## Build
+
+- [build_info.json](build_info.json): build provenance (commit, version, tool versions, whether the docs match the package)

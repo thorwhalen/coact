@@ -1,4 +1,0 @@
-coact
-=====
-.. automodule:: coact
-   :members:

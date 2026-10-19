@@ -1,4 +1,0 @@
-coact.realize
-=============
-.. automodule:: coact.realize
-   :members:

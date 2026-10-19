@@ -1,0 +1,23 @@
+coact.emit
+==========
+
+.. automodule:: coact.emit
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      emitters
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      agent_to_frontmatter
+      emit_agent
+      from_claude_agent_md
+      to_aw_agent_spec
+      to_claude_agent_md
+      to_sdk_agent_dict
+   

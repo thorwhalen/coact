@@ -1,4 +1,0 @@
-coact.integration
-=================
-.. automodule:: coact.integration
-   :members:
