@@ -137,3 +137,41 @@ def test_validate_returns_both_ref_and_inline():
 def test_validate_returns_neither_ref_nor_inline():
     issues = validate_coact_block({"coact": {"returns": {"description": "only desc"}}})
     assert any("needs one of" in i for i in issues)
+
+
+# --- metadata.coact (Agent Skills spec keeps custom keys under ``metadata``) ---
+
+
+def test_from_frontmatter_reads_metadata_coact():
+    meta = {"name": "x", "metadata": {"coact": {"model": "opus", "tools": ["Read"]}}}
+    m = CoactMeta.from_frontmatter(meta)
+    assert (m.model, m.tools) == ("opus", ["Read"])
+
+
+def test_top_level_coact_wins_over_metadata_coact():
+    meta = {"coact": {"model": "haiku"}, "metadata": {"coact": {"model": "opus"}}}
+    assert CoactMeta.from_frontmatter(meta).model == "haiku"
+
+
+def test_metadata_without_coact_is_empty():
+    assert CoactMeta.from_frontmatter({"metadata": {"author": "me"}}).is_empty()
+    assert CoactMeta.from_frontmatter({"metadata": "not-a-mapping"}).is_empty()
+
+
+def test_validate_metadata_coact_prefixes_issues_with_its_path():
+    issues = validate_coact_block({"metadata": {"coact": {"model": "gpt-4"}}})
+    assert issues == [
+        "metadata.coact.model: 'gpt-4' is not one of sonnet, opus, haiku, inherit"
+    ]
+    assert validate_coact_block({"metadata": {"coact": "x"}}) == [
+        "metadata.coact: block must be a mapping, got str"
+    ]
+
+
+def test_parse_coact_meta_reads_metadata_coact_from_skill_md(tmp_path):
+    from coact.frontmatter import parse_coact_meta
+
+    (tmp_path / "SKILL.md").write_text(
+        "---\nname: s\ndescription: d\nmetadata:\n  coact:\n    model: sonnet\n---\nbody\n"
+    )
+    assert parse_coact_meta(tmp_path).model == "sonnet"

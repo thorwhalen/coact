@@ -21,7 +21,9 @@ the skill→agent lift is mechanical and reproducible (SSOT for the extras)::
         You are a meticulous UX analyst...
 
 The block is ignored by other tools (a skill carrying it is still a valid plain
-SKILL.md). coact reads it from the **raw** frontmatter because
+SKILL.md). The Agent Skills spec keeps custom keys under ``metadata:``, so a
+spec-clean skill may nest the block there instead (``metadata: {coact: {...}}``);
+coact reads either, and a top-level block wins when both exist. coact reads it from the **raw** frontmatter because
 ``skill.SkillMeta`` only retains the standard keys — so this module parses the
 SKILL.md text directly rather than going through ``Skill.meta``.
 
@@ -42,6 +44,9 @@ from coact.base import ReturnContract
 
 #: The single namespaced frontmatter key coact reads/writes.
 COACT_KEY = "coact"
+#: The spec's home for custom keys: ``metadata.coact`` is read when there is no
+#: top-level ``coact`` block.
+METADATA_KEY = "metadata"
 
 _VALID_MODELS = {"sonnet", "opus", "haiku", "inherit"}
 _VALID_MEMORY = {"user", "project", "local"}
@@ -68,6 +73,8 @@ class CoactMeta:
     ('opus', ['Read'], False)
     >>> CoactMeta.from_frontmatter({'name': 'x'}).is_empty()
     True
+    >>> CoactMeta.from_frontmatter({'metadata': {'coact': {'model': 'haiku'}}}).model
+    'haiku'
     """
 
     tools: Optional[list[str]] = None
@@ -83,8 +90,11 @@ class CoactMeta:
 
     @classmethod
     def from_frontmatter(cls, meta: dict) -> "CoactMeta":
-        """Build from a full frontmatter dict (reads the ``coact`` sub-mapping)."""
-        block = (meta or {}).get(COACT_KEY) or {}
+        """Build from a full frontmatter dict (reads the ``coact`` sub-mapping).
+
+        The block is the top-level ``coact`` key, else ``metadata.coact``.
+        """
+        block = coact_block_location(meta)[0] or {}
         if not isinstance(block, dict):
             return cls()
         return cls(
@@ -109,6 +119,30 @@ class CoactMeta:
         return ReturnContract.from_dict(self.returns)
 
 
+def coact_block_location(meta: dict) -> tuple[Any, str]:
+    """Return ``(block, path)``: the frontmatter's coact block and where it was found.
+
+    ``path`` is ``"coact"`` (top level, which wins when both exist),
+    ``"metadata.coact"`` (the Agent Skills spec's home for custom keys), or
+    ``"coact"`` with a ``None`` block when there is none, so writers default to
+    the top level.
+
+    >>> coact_block_location({'metadata': {'coact': {'model': 'opus'}}})
+    ({'model': 'opus'}, 'metadata.coact')
+    >>> coact_block_location({'coact': {'model': 'haiku'}, 'metadata': {'coact': {}}})
+    ({'model': 'haiku'}, 'coact')
+    >>> coact_block_location({'name': 'x'})
+    (None, 'coact')
+    """
+    meta = meta or {}
+    if meta.get(COACT_KEY) is not None:
+        return meta[COACT_KEY], COACT_KEY
+    metadata = meta.get(METADATA_KEY)
+    if isinstance(metadata, dict) and metadata.get(COACT_KEY) is not None:
+        return metadata[COACT_KEY], f"{METADATA_KEY}.{COACT_KEY}"
+    return None, COACT_KEY
+
+
 def parse_coact_meta(source: str | Path | Skill | dict) -> CoactMeta:
     """Parse a :class:`CoactMeta` from a SKILL.md path/text/``Skill``/frontmatter dict.
 
@@ -131,7 +165,11 @@ def parse_coact_meta(source: str | Path | Skill | dict) -> CoactMeta:
         if source.source_path is not None:
             text = (Path(source.source_path) / "SKILL.md").read_text()
             return CoactMeta.from_frontmatter(parse_frontmatter(text)[0])
-        return CoactMeta()  # no path -> coact block was not retained; nothing to read
+        # No path: a top-level block was not retained, but ``metadata`` is a
+        # standard key, so a ``metadata.coact`` block survives on ``Skill.meta``.
+        return CoactMeta.from_frontmatter(
+            {METADATA_KEY: getattr(source.meta, METADATA_KEY, None)}
+        )
     text = _read_skill_md_text(source)
     return CoactMeta.from_frontmatter(parse_frontmatter(text)[0])
 
@@ -152,7 +190,9 @@ def _read_skill_md_text(source: str | Path) -> str:
 def validate_coact_block(skill_or_meta: Skill | dict) -> list[str]:
     """Validate a ``coact:`` block, returning issue strings (empty = valid/absent).
 
-    Additive: a skill with no ``coact:`` block passes trivially. Checks key
+    Additive: a skill with no ``coact:`` block passes trivially. The block is read
+    from the top level or from ``metadata.coact`` (see :func:`coact_block_location`),
+    and issues are prefixed with where it was found. Checks key
     spelling, ``model``/``memory`` enums, ``mcp`` entry shape, and that
     ``returns`` carries exactly one of ``schema_ref``/``json_schema``.
 
@@ -174,70 +214,70 @@ def validate_coact_block(skill_or_meta: Skill | dict) -> list[str]:
     else:
         meta = skill_or_meta or {}
 
-    block = meta.get(COACT_KEY)
+    block, where = coact_block_location(meta)
     if block is None:
         return []
     issues: list[str] = []
     if not isinstance(block, dict):
-        return [f"coact: block must be a mapping, got {type(block).__name__}"]
+        return [f"{where}: block must be a mapping, got {type(block).__name__}"]
 
     for key in block:
         if key not in _KNOWN_KEYS:
             issues.append(
-                f"coact.{key}: unknown key (known: {', '.join(sorted(_KNOWN_KEYS))})"
+                f"{where}.{key}: unknown key (known: {', '.join(sorted(_KNOWN_KEYS))})"
             )
 
     model = block.get("model")
     if model is not None and model not in _VALID_MODELS:
         issues.append(
-            f"coact.model: {model!r} is not one of sonnet, opus, haiku, inherit"
+            f"{where}.model: {model!r} is not one of sonnet, opus, haiku, inherit"
         )
 
     memory = block.get("memory")
     if memory is not None and memory not in _VALID_MEMORY:
-        issues.append(f"coact.memory: {memory!r} is not one of user, project, local")
+        issues.append(f"{where}.memory: {memory!r} is not one of user, project, local")
 
     for list_key in ("tools", "disallowed_tools", "skills"):
         val = block.get(list_key)
         if val is not None and not _is_list_of_str(val):
-            issues.append(f"coact.{list_key}: must be a list of strings")
+            issues.append(f"{where}.{list_key}: must be a list of strings")
 
     mcp = block.get("mcp")
     if mcp is not None:
         if not isinstance(mcp, list):
-            issues.append("coact.mcp: must be a list of {module, functions} entries")
+            issues.append(f"{where}.mcp: must be a list of {{module, functions}} entries")
         else:
             for i, entry in enumerate(mcp):
                 if not isinstance(entry, dict):
-                    issues.append(f"coact.mcp[{i}]: must be a mapping")
+                    issues.append(f"{where}.mcp[{i}]: must be a mapping")
                     continue
                 if not entry.get("module"):
-                    issues.append(f"coact.mcp[{i}]: missing required 'module'")
+                    issues.append(f"{where}.mcp[{i}]: missing required 'module'")
                 functions = entry.get("functions")
                 if not functions:
                     issues.append(
-                        f"coact.mcp[{i}]: missing required 'functions' "
+                        f"{where}.mcp[{i}]: missing required 'functions' "
                         "(a non-empty list of function names)"
                     )
                 elif not _is_list_of_str(functions):
                     issues.append(
-                        f"coact.mcp[{i}]: 'functions' must be a list of strings"
+                        f"{where}.mcp[{i}]: 'functions' must be a list of strings"
                     )
 
     returns = block.get("returns")
     if returns is not None:
         if not isinstance(returns, dict):
-            issues.append("coact.returns: must be a mapping")
+            issues.append(f"{where}.returns: must be a mapping")
         else:
             has_ref = bool(returns.get("schema_ref") or returns.get("ref"))
             has_inline = bool(returns.get("json_schema"))
             if has_ref and has_inline:
                 issues.append(
-                    "coact.returns: provide only one of 'schema_ref' or 'json_schema'"
+                    f"{where}.returns: provide only one of 'schema_ref' or 'json_schema'"
                 )
             elif not has_ref and not has_inline:
                 issues.append(
-                    "coact.returns: needs one of 'schema_ref' or 'json_schema'"
+                    f"{where}.returns: needs one of 'schema_ref' or 'json_schema'"
                 )
 
     return issues
