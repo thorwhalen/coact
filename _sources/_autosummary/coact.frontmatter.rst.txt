@@ -9,11 +9,13 @@ coact.frontmatter
    .. autosummary::
    
       COACT_KEY
+      METADATA_KEY
    
    .. rubric:: Functions
 
    .. autosummary::
    
+      coact_block_location
       parse_coact_meta
       register_validator
       validate_coact_block

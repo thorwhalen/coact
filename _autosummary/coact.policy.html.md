@@ -95,6 +95,6 @@ Return a new policy with overridden fields (cascading defaults).
 
 body substrings that imply the agent writes/edits files.
 
-### coact.policy.default_policy *= CompletionPolicy(default_model='sonnet', default_memory=None, default_tools=('Read', 'Grep', 'Glob'), read_only_tools=frozenset({'WebSearch', 'WebFetch', 'Read', 'Glob', 'Grep', 'NotebookRead'}), opus_keywords=('orchestrat\\\\w\*', 'architect\\\\w\*', 'coordinat\\\\w\*', '\\\\bplan(?:ning|s|ned)?\\\\b', '\\\\bdesign(?:s|ing|ed)?\\\\b', 'review\\\\w\*'), opus_skill_threshold=3, write_keywords=('write', 'edit', 'create file', 'modify', 'generate', 'refactor'))*
+### coact.policy.default_policy *= CompletionPolicy(default_model='sonnet', default_memory=None, default_tools=('Read', 'Grep', 'Glob'), read_only_tools=frozenset({'WebFetch', 'WebSearch', 'NotebookRead', 'Read', 'Grep', 'Glob'}), opus_keywords=('orchestrat\\\\w\*', 'architect\\\\w\*', 'coordinat\\\\w\*', '\\\\bplan(?:ning|s|ned)?\\\\b', '\\\\bdesign(?:s|ing|ed)?\\\\b', 'review\\\\w\*'), opus_skill_threshold=3, write_keywords=('write', 'edit', 'create file', 'modify', 'generate', 'refactor'))*
 
 The default policy instance (importable, mutable-by-override).

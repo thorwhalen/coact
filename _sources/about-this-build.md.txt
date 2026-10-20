@@ -5,7 +5,7 @@ orphan: true
 
 # About this build
 
-This documentation was built on **2026-10-19 00:49 UTC** from commit <a href="https://github.com/thorwhalen/coact/commit/3a0e428a077669a3b2c1a1a8e142ddf1e344725a"><code>3a0e428</code></a> on branch <code>main</code>, for **coact 0.0.4** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 16:05 UTC** from commit <a href="https://github.com/thorwhalen/coact/commit/981aa28c489f027ea9ce6e083a62736fff92c366"><code>981aa28</code></a> on branch <code>main</code>, for **coact 0.0.4** (from <code>pyproject.toml</code>).
 
 :::{note}
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -15,7 +15,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 | | |
 |---|---|
-| Commit | <a href="https://github.com/thorwhalen/coact/commit/3a0e428a077669a3b2c1a1a8e142ddf1e344725a"><code>3a0e428a077669a3b2c1a1a8e142ddf1e344725a</code></a> |
+| Commit | <a href="https://github.com/thorwhalen/coact/commit/981aa28c489f027ea9ce6e083a62736fff92c366"><code>981aa28c489f027ea9ce6e083a62736fff92c366</code></a> |
 | Branch | <code>main</code> |
 | Tags at this commit | none |
 | Working tree | clean |
@@ -26,16 +26,16 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 | | |
 |---|---|
 | Repository | <code>thorwhalen/coact</code> |
-| Run | <a href="https://github.com/thorwhalen/coact/actions/runs/39182393308">39182393308</a> |
+| Run | <a href="https://github.com/thorwhalen/coact/actions/runs/39454071007">39454071007</a> |
 | Ref | <code>refs/heads/main</code> |
-| Event commit | <code>3a0e428a077669a3b2c1a1a8e142ddf1e344725a</code> (in the history of the built commit) |
+| Event commit | <code>981aa28c489f027ea9ce6e083a62736fff92c366</code> (in the history of the built commit) |
 
 ## Tools
 
 | | |
 |---|---|
-| epythet | 0.2.17 |
-| Sphinx | 9.1.0 |
+| epythet | 0.2.21 |
+| Sphinx | 9.1.1 |
 | docutils | 0.22.4 |
 | Python | 3.12.15 |
 
@@ -59,8 +59,8 @@ Latest release: <a href="https://pypi.org/project/coact/0.0.4/">0.0.4</a>, the s
 
 ```bash
 git clone https://github.com/thorwhalen/coact && cd coact
-git checkout 3a0e428a077669a3b2c1a1a8e142ddf1e344725a
-pip install "epythet==0.2.17"
+git checkout 981aa28c489f027ea9ce6e083a62736fff92c366
+pip install "epythet==0.2.21"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

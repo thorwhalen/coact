@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "built_at": "2026-10-19T00:49:25Z",
+  "built_at": "2026-10-20T16:05:20Z",
   "package": {
     "name": "coact",
     "version": "0.0.4",
@@ -9,29 +9,29 @@
   },
   "git": {
     "available": true,
-    "commit": "3a0e428a077669a3b2c1a1a8e142ddf1e344725a",
-    "short_commit": "3a0e428",
+    "commit": "981aa28c489f027ea9ce6e083a62736fff92c366",
+    "short_commit": "981aa28",
     "branch": "main",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/coact",
-    "commit_url": "https://github.com/thorwhalen/coact/commit/3a0e428a077669a3b2c1a1a8e142ddf1e344725a",
+    "commit_url": "https://github.com/thorwhalen/coact/commit/981aa28c489f027ea9ce6e083a62736fff92c366",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/coact",
-    "sha": "3a0e428a077669a3b2c1a1a8e142ddf1e344725a",
+    "sha": "981aa28c489f027ea9ce6e083a62736fff92c366",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "39182393308",
-    "run_url": "https://github.com/thorwhalen/coact/actions/runs/39182393308",
+    "run_id": "39454071007",
+    "run_url": "https://github.com/thorwhalen/coact/actions/runs/39454071007",
     "server_url": "https://github.com"
   },
   "tools": {
-    "epythet": "0.2.17",
-    "sphinx": "9.1.0",
+    "epythet": "0.2.21",
+    "sphinx": "9.1.1",
     "docutils": "0.22.4",
     "python": "3.12.15"
   },
@@ -56,7 +56,7 @@
   },
   "site": {
     "modules_documented": 15,
-    "objects_documented": 188
+    "objects_documented": 190
   },
   "pypi": {
     "checked": true,
@@ -64,7 +64,7 @@
     "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/coact && cd coact\ngit checkout 3a0e428a077669a3b2c1a1a8e142ddf1e344725a\npip install \"epythet==0.2.17\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/coact && cd coact\ngit checkout 981aa28c489f027ea9ce6e083a62736fff92c366\npip install \"epythet==0.2.21\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": true,

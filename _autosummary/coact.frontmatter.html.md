@@ -25,7 +25,9 @@ coact:
 ```
 
 The block is ignored by other tools (a skill carrying it is still a valid plain
-SKILL.md). coact reads it from the **raw** frontmatter because
+SKILL.md). The Agent Skills spec keeps custom keys under `metadata:`, so a
+spec-clean skill may nest the block there instead (`metadata: {coact: {...}}`);
+coact reads either, and a top-level block wins when both exist. coact reads it from the **raw** frontmatter because
 `skill.SkillMeta` only retains the standard keys — so this module parses the
 SKILL.md text directly rather than going through `Skill.meta`.
 
@@ -35,15 +37,17 @@ block without coact having to be the entry point.
 
 ### Module Attributes
 
-| [`COACT_KEY`](#coact.frontmatter.COACT_KEY)   | The single namespaced frontmatter key coact reads/writes.   |
-|--------------------------------------------------------------|-------------------------------------------------------------|
+| [`COACT_KEY`](#coact.frontmatter.COACT_KEY)    | The single namespaced frontmatter key coact reads/writes.          |
+|---------------------------------------------------------------|--------------------------------------------------------------------|
+| [`METADATA_KEY`](#coact.frontmatter.METADATA_KEY) | `metadata.coact` is read when there is no top-level `coact` block. |
 
 ### Functions
 
-| [`parse_coact_meta`](#coact.frontmatter.parse_coact_meta)(source)            | Parse a [`CoactMeta`](#coact.frontmatter.CoactMeta) from a SKILL.md path/text/`Skill`/frontmatter dict.   |
-|--------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| [`register_validator`](#coact.frontmatter.register_validator)()                | Register the coact-block validator into `skill.create.validators` (idempotent).                                          |
-| [`validate_coact_block`](#coact.frontmatter.validate_coact_block)(skill_or_meta) | Validate a `coact:` block, returning issue strings (empty = valid/absent).                                               |
+| [`coact_block_location`](#coact.frontmatter.coact_block_location)(meta)          | Return `(block, path)`: the frontmatter's coact block and where it was found.                                          |
+|--------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| [`parse_coact_meta`](#coact.frontmatter.parse_coact_meta)(source)            | Parse a [`CoactMeta`](#coact.frontmatter.CoactMeta) from a SKILL.md path/text/`Skill`/frontmatter dict. |
+| [`register_validator`](#coact.frontmatter.register_validator)()                | Register the coact-block validator into `skill.create.validators` (idempotent).                                        |
+| [`validate_coact_block`](#coact.frontmatter.validate_coact_block)(skill_or_meta) | Validate a `coact:` block, returning issue strings (empty = valid/absent).                                             |
 
 ### Classes
 
@@ -66,11 +70,15 @@ The parsed `coact:` block (every field optional; all default to absent).
 ('opus', ['Read'], False)
 >>> CoactMeta.from_frontmatter({'name': 'x'}).is_empty()
 True
+>>> CoactMeta.from_frontmatter({'metadata': {'coact': {'model': 'haiku'}}}).model
+'haiku'
 ```
 
 #### *classmethod* from_frontmatter(meta)
 
 Build from a full frontmatter dict (reads the `coact` sub-mapping).
+
+The block is the top-level `coact` key, else `metadata.coact`.
 
 * **Return type:**
   [`CoactMeta`](#coact.frontmatter.CoactMeta)
@@ -88,6 +96,35 @@ The author-pinned [`ReturnContract`](coact.base.html.md#coact.base.ReturnContrac
 
 * **Return type:**
   [`ReturnContract`](coact.base.html.md#coact.base.ReturnContract)
+
+### coact.frontmatter.METADATA_KEY *= 'metadata'*
+
+`metadata.coact` is read when there is no
+top-level `coact` block.
+
+* **Type:**
+  The spec’s home for custom keys
+
+### coact.frontmatter.coact_block_location(meta)
+
+Return `(block, path)`: the frontmatter’s coact block and where it was found.
+
+`path` is `"coact"` (top level, which wins when both exist),
+`"metadata.coact"` (the Agent Skills spec’s home for custom keys), or
+`"coact"` with a `None` block when there is none, so writers default to
+the top level.
+
+```pycon
+>>> coact_block_location({'metadata': {'coact': {'model': 'opus'}}})
+({'model': 'opus'}, 'metadata.coact')
+>>> coact_block_location({'coact': {'model': 'haiku'}, 'metadata': {'coact': {}}})
+({'model': 'haiku'}, 'coact')
+>>> coact_block_location({'name': 'x'})
+(None, 'coact')
+```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### coact.frontmatter.parse_coact_meta(source)
 
@@ -120,7 +157,9 @@ Register the coact-block validator into `skill.create.validators` (idempotent).
 
 Validate a `coact:` block, returning issue strings (empty = valid/absent).
 
-Additive: a skill with no `coact:` block passes trivially. Checks key
+Additive: a skill with no `coact:` block passes trivially. The block is read
+from the top level or from `metadata.coact` (see [`coact_block_location()`](#coact.frontmatter.coact_block_location)),
+and issues are prefixed with where it was found. Checks key
 spelling, `model`/`memory` enums, `mcp` entry shape, and that
 `returns` carries exactly one of `schema_ref`/`json_schema`.
 

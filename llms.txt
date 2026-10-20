@@ -23,7 +23,7 @@
 - [coact.synthesis](_autosummary/coact.synthesis.html.md): Persona &amp; return-contract synthesis — the two real “extras” of a skill→agent lift.
 - [coact.util](_autosummary/coact.util.html.md): Pure helpers for coact with no internal coact imports.
 - [For AI agents](ai-agents.html.md): &#96;coact&#96; ships artifacts for coding agents alongside its code. This page lists
-- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-19 00:49 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-20 16:05 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
 
 ## Optional
 

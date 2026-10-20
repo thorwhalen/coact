@@ -166,11 +166,15 @@ The parsed `coact:` block (every field optional; all default to absent).
 ('opus', ['Read'], False)
 >>> CoactMeta.from_frontmatter({'name': 'x'}).is_empty()
 True
+>>> CoactMeta.from_frontmatter({'metadata': {'coact': {'model': 'haiku'}}}).model
+'haiku'
 ```
 
 #### *classmethod* from_frontmatter(meta)
 
 Build from a full frontmatter dict (reads the `coact` sub-mapping).
+
+The block is the top-level `coact` key, else `metadata.coact`.
 
 * **Return type:**
   [`CoactMeta`](coact.frontmatter.html.md#coact.frontmatter.CoactMeta)
@@ -1275,7 +1279,9 @@ True
 
 Validate a `coact:` block, returning issue strings (empty = valid/absent).
 
-Additive: a skill with no `coact:` block passes trivially. Checks key
+Additive: a skill with no `coact:` block passes trivially. The block is read
+from the top level or from `metadata.coact` (see `coact_block_location()`),
+and issues are prefixed with where it was found. Checks key
 spelling, `model`/`memory` enums, `mcp` entry shape, and that
 `returns` carries exactly one of `schema_ref`/`json_schema`.
 

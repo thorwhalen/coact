@@ -151,7 +151,9 @@ the skill→agent lift is mechanical and reproducible (SSOT for the extras):</p>
 </span></code></pre></div>
 </div>
 <p>The block is ignored by other tools (a skill carrying it is still a valid plain
-SKILL.md). coact reads it from the <strong>raw</strong> frontmatter because
+SKILL.md). The Agent Skills spec keeps custom keys under <code class="docutils literal notranslate"><span class="pre">metadata:</span></code>, so a
+spec-clean skill may nest the block there instead (<code class="docutils literal notranslate"><span class="pre">metadata:</span> <span class="pre">{coact:</span> <span class="pre">{...}}</span></code>);
+coact reads either, and a top-level block wins when both exist. coact reads it from the <strong>raw</strong> frontmatter because
 <code class="docutils literal notranslate"><span class="pre">skill.SkillMeta</span></code> only retains the standard keys — so this module parses the
 SKILL.md text directly rather than going through <code class="docutils literal notranslate"><span class="pre">Skill.meta</span></code>.</p>
 <p>The validator is registered into <code class="docutils literal notranslate"><span class="pre">skill.create.validators</span></code> (additive) and also
@@ -163,18 +165,24 @@ block without coact having to be the entry point.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#coact.frontmatter.COACT_KEY" title="coact.frontmatter.COACT_KEY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">COACT_KEY</span></code></a></p></td>
 <td><p>The single namespaced frontmatter key coact reads/writes.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#coact.frontmatter.METADATA_KEY" title="coact.frontmatter.METADATA_KEY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">METADATA_KEY</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">metadata.coact</span></code> is read when there is no top-level <code class="docutils literal notranslate"><span class="pre">coact</span></code> block.</p></td>
+</tr>
 </tbody>
 </table>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#coact.frontmatter.parse_coact_meta" title="coact.frontmatter.parse_coact_meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_coact_meta</span></code></a>(source)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#coact.frontmatter.coact_block_location" title="coact.frontmatter.coact_block_location"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coact_block_location</span></code></a>(meta)</p></td>
+<td><p>Return <code class="docutils literal notranslate"><span class="pre">(block,</span> <span class="pre">path)</span></code>: the frontmatter's coact block and where it was found.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#coact.frontmatter.parse_coact_meta" title="coact.frontmatter.parse_coact_meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_coact_meta</span></code></a>(source)</p></td>
 <td><p>Parse a <a class="reference internal" href="#coact.frontmatter.CoactMeta" title="coact.frontmatter.CoactMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoactMeta</span></code></a> from a SKILL.md path/text/<code class="docutils literal notranslate"><span class="pre">Skill</span></code>/frontmatter dict.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#coact.frontmatter.register_validator" title="coact.frontmatter.register_validator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_validator</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#coact.frontmatter.register_validator" title="coact.frontmatter.register_validator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_validator</span></code></a>()</p></td>
 <td><p>Register the coact-block validator into <code class="docutils literal notranslate"><span class="pre">skill.create.validators</span></code> (idempotent).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#coact.frontmatter.validate_coact_block" title="coact.frontmatter.validate_coact_block"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_coact_block</span></code></a>(skill_or_meta)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#coact.frontmatter.validate_coact_block" title="coact.frontmatter.validate_coact_block"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_coact_block</span></code></a>(skill_or_meta)</p></td>
 <td><p>Validate a <code class="docutils literal notranslate"><span class="pre">coact:</span></code> block, returning issue strings (empty = valid/absent).</p></td>
 </tr>
 </tbody>
@@ -202,6 +210,8 @@ block without coact having to be the entry point.</p>
 </span><span id="line-3"><span class="go">('opus', ['Read'], False)</span>
 </span><span id="line-4"><span class="gp">&gt;&gt;&gt; </span><span class="n">CoactMeta</span><span class="o">.</span><span class="n">from_frontmatter</span><span class="p">({</span><span class="s1">'name'</span><span class="p">:</span> <span class="s1">'x'</span><span class="p">})</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span>
 </span><span id="line-5"><span class="go">True</span>
+</span><span id="line-6"><span class="gp">&gt;&gt;&gt; </span><span class="n">CoactMeta</span><span class="o">.</span><span class="n">from_frontmatter</span><span class="p">({</span><span class="s1">'metadata'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'coact'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'model'</span><span class="p">:</span> <span class="s1">'haiku'</span><span class="p">}}})</span><span class="o">.</span><span class="n">model</span>
+</span><span id="line-7"><span class="go">'haiku'</span>
 </span></code></pre></div>
 </div>
 <dl class="field-list simple">
@@ -210,6 +220,7 @@ block without coact having to be the entry point.</p>
 <dt class="sig sig-object py" id="coact.frontmatter.CoactMeta.from_frontmatter">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_frontmatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/coact/frontmatter.html#CoactMeta.from_frontmatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#coact.frontmatter.CoactMeta.from_frontmatter" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#coact.frontmatter.CoactMeta.from_frontmatter'">¶</a></dt>
 <dd><p>Build from a full frontmatter dict (reads the <code class="docutils literal notranslate"><span class="pre">coact</span></code> sub-mapping).</p>
+<p>The block is the top-level <code class="docutils literal notranslate"><span class="pre">coact</span></code> key, else <code class="docutils literal notranslate"><span class="pre">metadata.coact</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#coact.frontmatter.CoactMeta" title="coact.frontmatter.CoactMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoactMeta</span></code></a></span></p>
@@ -236,6 +247,39 @@ block without coact having to be the entry point.</p>
 </dd>
 </dl>
 </dd></dl>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="coact.frontmatter.METADATA_KEY">
+<span class="sig-prename descclassname"><span class="pre">coact.frontmatter.</span></span><span class="sig-name descname"><span class="pre">METADATA_KEY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'metadata'</span></span><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#coact.frontmatter.METADATA_KEY" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#coact.frontmatter.METADATA_KEY'">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">metadata.coact</span></code> is read when there is no
+top-level <code class="docutils literal notranslate"><span class="pre">coact</span></code> block.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The spec’s home for custom keys</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="coact.frontmatter.coact_block_location">
+<span class="sig-prename descclassname"><span class="pre">coact.frontmatter.</span></span><span class="sig-name descname"><span class="pre">coact_block_location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/coact/frontmatter.html#coact_block_location"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#coact.frontmatter.coact_block_location" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#coact.frontmatter.coact_block_location'">¶</a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">(block,</span> <span class="pre">path)</span></code>: the frontmatter’s coact block and where it was found.</p>
+<p><code class="docutils literal notranslate"><span class="pre">path</span></code> is <code class="docutils literal notranslate"><span class="pre">"coact"</span></code> (top level, which wins when both exist),
+<code class="docutils literal notranslate"><span class="pre">"metadata.coact"</span></code> (the Agent Skills spec’s home for custom keys), or
+<code class="docutils literal notranslate"><span class="pre">"coact"</span></code> with a <code class="docutils literal notranslate"><span class="pre">None</span></code> block when there is none, so writers default to
+the top level.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="n">coact_block_location</span><span class="p">({</span><span class="s1">'metadata'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'coact'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'model'</span><span class="p">:</span> <span class="s1">'opus'</span><span class="p">}}})</span>
+</span><span id="line-2"><span class="go">({'model': 'opus'}, 'metadata.coact')</span>
+</span><span id="line-3"><span class="gp">&gt;&gt;&gt; </span><span class="n">coact_block_location</span><span class="p">({</span><span class="s1">'coact'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'model'</span><span class="p">:</span> <span class="s1">'haiku'</span><span class="p">},</span> <span class="s1">'metadata'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'coact'</span><span class="p">:</span> <span class="p">{}}})</span>
+</span><span id="line-4"><span class="go">({'model': 'haiku'}, 'coact')</span>
+</span><span id="line-5"><span class="gp">&gt;&gt;&gt; </span><span class="n">coact_block_location</span><span class="p">({</span><span class="s1">'name'</span><span class="p">:</span> <span class="s1">'x'</span><span class="p">})</span>
+</span><span id="line-6"><span class="go">(None, 'coact')</span>
+</span></code></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>]</span></p>
+</dd>
+</dl>
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="coact.frontmatter.parse_coact_meta">
@@ -273,7 +317,9 @@ frontmatter, since <code class="docutils literal notranslate"><span class="pre">
 <dt class="sig sig-object py" id="coact.frontmatter.validate_coact_block">
 <span class="sig-prename descclassname"><span class="pre">coact.frontmatter.</span></span><span class="sig-name descname"><span class="pre">validate_coact_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skill_or_meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/coact/frontmatter.html#validate_coact_block"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#coact.frontmatter.validate_coact_block" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#coact.frontmatter.validate_coact_block'">¶</a></dt>
 <dd><p>Validate a <code class="docutils literal notranslate"><span class="pre">coact:</span></code> block, returning issue strings (empty = valid/absent).</p>
-<p>Additive: a skill with no <code class="docutils literal notranslate"><span class="pre">coact:</span></code> block passes trivially. Checks key
+<p>Additive: a skill with no <code class="docutils literal notranslate"><span class="pre">coact:</span></code> block passes trivially. The block is read
+from the top level or from <code class="docutils literal notranslate"><span class="pre">metadata.coact</span></code> (see <a class="reference internal" href="#coact.frontmatter.coact_block_location" title="coact.frontmatter.coact_block_location"><code class="xref py py-func docutils literal notranslate"><span class="pre">coact_block_location()</span></code></a>),
+and issues are prefixed with where it was found. Checks key
 spelling, <code class="docutils literal notranslate"><span class="pre">model</span></code>/<code class="docutils literal notranslate"><span class="pre">memory</span></code> enums, <code class="docutils literal notranslate"><span class="pre">mcp</span></code> entry shape, and that
 <code class="docutils literal notranslate"><span class="pre">returns</span></code> carries exactly one of <code class="docutils literal notranslate"><span class="pre">schema_ref</span></code>/<code class="docutils literal notranslate"><span class="pre">json_schema</span></code>.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="n">validate_coact_block</span><span class="p">({</span><span class="s1">'coact'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'model'</span><span class="p">:</span> <span class="s1">'gpt-4'</span><span class="p">}})</span>
@@ -301,6 +347,8 @@ spelling, <code class="docutils literal notranslate"><span class="pre">model</sp
 <li><a :data-current="activeSection === '#coact.frontmatter.CoactMeta.return_contract'" class="reference internal" href="#coact.frontmatter.CoactMeta.return_contract"><code class="docutils literal notranslate"><span class="pre">CoactMeta.return_contract()</span></code></a></li>
 </ul>
 </li>
+<li><a :data-current="activeSection === '#coact.frontmatter.METADATA_KEY'" class="reference internal" href="#coact.frontmatter.METADATA_KEY"><code class="docutils literal notranslate"><span class="pre">METADATA_KEY</span></code></a></li>
+<li><a :data-current="activeSection === '#coact.frontmatter.coact_block_location'" class="reference internal" href="#coact.frontmatter.coact_block_location"><code class="docutils literal notranslate"><span class="pre">coact_block_location()</span></code></a></li>
 <li><a :data-current="activeSection === '#coact.frontmatter.parse_coact_meta'" class="reference internal" href="#coact.frontmatter.parse_coact_meta"><code class="docutils literal notranslate"><span class="pre">parse_coact_meta()</span></code></a></li>
 <li><a :data-current="activeSection === '#coact.frontmatter.register_validator'" class="reference internal" href="#coact.frontmatter.register_validator"><code class="docutils literal notranslate"><span class="pre">register_validator()</span></code></a></li>
 <li><a :data-current="activeSection === '#coact.frontmatter.validate_coact_block'" class="reference internal" href="#coact.frontmatter.validate_coact_block"><code class="docutils literal notranslate"><span class="pre">validate_coact_block()</span></code></a></li>

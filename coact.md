@@ -1,4 +1,4 @@
-> built 2026-10-19 00:49 UTC from 3a0e428 (main) · coact 0.0.4. Details: build_info.json
+> built 2026-10-20 16:05 UTC from 981aa28 (main) · coact 0.0.4. Details: build_info.json
 
 # index.html.md
 
@@ -775,7 +775,9 @@ coact:
 ```
 
 The block is ignored by other tools (a skill carrying it is still a valid plain
-SKILL.md). coact reads it from the **raw** frontmatter because
+SKILL.md). The Agent Skills spec keeps custom keys under `metadata:`, so a
+spec-clean skill may nest the block there instead (`metadata: {coact: {...}}`);
+coact reads either, and a top-level block wins when both exist. coact reads it from the **raw** frontmatter because
 `skill.SkillMeta` only retains the standard keys — so this module parses the
 SKILL.md text directly rather than going through `Skill.meta`.
 
@@ -785,15 +787,17 @@ block without coact having to be the entry point.
 
 ### Module Attributes
 
-| [`COACT_KEY`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.COACT_KEY)   | The single namespaced frontmatter key coact reads/writes.   |
-|--------------------------------------------------------------|-------------------------------------------------------------|
+| [`COACT_KEY`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.COACT_KEY)    | The single namespaced frontmatter key coact reads/writes.          |
+|---------------------------------------------------------------|--------------------------------------------------------------------|
+| [`METADATA_KEY`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.METADATA_KEY) | `metadata.coact` is read when there is no top-level `coact` block. |
 
 ### Functions
 
-| [`parse_coact_meta`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.parse_coact_meta)(source)            | Parse a [`CoactMeta`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.CoactMeta) from a SKILL.md path/text/`Skill`/frontmatter dict.   |
-|--------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| [`register_validator`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.register_validator)()                | Register the coact-block validator into `skill.create.validators` (idempotent).                                          |
-| [`validate_coact_block`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.validate_coact_block)(skill_or_meta) | Validate a `coact:` block, returning issue strings (empty = valid/absent).                                               |
+| [`coact_block_location`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.coact_block_location)(meta)          | Return `(block, path)`: the frontmatter's coact block and where it was found.                                          |
+|--------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| [`parse_coact_meta`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.parse_coact_meta)(source)            | Parse a [`CoactMeta`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.CoactMeta) from a SKILL.md path/text/`Skill`/frontmatter dict. |
+| [`register_validator`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.register_validator)()                | Register the coact-block validator into `skill.create.validators` (idempotent).                                        |
+| [`validate_coact_block`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.validate_coact_block)(skill_or_meta) | Validate a `coact:` block, returning issue strings (empty = valid/absent).                                             |
 
 ### Classes
 
@@ -816,11 +820,15 @@ The parsed `coact:` block (every field optional; all default to absent).
 ('opus', ['Read'], False)
 >>> CoactMeta.from_frontmatter({'name': 'x'}).is_empty()
 True
+>>> CoactMeta.from_frontmatter({'metadata': {'coact': {'model': 'haiku'}}}).model
+'haiku'
 ```
 
 #### *classmethod* from_frontmatter(meta)
 
 Build from a full frontmatter dict (reads the `coact` sub-mapping).
+
+The block is the top-level `coact` key, else `metadata.coact`.
 
 * **Return type:**
   [`CoactMeta`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.CoactMeta)
@@ -838,6 +846,35 @@ The author-pinned [`ReturnContract`](_autosummary/coact.base.html.md#coact.base.
 
 * **Return type:**
   [`ReturnContract`](_autosummary/coact.base.html.md#coact.base.ReturnContract)
+
+### coact.frontmatter.METADATA_KEY *= 'metadata'*
+
+`metadata.coact` is read when there is no
+top-level `coact` block.
+
+* **Type:**
+  The spec’s home for custom keys
+
+### coact.frontmatter.coact_block_location(meta)
+
+Return `(block, path)`: the frontmatter’s coact block and where it was found.
+
+`path` is `"coact"` (top level, which wins when both exist),
+`"metadata.coact"` (the Agent Skills spec’s home for custom keys), or
+`"coact"` with a `None` block when there is none, so writers default to
+the top level.
+
+```pycon
+>>> coact_block_location({'metadata': {'coact': {'model': 'opus'}}})
+({'model': 'opus'}, 'metadata.coact')
+>>> coact_block_location({'coact': {'model': 'haiku'}, 'metadata': {'coact': {}}})
+({'model': 'haiku'}, 'coact')
+>>> coact_block_location({'name': 'x'})
+(None, 'coact')
+```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### coact.frontmatter.parse_coact_meta(source)
 
@@ -870,7 +907,9 @@ Register the coact-block validator into `skill.create.validators` (idempotent).
 
 Validate a `coact:` block, returning issue strings (empty = valid/absent).
 
-Additive: a skill with no `coact:` block passes trivially. Checks key
+Additive: a skill with no `coact:` block passes trivially. The block is read
+from the top level or from `metadata.coact` (see [`coact_block_location()`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.coact_block_location)),
+and issues are prefixed with where it was found. Checks key
 spelling, `model`/`memory` enums, `mcp` entry shape, and that
 `returns` carries exactly one of `schema_ref`/`json_schema`.
 
@@ -1057,11 +1096,15 @@ The parsed `coact:` block (every field optional; all default to absent).
 ('opus', ['Read'], False)
 >>> CoactMeta.from_frontmatter({'name': 'x'}).is_empty()
 True
+>>> CoactMeta.from_frontmatter({'metadata': {'coact': {'model': 'haiku'}}}).model
+'haiku'
 ```
 
 #### *classmethod* from_frontmatter(meta)
 
 Build from a full frontmatter dict (reads the `coact` sub-mapping).
+
+The block is the top-level `coact` key, else `metadata.coact`.
 
 * **Return type:**
   [`CoactMeta`](_autosummary/coact.frontmatter.html.md#coact.frontmatter.CoactMeta)
@@ -2166,7 +2209,9 @@ True
 
 Validate a `coact:` block, returning issue strings (empty = valid/absent).
 
-Additive: a skill with no `coact:` block passes trivially. Checks key
+Additive: a skill with no `coact:` block passes trivially. The block is read
+from the top level or from `metadata.coact` (see `coact_block_location()`),
+and issues are prefixed with where it was found. Checks key
 spelling, `model`/`memory` enums, `mcp` entry shape, and that
 `returns` carries exactly one of `schema_ref`/`json_schema`.
 
@@ -2587,7 +2632,7 @@ Return a new policy with overridden fields (cascading defaults).
 
 body substrings that imply the agent writes/edits files.
 
-### coact.policy.default_policy *= CompletionPolicy(default_model='sonnet', default_memory=None, default_tools=('Read', 'Grep', 'Glob'), read_only_tools=frozenset({'WebSearch', 'WebFetch', 'Read', 'Glob', 'Grep', 'NotebookRead'}), opus_keywords=('orchestrat\\\\w\*', 'architect\\\\w\*', 'coordinat\\\\w\*', '\\\\bplan(?:ning|s|ned)?\\\\b', '\\\\bdesign(?:s|ing|ed)?\\\\b', 'review\\\\w\*'), opus_skill_threshold=3, write_keywords=('write', 'edit', 'create file', 'modify', 'generate', 'refactor'))*
+### coact.policy.default_policy *= CompletionPolicy(default_model='sonnet', default_memory=None, default_tools=('Read', 'Grep', 'Glob'), read_only_tools=frozenset({'WebFetch', 'WebSearch', 'NotebookRead', 'Read', 'Grep', 'Glob'}), opus_keywords=('orchestrat\\\\w\*', 'architect\\\\w\*', 'coordinat\\\\w\*', '\\\\bplan(?:ning|s|ned)?\\\\b', '\\\\bdesign(?:s|ing|ed)?\\\\b', 'review\\\\w\*'), opus_skill_threshold=3, write_keywords=('write', 'edit', 'create file', 'modify', 'generate', 'refactor'))*
 
 The default policy instance (importable, mutable-by-override).
 
@@ -3159,7 +3204,7 @@ Convert CamelCase / kebab-case / spaces to snake_case.
 
 # About this build
 
-This documentation was built on **2026-10-19 00:49 UTC** from commit <a href="https://github.com/thorwhalen/coact/commit/3a0e428a077669a3b2c1a1a8e142ddf1e344725a"><code>3a0e428</code></a> on branch <code>main</code>, for **coact 0.0.4** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 16:05 UTC** from commit <a href="https://github.com/thorwhalen/coact/commit/981aa28c489f027ea9ce6e083a62736fff92c366"><code>981aa28</code></a> on branch <code>main</code>, for **coact 0.0.4** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -3168,7 +3213,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                         |
 |---------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/coact/commit/3a0e428a077669a3b2c1a1a8e142ddf1e344725a"><code>3a0e428a077669a3b2c1a1a8e142ddf1e344725a</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/coact/commit/981aa28c489f027ea9ce6e083a62736fff92c366"><code>981aa28c489f027ea9ce6e083a62736fff92c366</code></a> |
 | Branch              | <code>main</code>                                                                                                                                       |
 | Tags at this commit | none                                                                                                                                                    |
 | Working tree        | clean                                                                                                                                                   |
@@ -3179,16 +3224,16 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/coact</code>                                                              |
-| Run          | <a href="https://github.com/thorwhalen/coact/actions/runs/39182393308">39182393308</a>     |
+| Run          | <a href="https://github.com/thorwhalen/coact/actions/runs/39454071007">39454071007</a>     |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>3a0e428a077669a3b2c1a1a8e142ddf1e344725a</code> (in the history of the built commit) |
+| Event commit | <code>981aa28c489f027ea9ce6e083a62736fff92c366</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.17  |
-| Sphinx   | 9.1.0   |
+| epythet  | 0.2.21  |
+| Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
 | Python   | 3.12.15 |
 
@@ -3212,8 +3257,8 @@ Latest release: <a href="https://pypi.org/project/coact/0.0.4/">0.0.4</a>, the s
 
 ```bash
 git clone https://github.com/thorwhalen/coact && cd coact
-git checkout 3a0e428a077669a3b2c1a1a8e142ddf1e344725a
-pip install "epythet==0.2.17"
+git checkout 981aa28c489f027ea9ce6e083a62736fff92c366
+pip install "epythet==0.2.21"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 
